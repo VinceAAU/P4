@@ -14,26 +14,19 @@ struct Enemy {
     enemy_type: type = none;
 }
 
-MAP.width = 200
-MAP.height = 200
-
+MAP.grid(width, height); // inbuild function
 
 MAP.seed = SYSTEM.time().asMillis() //this is the default anyway
 //int roomCount, int minRoomSize, int maxRoomSize
-MAP.roomGenerator = SimpleRoomGenerator;
+map.generateRooms() = simpleRoomGenerate(count, size, size);
 
-MAP.roomGenerator.roomCount = 10
-MAP.roomGenerator.minRoomSize = 15
-MAP.roomGenerator.maxRoomSize = 30
 
-MAP.generateRooms()
+MAP.put(MAP.rooms[0].centre, PLAYER) // method
 
-MAP.put(MAP.rooms[0].centre, PLAYER)
+var orc: Enemy// type
+orc.health = 50..100 // method
 
-var orc: Enemy
-orc.health = 50..100
-
-MAP.put(MAP.centre + (0, 5), orc)
+MAP.put(MAP.centre + (0, 5), orc) // method put in center + 5 hen?
 
 OUTPUT.format = "json"
 OUTPUT.path = "C:\Users\carl\Desktop\output.json"
