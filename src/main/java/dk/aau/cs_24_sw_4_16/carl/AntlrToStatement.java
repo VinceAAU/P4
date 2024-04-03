@@ -1,22 +1,9 @@
 package dk.aau.cs_24_sw_4_16.carl;
 
-import java.beans.Statement;
+
+import dk.aau.cs_24_sw_4_16.carl.Statement.Statement;
 
 public class AntlrToStatement extends CARLBaseVisitor<Statement> {
-//statement
-//    : assignment
-//    | functionCall
-//    | functionDefinition
-//    | ifStatement
-//    | whileLoop
-//    | returnStatement
-//    | structureDefinition
-//    | importStatement
-//    | variableDeclaration
-//    | arrayDefinition
-//    | coordinateDeclaration
-//    ;
-
 
     @Override
     public Statement visitIfStatement(CARLParser.IfStatementContext ctx) {
@@ -63,5 +50,23 @@ public class AntlrToStatement extends CARLBaseVisitor<Statement> {
         return super.visitFunctionCall(ctx);
     }
 
+    @Override
+    public Statement visitArrayDefinition(CARLParser.ArrayDefinitionContext ctx) {
+        return super.visitArrayDefinition(ctx);
+    }
 
+    @Override
+    public Statement visitCoordinateDeclaration(CARLParser.CoordinateDeclarationContext ctx) {
+        return super.visitCoordinateDeclaration(ctx);
+    }
+
+    @Override
+    public Statement visitArgumentList(CARLParser.ArgumentListContext ctx) {
+        return super.visitArgumentList(ctx);
+    }
+
+    @Override
+    public Statement visitParameterList(CARLParser.ParameterListContext ctx) {
+        return super.visitParameterList(ctx);
+    }
 }

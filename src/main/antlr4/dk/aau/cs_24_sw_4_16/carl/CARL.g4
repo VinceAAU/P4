@@ -1,7 +1,7 @@
 grammar CARL;
 
 // Parser rules
-program : statement* ;
+program : statement* EOF;
 
 statement
     : assignment
@@ -23,8 +23,8 @@ structureDefinition : 'struct' IDENTIFIER '{' variableDeclaration* '}' ;
 variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression | structInstantiation) ;
 type
     : 'int'
-    | 'float'
-    | 'string'
+    | 'float' //Maybe not neccerry
+    | 'string' //Maybe not neccerry
     | 'bool'
     | 'coord'
     | 'void'
@@ -41,13 +41,15 @@ expression
     | FLOAT
     | STRING
     | IDENTIFIER
-    | '(' expression ')'
+  //| BOOL?
+  //| ARRAY String[]
+    | '(' expression ')' //A bit ambigous
     | expression operator expression
-    | functionCall // Now includes function and method calls
-    | expression '..' expression // Incorporating randomFunction directly
-    | arrayAccess // Array element access
-    | propertyAccess // Property access of structs
-    | structInstantiation // Struct instantiation
+    | functionCall
+    | expression '..' expression
+    | arrayAccess
+    | propertyAccess
+    | structInstantiation
     ;
 
 structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER ':' expression)*)? '}' ;
@@ -60,11 +62,12 @@ operator
     | '%' # Modulus
     | '==' # Equals
     | '!=' # NotEquals
+    | '!' # Not
     | '<' # LessThan
     | '>' # GreaterThan
     | '<=' # LessThanOrEqual
     | '>=' # GreaterThanOrEqual
-    | 'and' # And
+    | 'and' # And //Not capital?
     | 'or' # Or
     ;
 

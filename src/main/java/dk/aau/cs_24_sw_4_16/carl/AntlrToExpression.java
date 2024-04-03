@@ -1,6 +1,7 @@
 package dk.aau.cs_24_sw_4_16.carl;
 
-import java.beans.Expression;
+
+import dk.aau.cs_24_sw_4_16.carl.Expression.Expression;
 
 public class AntlrToExpression extends CARLBaseVisitor<Expression> {
     @Override
@@ -11,11 +12,6 @@ public class AntlrToExpression extends CARLBaseVisitor<Expression> {
     @Override
     public Expression visitType(CARLParser.TypeContext ctx) {
         return super.visitType(ctx);
-    }
-
-    @Override
-    public Expression visitAssignment(CARLParser.AssignmentContext ctx) {
-        return super.visitAssignment(ctx);
     }
 
     @Override
@@ -82,4 +78,31 @@ public class AntlrToExpression extends CARLBaseVisitor<Expression> {
     public Expression visitOr(CARLParser.OrContext ctx) {
         return super.visitOr(ctx);
     }
+
+    @Override
+    public Expression visitFunctionCall(CARLParser.FunctionCallContext ctx) {
+        return super.visitFunctionCall(ctx);
+    }
+
+    @Override
+    public Expression visitMethodCall(CARLParser.MethodCallContext ctx) {
+        return super.visitMethodCall(ctx);
+    }
+
+    @Override
+    public Expression visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
+        return super.visitArrayAccess(ctx);
+    }
+
+    @Override
+    public Expression visitPropertyAccess(CARLParser.PropertyAccessContext ctx) {
+        return super.visitPropertyAccess(ctx);
+    }
+
+    @Override
+    public Expression visitStructInstantiation(CARLParser.StructInstantiationContext ctx) {
+        return super.visitStructInstantiation(ctx);
+    }
+
+    //Mangler lige randomizer
 }
