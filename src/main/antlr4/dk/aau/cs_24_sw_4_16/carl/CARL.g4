@@ -53,19 +53,19 @@ expression
 structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER ':' expression)*)? '}' ;
 
 operator
-    : '+'
-    | '-'
-    | '*'
-    | '/'
-    | '%'
-    | '=='
-    | '!='
-    | '<'
-    | '>'
-    | '<='
-    | '>='
-    | 'and'
-    | 'or'
+    : '+' # Addition
+    | '-' # Subtraction
+    | '*' # Multiplication
+    | '/' # Division
+    | '%' # Modulus
+    | '==' # Equals
+    | '!=' # NotEquals
+    | '<' # LessThan
+    | '>' # GreaterThan
+    | '<=' # LessThanOrEqual
+    | '>=' # GreaterThanOrEqual
+    | 'and' # And
+    | 'or' # Or
     ;
 
 ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' block )? ;
