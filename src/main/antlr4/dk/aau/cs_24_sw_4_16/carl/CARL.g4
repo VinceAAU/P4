@@ -36,6 +36,10 @@ methodCall : propertyAccess '(' argumentList? ')' ;
 argumentList : expression (',' expression)* ;
 parameterList : IDENTIFIER ':' type (',' IDENTIFIER ':' type)* ;
 
+//Should probably define visitor method for each type. Might make it easier when implementing.
+//Need to create visitMethod for for exmaple (expression operator expression) operator expression (Parenthese method).
+//Need to create visitMethod for '..'.
+//Once the methods are set up and the CFG is correct, we can probably start coding.
 expression
     : INT
     | FLOAT
@@ -43,7 +47,7 @@ expression
     | IDENTIFIER
   //| BOOL?
   //| ARRAY String[]
-    | '(' expression ')' //A bit ambigous
+    | '(' expression ')' //A bit ambigous?
     | expression operator expression
     | functionCall
     | expression '..' expression
