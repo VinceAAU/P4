@@ -104,5 +104,8 @@ public class AntlrToExpression extends CARLBaseVisitor<Expression> {
         return super.visitStructInstantiation(ctx);
     }
 
-    //Mangler lige randomizer
+    @Override
+    public Expression visitRandomBetween(CARLParser.RandomBetweenContext ctx) {
+        return super.visitRandomBetween(ctx);
+    }
 }

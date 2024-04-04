@@ -21,36 +21,41 @@ importStatement : 'import' STRING ;
 functionDefinition : 'fn' IDENTIFIER '(' parameterList? ')' '->' type block ;
 structureDefinition : 'struct' IDENTIFIER '{' variableDeclaration* '}' ;
 variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression | structInstantiation) ;
-type
+
+primitiveTypeForArray
     : 'int'
-    | 'float' //Maybe not neccerry
-    | 'string' //Maybe not neccerry
+    | 'float'
+    | 'string'
+    ;
+
+type
+    : primitiveTypeForArray
     | 'bool'
     | 'coord'
     | 'void'
     | IDENTIFIER
+    | primitiveTypeForArray '[' ']''[' ']' //Questionable, but maybe?
     ;
 assignment : IDENTIFIER '=' expression ;
 functionCall : IDENTIFIER '(' argumentList? ')' ;
-methodCall : propertyAccess '(' argumentList? ')' ;
+methodCall : propertyAccess '(' argumentList? ')' ; //Lige nu så bliver den slet ikke brugt
 argumentList : expression (',' expression)* ;
 parameterList : IDENTIFIER ':' type (',' IDENTIFIER ':' type)* ;
 
 //Should probably define visitor method for each type. Might make it easier when implementing.
 //Need to create visitMethod for for exmaple (expression operator expression) operator expression (Parenthese method).
-//Need to create visitMethod for '..'.
 //Once the methods are set up and the CFG is correct, we can probably start coding.
+//Saving expression values in hashmap with functions?
 expression
     : INT
     | FLOAT
     | STRING
     | IDENTIFIER
-  //| BOOL?
-  //| ARRAY String[]
     | '(' expression ')' //A bit ambigous?
     | expression operator expression
     | functionCall
-    | expression '..' expression
+//    | expression '..' expression // Virker ikke rigtigt, for her vil man kunne lave mærkelige som ID..Float
+//    | randomExpression //Man kunne også definere den under operator. Hvilket jeg har valgt at gøre her
     | arrayAccess
     | propertyAccess
     | structInstantiation
@@ -71,16 +76,17 @@ operator
     | '>' # GreaterThan
     | '<=' # LessThanOrEqual
     | '>=' # GreaterThanOrEqual
-    | 'and' # And //Not capital?
-    | 'or' # Or
+    | 'AND' # And //Not capital?
+    | 'OR' # Or
+    | '..' # RandomBetween
     ;
 
 ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' block )? ;
 whileLoop : 'while' expression block ;
 returnStatement : 'return' expression? ;
 block : '{' statement* '}' ;
-arrayDefinition : type '[' expression? ']' IDENTIFIER ;
-arrayAccess : IDENTIFIER '[' expression ']' ;
+arrayDefinition : primitiveTypeForArray '[' expression? ']' ('[' expression ']')? IDENTIFIER ;
+arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']') '=' primitiveTypeForArray?;
 propertyAccess : IDENTIFIER '.' IDENTIFIER ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;
 
