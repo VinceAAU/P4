@@ -6,21 +6,6 @@ import dk.aau.cs_24_sw_4_16.carl.Statement.Statement;
 public class AntlrToStatement extends CARLBaseVisitor<Statement> {
 
     @Override
-    public Statement visitIfStatement(CARLParser.IfStatementContext ctx) {
-        return super.visitIfStatement(ctx);
-    }
-
-    @Override
-    public Statement visitWhileLoop(CARLParser.WhileLoopContext ctx) {
-        return super.visitWhileLoop(ctx);
-    }
-
-    @Override
-    public Statement visitReturnStatement(CARLParser.ReturnStatementContext ctx) {
-        return super.visitReturnStatement(ctx);
-    }
-
-    @Override
     public Statement visitImportStatement(CARLParser.ImportStatementContext ctx) {
         return super.visitImportStatement(ctx);
     }
@@ -51,13 +36,33 @@ public class AntlrToStatement extends CARLBaseVisitor<Statement> {
     }
 
     @Override
-    public Statement visitArrayDefinition(CARLParser.ArrayDefinitionContext ctx) {
-        return super.visitArrayDefinition(ctx);
+    public Statement visitMethodCall(CARLParser.MethodCallContext ctx) {
+        return super.visitMethodCall(ctx);
+    }
+
+    @Override
+    public Statement visitIfStatement(CARLParser.IfStatementContext ctx) {
+        return super.visitIfStatement(ctx);
+    }
+
+    @Override
+    public Statement visitWhileLoop(CARLParser.WhileLoopContext ctx) {
+        return super.visitWhileLoop(ctx);
+    }
+
+    @Override
+    public Statement visitReturnStatement(CARLParser.ReturnStatementContext ctx) {
+        return super.visitReturnStatement(ctx);
     }
 
     @Override
     public Statement visitCoordinateDeclaration(CARLParser.CoordinateDeclarationContext ctx) {
         return super.visitCoordinateDeclaration(ctx);
+    }
+
+    @Override
+    public Statement visitArrayDefinition(CARLParser.ArrayDefinitionContext ctx) {
+        return super.visitArrayDefinition(ctx);
     }
 
     @Override
@@ -68,5 +73,10 @@ public class AntlrToStatement extends CARLBaseVisitor<Statement> {
     @Override
     public Statement visitParameterList(CARLParser.ParameterListContext ctx) {
         return super.visitParameterList(ctx);
+    }
+
+    @Override
+    public Statement visitBlock(CARLParser.BlockContext ctx) {
+        return super.visitBlock(ctx);
     }
 }

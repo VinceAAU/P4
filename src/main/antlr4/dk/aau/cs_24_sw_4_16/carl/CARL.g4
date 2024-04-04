@@ -9,12 +9,13 @@ statement
     | functionDefinition
     | ifStatement
     | whileLoop
-    | returnStatement
+//    | returnStatement Seems wierd to be able to return just a return statement
     | structureDefinition
     | importStatement
     | variableDeclaration
     | arrayDefinition
     | coordinateDeclaration
+    | methodCall
     ;
 
 importStatement : 'import' STRING ;
@@ -34,61 +35,73 @@ type
     | 'coord'
     | 'void'
     | IDENTIFIER
-    | primitiveTypeForArray '[' ']''[' ']' //Questionable, but maybe?
+    | primitiveTypeForArray '[' ']'('[' ']')*
     ;
-assignment : IDENTIFIER '=' expression ;
+assignment : (IDENTIFIER | arrayAccess) '=' expression ;
 functionCall : IDENTIFIER '(' argumentList? ')' ;
-methodCall : propertyAccess '(' argumentList? ')' ; //Lige nu så bliver den slet ikke brugt
+methodCall : propertyAccess '(' argumentList? ')' ;
 argumentList : expression (',' expression)* ;
 parameterList : IDENTIFIER ':' type (',' IDENTIFIER ':' type)* ;
 
-//Should probably define visitor method for each type. Might make it easier when implementing.
-//Need to create visitMethod for for exmaple (expression operator expression) operator expression (Parenthese method).
-//Once the methods are set up and the CFG is correct, we can probably start coding.
-//Saving expression values in hashmap with functions?
+//Only way to get precedence in terms of *+- etc.
 expression
-    : INT
-    | FLOAT
-    | STRING
-    | IDENTIFIER
-    | '(' expression ')' //A bit ambigous?
-    | expression operator expression
-    | functionCall
-//    | expression '..' expression // Virker ikke rigtigt, for her vil man kunne lave mærkelige som ID..Float
-//    | randomExpression //Man kunne også definere den under operator. Hvilket jeg har valgt at gøre her
-    | arrayAccess
-    | propertyAccess
-    | structInstantiation
+    : INT # Int
+    | FLOAT # Float
+    | STRING # String
+    | IDENTIFIER # Identifier
+    | '(' expression ')' # Parentheses
+    | functionCall # DummyFunctionCallExpr
+    | arrayAccess # DummyArrayAccessExpr
+    | propertyAccess # DummyPropertyAccess
+    | structInstantiation # DummyStructInstantiationExpr
+    | expression '*' expression # Multiplication
+    | expression '/' expression # Division
+    | expression '%' expression # Modulus
+    | expression '+' expression # Addition
+    | expression '-' expression # Subtraction
+    | expression '<' expression # LessThan
+    | expression '<=' expression # LessThanOrEqual
+    | expression '>' expression # GreaterThan
+    | expression '>=' expression # GreaterThanOrEqual
+    | expression '==' expression # Equals
+    | expression '!=' expression # NotEquals
+    | expression 'AND' expression # And
+    | expression 'OR' expression # Or
+    | expression '..' expression # RandomBetween
+    | '!' expression # Not
     ;
+
 
 structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER ':' expression)*)? '}' ;
 
-operator
-    : '+' # Addition
-    | '-' # Subtraction
-    | '*' # Multiplication
-    | '/' # Division
-    | '%' # Modulus
-    | '==' # Equals
-    | '!=' # NotEquals
-    | '!' # Not
-    | '<' # LessThan
-    | '>' # GreaterThan
-    | '<=' # LessThanOrEqual
-    | '>=' # GreaterThanOrEqual
-    | 'AND' # And //Not capital?
-    | 'OR' # Or
-    | '..' # RandomBetween
-    ;
+//operator
+//    : '!' # Not
+//    | '*' # Multiplication
+//    | '-' # Subtraction
+//    | '+' # Addition
+//    | '/' # Division
+//    | '%' # Modulus
+//    | '<' # LessThan
+//    | '<=' # LessThanOrEqual
+//    | '>' # GreaterThan
+//    | '>=' # GreaterThanOrEqual
+//    | '==' # Equals
+//    | '!=' # NotEquals
+//    | 'AND' # And
+//    | 'OR' # Or
+//    | '..' # RandomBetween
+//    ;
 
-ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' block )? ;
-whileLoop : 'while' expression block ;
+//Maybe wrong since we already have it defined earlier, but we need true false values and to not be able to write anything in the condition
+booleanExpression : expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expression | 'true' | 'false';
+ifStatement : 'if' booleanExpression block ( 'else if' booleanExpression block )* ( 'else' block )? ;
+whileLoop : 'while' booleanExpression block ;
 returnStatement : 'return' expression? ;
-block : '{' statement* '}' ;
-arrayDefinition : primitiveTypeForArray '[' expression? ']' ('[' expression ']')? IDENTIFIER ;
-arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']') '=' primitiveTypeForArray?;
+block : '{' statement* (returnStatement)?'}' ;
+arrayDefinition : primitiveTypeForArray '[' INT? ']' ('[' INT ']')* IDENTIFIER ;
+arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']')*;
 propertyAccess : IDENTIFIER '.' IDENTIFIER ;
-coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;
+coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
 
 // Lexer rules
 INT : [0-9]+ ;
