@@ -5,149 +5,160 @@ import dk.aau.cs_24_sw_4_16.carl.Expression.BinaryOperations;
 import dk.aau.cs_24_sw_4_16.carl.Expression.Expression;
 import dk.aau.cs_24_sw_4_16.carl.Expression.Type;
 
-public class AntlrToExpression extends CARLBaseVisitor<Expression> {
+import java.util.Objects;
+
+public class AntlrToExpression extends CARLBaseVisitor<Object> {
     @Override
-    public Expression visitMultiplication(CARLParser.MultiplicationContext ctx) {
+    public Object visitMultiplication(CARLParser.MultiplicationContext ctx) {
         return super.visitMultiplication(ctx);
     }
 
     @Override
-    public Expression visitAddition(CARLParser.AdditionContext ctx) {
-        Expression left = visit(ctx.getChild(0));
-        Expression right = visit(ctx.getChild(2));
-
-        return new BinaryOperations(left, right,BinaryOperations.operator.ADD);
+    public Object visitAddition(CARLParser.AdditionContext ctx) {
+//        Expression left = visit(ctx.getChild(0));
+//        Expression right = visit(ctx.getChild(2));
+//
+//        return new BinaryOperations(left, right,BinaryOperations.operator.ADD);
+        return null;
     }
 
     @Override
-    public Expression visitOr(CARLParser.OrContext ctx) {
+    public Object visitOr(CARLParser.OrContext ctx) {
         return super.visitOr(ctx);
     }
 
     @Override
-    public Expression visitLessThanOrEqual(CARLParser.LessThanOrEqualContext ctx) {
+    public Object visitLessThanOrEqual(CARLParser.LessThanOrEqualContext ctx) {
         return super.visitLessThanOrEqual(ctx);
     }
 
     @Override
-    public Expression visitString(CARLParser.StringContext ctx) {
-        return super.visitString(ctx);
-    }
+    public Object visitString(CARLParser.StringContext ctx) {
+        if (ctx.STRING() != null) {
+            return ctx.STRING().getText().substring(1, ctx.STRING().getText().length() - 2);
+        }
+        return null;    }
 
     @Override
-    public Expression visitGreaterThanOrEqual(CARLParser.GreaterThanOrEqualContext ctx) {
+    public Object visitGreaterThanOrEqual(CARLParser.GreaterThanOrEqualContext ctx) {
         return super.visitGreaterThanOrEqual(ctx);
     }
 
     @Override
-    public Expression visitInt(CARLParser.IntContext ctx) {
-        String numText = ctx.getChild(1).getText();
-        int num = Integer.parseInt(numText);
-        return new Type<>(num);
+    public Object visitInt(CARLParser.IntContext ctx) {
+        if (ctx.INT() != null) {
+            return Integer.parseInt(ctx.INT().getText());
+        }
+        return null;
     }
 
     @Override
-    public Expression visitNotEquals(CARLParser.NotEqualsContext ctx) {
+    public Object visitNotEquals(CARLParser.NotEqualsContext ctx) {
         return super.visitNotEquals(ctx);
     }
 
     @Override
-    public Expression visitFloat(CARLParser.FloatContext ctx) {
-        return super.visitFloat(ctx);
-    }
+    public Object visitFloat(CARLParser.FloatContext ctx) {
+        if (ctx.FLOAT() != null) {
+            return Float.parseFloat(ctx.FLOAT().getText());
+        }
+        return null;    }
 
     @Override
-    public Expression visitNot(CARLParser.NotContext ctx) {
+    public Object visitNot(CARLParser.NotContext ctx) {
         return super.visitNot(ctx);
     }
 
     @Override
-    public Expression visitLessThan(CARLParser.LessThanContext ctx) {
+    public Object visitLessThan(CARLParser.LessThanContext ctx) {
         return super.visitLessThan(ctx);
     }
 
     @Override
-    public Expression visitEquals(CARLParser.EqualsContext ctx) {
+    public Object visitEquals(CARLParser.EqualsContext ctx) {
         return super.visitEquals(ctx);
     }
 
     @Override
-    public Expression visitRandomBetween(CARLParser.RandomBetweenContext ctx) {
+    public Object visitRandomBetween(CARLParser.RandomBetweenContext ctx) {
         return super.visitRandomBetween(ctx);
     }
 
     @Override
-    public Expression visitIdentifier(CARLParser.IdentifierContext ctx) {
+    public Object visitIdentifier(CARLParser.IdentifierContext ctx) {
         return super.visitIdentifier(ctx);
     }
 
     @Override
-    public Expression visitSubtraction(CARLParser.SubtractionContext ctx) {
+    public Object visitSubtraction(CARLParser.SubtractionContext ctx) {
         return super.visitSubtraction(ctx);
     }
 
     @Override
-    public Expression visitGreaterThan(CARLParser.GreaterThanContext ctx) {
+    public Object visitGreaterThan(CARLParser.GreaterThanContext ctx) {
         return super.visitGreaterThan(ctx);
     }
 
     @Override
-    public Expression visitModulus(CARLParser.ModulusContext ctx) {
+    public Object visitModulus(CARLParser.ModulusContext ctx) {
         return super.visitModulus(ctx);
     }
 
     @Override
-    public Expression visitAnd(CARLParser.AndContext ctx) {
+    public Object visitAnd(CARLParser.AndContext ctx) {
         return super.visitAnd(ctx);
     }
 
     @Override
-    public Expression visitDivision(CARLParser.DivisionContext ctx) {
+    public Object visitDivision(CARLParser.DivisionContext ctx) {
         return super.visitDivision(ctx);
     }
 
     @Override
-    public Expression visitParentheses(CARLParser.ParenthesesContext ctx) {
+    public Object visitParentheses(CARLParser.ParenthesesContext ctx) {
         return super.visitParentheses(ctx);
     }
 
     @Override
-    public Expression visitStructInstantiation(CARLParser.StructInstantiationContext ctx) {
+    public Object visitStructInstantiation(CARLParser.StructInstantiationContext ctx) {
         return super.visitStructInstantiation(ctx);
     }
 
     @Override
-    public Expression visitBool(CARLParser.BoolContext ctx) {
-        return super.visitBool(ctx);
+    public Object visitBool(CARLParser.BoolContext ctx) {
+        if (ctx.BOOL() != null) {
+            return Objects.equals(ctx.BOOL().getText(), "true");
+        }
+        return null;
     }
 
     @Override
-    public Expression visitFunctionCall(CARLParser.FunctionCallContext ctx) {
+    public Object visitFunctionCall(CARLParser.FunctionCallContext ctx) {
         return super.visitFunctionCall(ctx);
     }
 
     @Override
-    public Expression visitMethodCall(CARLParser.MethodCallContext ctx) {
+    public Object visitMethodCall(CARLParser.MethodCallContext ctx) {
         return super.visitMethodCall(ctx);
     }
 
     @Override
-    public Expression visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
+    public Object visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
         return super.visitArrayAccess(ctx);
     }
 
     @Override
-    public Expression visitPropertyAccess(CARLParser.PropertyAccessContext ctx) {
+    public Object visitPropertyAccess(CARLParser.PropertyAccessContext ctx) {
         return super.visitPropertyAccess(ctx);
     }
 
     @Override
-    public Expression visitPrimitiveTypeForArray(CARLParser.PrimitiveTypeForArrayContext ctx) {
+    public Object visitPrimitiveTypeForArray(CARLParser.PrimitiveTypeForArrayContext ctx) {
         return super.visitPrimitiveTypeForArray(ctx);
     }
 
     @Override
-    public Expression visitType(CARLParser.TypeContext ctx) {
+    public Object visitType(CARLParser.TypeContext ctx) {
         return super.visitType(ctx);
     }
 }

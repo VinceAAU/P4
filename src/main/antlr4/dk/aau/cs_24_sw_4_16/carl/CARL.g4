@@ -110,7 +110,7 @@ INT : [0-9]+ ;
 FLOAT : [0-9]* '.' [0-9]+ ;
 STRING : '"' ~["]* '"' ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
-BOOL : ('True' | 'False') ;
+BOOL : ('true' | 'false') ;
 WS : [ \t\r\n]+ -> skip ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
 
