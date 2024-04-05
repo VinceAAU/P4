@@ -1,7 +1,9 @@
 package dk.aau.cs_24_sw_4_16.carl;
 
 
+import dk.aau.cs_24_sw_4_16.carl.Expression.BinaryOperations;
 import dk.aau.cs_24_sw_4_16.carl.Expression.Expression;
+import dk.aau.cs_24_sw_4_16.carl.Expression.Type;
 
 public class AntlrToExpression extends CARLBaseVisitor<Expression> {
     @Override
@@ -11,7 +13,10 @@ public class AntlrToExpression extends CARLBaseVisitor<Expression> {
 
     @Override
     public Expression visitAddition(CARLParser.AdditionContext ctx) {
-        return super.visitAddition(ctx);
+        Expression left = visit(ctx.getChild(0));
+        Expression right = visit(ctx.getChild(2));
+
+        return new BinaryOperations(left, right,BinaryOperations.operator.ADD);
     }
 
     @Override
@@ -36,7 +41,9 @@ public class AntlrToExpression extends CARLBaseVisitor<Expression> {
 
     @Override
     public Expression visitInt(CARLParser.IntContext ctx) {
-        return super.visitInt(ctx);
+        String numText = ctx.getChild(1).getText();
+        int num = Integer.parseInt(numText);
+        return new Type<>(num);
     }
 
     @Override
@@ -110,8 +117,8 @@ public class AntlrToExpression extends CARLBaseVisitor<Expression> {
     }
 
     @Override
-    public Expression visitBooleanExpression(CARLParser.BooleanExpressionContext ctx) {
-        return super.visitBooleanExpression(ctx);
+    public Expression visitBool(CARLParser.BoolContext ctx) {
+        return super.visitBool(ctx);
     }
 
     @Override

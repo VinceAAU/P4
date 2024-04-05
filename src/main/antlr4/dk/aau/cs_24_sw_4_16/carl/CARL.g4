@@ -49,6 +49,7 @@ expression
     | FLOAT # Float
     | STRING # String
     | IDENTIFIER # Identifier
+    | BOOL # Bool
     | '(' expression ')' # Parentheses
     | functionCall # DummyFunctionCallExpr
     | methodCall # DummyMethodCall
@@ -94,9 +95,9 @@ structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER 
 //    ;
 
 //Maybe wrong since we already have it defined earlier, but we need true false values and to not be able to write anything in the condition
-booleanExpression : expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expression | 'true' | 'false';
-ifStatement : 'if' booleanExpression block ( 'else if' booleanExpression block )* ( 'else' block )? ;
-whileLoop : 'while' booleanExpression block ;
+//booleanExpression : expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expression | 'true' | 'false';
+ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' block )? ;
+whileLoop : 'while' expression block ;
 returnStatement : 'return' expression? ;
 block : '{' statement* '}' ;
 arrayDefinition : primitiveTypeForArray '[' INT? ']' ('[' INT ']')* IDENTIFIER ;
@@ -109,6 +110,7 @@ INT : [0-9]+ ;
 FLOAT : [0-9]* '.' [0-9]+ ;
 STRING : '"' ~["]* '"' ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
+BOOL : ('True' | 'False') ;
 WS : [ \t\r\n]+ -> skip ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
 
