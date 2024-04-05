@@ -9,7 +9,7 @@ statement
     | functionDefinition
     | ifStatement
     | whileLoop
-//    | returnStatement Seems wierd to be able to return just a return statement
+    | returnStatement
     | structureDefinition
     | importStatement
     | variableDeclaration
@@ -51,6 +51,7 @@ expression
     | IDENTIFIER # Identifier
     | '(' expression ')' # Parentheses
     | functionCall # DummyFunctionCallExpr
+    | methodCall # DummyMethodCall
     | arrayAccess # DummyArrayAccessExpr
     | propertyAccess # DummyPropertyAccess
     | structInstantiation # DummyStructInstantiationExpr
@@ -97,7 +98,7 @@ booleanExpression : expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expressio
 ifStatement : 'if' booleanExpression block ( 'else if' booleanExpression block )* ( 'else' block )? ;
 whileLoop : 'while' booleanExpression block ;
 returnStatement : 'return' expression? ;
-block : '{' statement* (returnStatement)?'}' ;
+block : '{' statement* '}' ;
 arrayDefinition : primitiveTypeForArray '[' INT? ']' ('[' INT ']')* IDENTIFIER ;
 arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']')*;
 propertyAccess : IDENTIFIER '.' IDENTIFIER ;
@@ -110,10 +111,6 @@ STRING : '"' ~["]* '"' ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
 WS : [ \t\r\n]+ -> skip ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
-LPAREN : '(' ;
-RPAREN : ')' ;
-LBRACE : '{' ;
-RBRACE : '}' ;
 
 /* code exmaple:
 import "basic_library"
