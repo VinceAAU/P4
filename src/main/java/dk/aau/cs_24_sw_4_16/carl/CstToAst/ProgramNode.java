@@ -20,9 +20,7 @@ public class ProgramNode extends AstNode {
         return statements;
     }
 
-    @Override
-    public  <T> T accept(AstVisitor<T> visitor) {return visitor.visit(this);
-    }
+
 
     @Override
     public String toString() {

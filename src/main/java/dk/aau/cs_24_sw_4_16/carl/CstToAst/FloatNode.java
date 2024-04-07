@@ -10,10 +10,7 @@ public class FloatNode extends AstNode{
         return value;
     }
 
-    @Override
-    public <T> T accept(AstVisitor<T> visitor) {
-        return visitor.visit(this); // The visit method decides the return type
-    }
+
     @Override
     public String toString() {
         return " value: " + value;

@@ -13,8 +13,5 @@ public class TypeNode extends AstNode {
     }
 
 
-    @Override
-    public <T> T accept(AstVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+
 }

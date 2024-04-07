@@ -12,10 +12,7 @@ public class StatementNode extends AstNode{
         this.node = node;
     }
 
-    @Override
-    public  <T> T accept(AstVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+
 
     @Override
     public String toString() {
