@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProgramNode extends AstNode {
-    List<StatementNode> statements;
+    List<AstNode> statements;
 
     public void addStatement(StatementNode node) {
         statements.add(node);
@@ -16,7 +16,7 @@ public class ProgramNode extends AstNode {
         statements = new ArrayList<>();
     }
 
-    public List<StatementNode> getStatements() {
+    public List<AstNode> getStatements() {
         return statements;
     }
 

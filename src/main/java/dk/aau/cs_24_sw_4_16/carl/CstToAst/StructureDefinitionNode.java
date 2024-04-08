@@ -3,16 +3,16 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 import java.util.List;
 
 public class StructureDefinitionNode extends AstNode {
-    private final String name;
+    private final IdentifierNode identifier;
     private final List<VariableDeclarationNode> variables;
 
-    public StructureDefinitionNode(String name, List<VariableDeclarationNode> variables) {
-        this.name = name;
+    public StructureDefinitionNode(AstNode identifier, List<VariableDeclarationNode> variables) {
+        this.identifier = (IdentifierNode) identifier;
         this.variables = variables;
     }
 
-    public String getName() {
-        return name;
+    public IdentifierNode getIdentifier() {
+        return identifier;
     }
 
     public List<VariableDeclarationNode> getVariables() {

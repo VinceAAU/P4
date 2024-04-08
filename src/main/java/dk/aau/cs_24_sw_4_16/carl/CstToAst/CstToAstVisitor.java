@@ -2,6 +2,10 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
+import dk.aau.cs_24_sw_4_16.carl.Statement.FunctionCall;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
@@ -20,6 +24,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitAssignment(ctx.assignment()));
         } else if (ctx.variableDeclaration() != null) {
             return new StatementNode(visitVariableDeclaration(ctx.variableDeclaration()));
+        } else if (ctx.functionCall() != null) {
+            return new StatementNode(visitFunctionCall(ctx.functionCall()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -42,9 +48,13 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitVariableDeclaration(CARLParser.VariableDeclarationContext ctx) {
         String identifier = ctx.IDENTIFIER().getText();
+
+        IdentifierNode identifierNode = new IdentifierNode(identifier);
+
         TypeNode type = (TypeNode) visit(ctx.type());
         AstNode value = visit(ctx.expression());
-        return new VariableDeclarationNode(identifier, type, value);
+
+        return new VariableDeclarationNode(identifierNode, type, value);
     }
 
     @Override
@@ -60,14 +70,21 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitAssignment(CARLParser.AssignmentContext ctx) {
-        String identifier = ctx.IDENTIFIER().getText();
         AstNode value = visit(ctx.expression());
-        return new AssignmentNode(identifier, value);
+        return new AssignmentNode(new IdentifierNode(ctx.IDENTIFIER().getText()), value);
     }
 
     @Override
     public AstNode visitFunctionCall(CARLParser.FunctionCallContext ctx) {
-        return super.visitFunctionCall(ctx);
+        //        for (CARLParser.StatementContext statementContext : ctx.statement()) {
+        //            programNode.addStatement((StatementNode) visit(statementContext));
+        //        }
+        List<AstNode> arguments = new ArrayList<>();
+        for (CARLParser.ExpressionContext expression : ctx.argumentList().expression()) {
+            System.out.println("hello");
+            arguments.add(visit(expression));
+        }
+        return new FunctionCallNode(new IdentifierNode(ctx.IDENTIFIER().getText()), arguments);
     }
 
     @Override
@@ -102,7 +119,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitString(CARLParser.StringContext ctx) {
-        return super.visitString(ctx);
+        return new StringNode(ctx.getText());
     }
 
     @Override
@@ -127,7 +144,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitIdentifier(CARLParser.IdentifierContext ctx) {
-        return super.visitIdentifier(ctx);
+        return new IdentifierNode(ctx.IDENTIFIER().getText());
     }
 
     @Override
@@ -157,7 +174,21 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitAddition(CARLParser.AdditionContext ctx) {
-        return super.visitAddition(ctx);
+//        AstNode left = visit(ctx.expression(0));
+//        AstNode right = visit(ctx.expression(1));
+//        String op = ctx.getChild(1).getText();
+//        System.out.println(left + " " + op + " " + right);
+//        System.out.println();
+//            if (left instanceof IntNode && right instanceof IntNode) {
+//                int result = Integer.parseInt(left.toString()) + Integer.parseInt(right.toString());
+//                return new IntNode(Integer.toString(result));
+//            } else if (left instanceof FloatNode && right instanceof FloatNode) {
+//                float result = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
+//                return new FloatNode(Float.toString(result));
+//            } else {
+//                throw new IllegalArgumentException("Unsupported types for addition: " + left.getClass() + " and " + right.getClass());
+//            }
+        return null;
     }
 
     @Override

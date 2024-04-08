@@ -3,16 +3,16 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 import java.util.List;
 
 public class FunctionCallNode extends AstNode {
-    private String functionName;
-    private List<AstNode> arguments;
+    private final IdentifierNode identifier;
+    private final List<AstNode> arguments;
 
-    public FunctionCallNode(String functionName, List<AstNode> arguments) {
-        this.functionName = functionName;
+    public FunctionCallNode(AstNode identifier, List<AstNode> arguments) {
+        this.identifier = (IdentifierNode) identifier;
         this.arguments = arguments;
     }
 
-    public String getFunctionName() {
-        return functionName;
+    public IdentifierNode getFunctionName() {
+        return identifier;
     }
 
     public List<AstNode> getArguments() {
@@ -21,10 +21,8 @@ public class FunctionCallNode extends AstNode {
 
     @Override
     public String toString() {
-        return "FunctionCallNode{" +
-                "functionName='" + functionName + '\'' +
-                ", arguments=" + arguments +
-                '}';
+        return "identifier='" + identifier + '\'' +
+                ", arguments=" + arguments;
     }
 
 }
