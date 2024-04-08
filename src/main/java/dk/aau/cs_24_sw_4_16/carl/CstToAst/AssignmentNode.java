@@ -25,4 +25,8 @@ public class AssignmentNode extends AstNode{
                 value;
     }
 
+    @Override
+    public <T> T accept(AstVisitor<T> visitor) {
+        return null;
+    }
 }
