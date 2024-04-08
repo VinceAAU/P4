@@ -11,8 +11,4 @@ public class ImportStatementNode extends AstNode {
         return path;
     }
 
-    @Override
-    public <T> T accept(AstVisitor<T> visitor) {
-        return visitor.visitImportStatementNode(this);
-    }
 }

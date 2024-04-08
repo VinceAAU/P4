@@ -17,8 +17,4 @@ public class FunctionDefinitionNode extends AstNode {
         return returnType;
     }
 
-    @Override
-    public <T> T accept(AstVisitor<T> visitor) {
-        return visitor.visitFunctionDefinitionNode(this);
-    }
 }

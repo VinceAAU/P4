@@ -19,8 +19,4 @@ public class StructureDefinitionNode extends AstNode {
         return variables;
     }
 
-    @Override
-    public <T> T accept(AstVisitor<T> visitor) {
-        return visitor.visitStructureDefinitionNode(this);
-    }
 }

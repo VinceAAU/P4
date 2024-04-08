@@ -19,8 +19,4 @@ public class ArrayDefinitionNode extends AstNode {
         return size;
     }
 
-    @Override
-    public <T> T accept(AstVisitor<T> visitor) {
-        return visitor.visitArrayDefinitionNode(this);
-    }
 }
