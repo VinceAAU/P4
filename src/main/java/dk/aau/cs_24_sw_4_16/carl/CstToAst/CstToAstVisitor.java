@@ -2,7 +2,6 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
-import dk.aau.cs_24_sw_4_16.carl.Statement.FunctionCall;
 
 import java.util.ArrayList;
 import java.util.List;

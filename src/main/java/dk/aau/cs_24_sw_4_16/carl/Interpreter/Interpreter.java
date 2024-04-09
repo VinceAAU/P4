@@ -1,7 +1,6 @@
 package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
-import dk.aau.cs_24_sw_4_16.carl.Expression.Expression;
 
 public class Interpreter {
 
@@ -84,8 +83,10 @@ public class Interpreter {
     public AstNode visit(AdditionNode node) {
         AstNode left = visit(node.getLeft());
         AstNode right = visit(node.getRight());
+
         if (left instanceof IntNode && right instanceof IntNode) {
             int result = Integer.parseInt(left.toString()) + Integer.parseInt(right.toString());
+            
             return new IntNode(Integer.toString(result));
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
             float result = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
