@@ -174,6 +174,10 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitAddition(CARLParser.AdditionContext ctx) {
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        return new AdditionNode(left, right);
+
 //        AstNode left = visit(ctx.expression(0));
 //        AstNode right = visit(ctx.expression(1));
 //        String op = ctx.getChild(1).getText();
@@ -188,7 +192,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 //            } else {
 //                throw new IllegalArgumentException("Unsupported types for addition: " + left.getClass() + " and " + right.getClass());
 //            }
-        return null;
     }
 
     @Override

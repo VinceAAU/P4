@@ -81,9 +81,23 @@ public class Interpreter {
         }
         return node;
     }
+    public AstNode visit(AdditionNode node) {
+        AstNode left = visit(node.getLeft());
+        AstNode right = visit(node.getRight());
+        if (left instanceof IntNode && right instanceof IntNode) {
+            int result = Integer.parseInt(left.toString()) + Integer.parseInt(right.toString());
+            return new IntNode(Integer.toString(result));
+        } else if (left instanceof FloatNode && right instanceof FloatNode) {
+            float result = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
+            return new FloatNode(Float.toString(result));
+        }
+        return null;
+    }
 
     public AstNode visit(ExpressionNode node) {
-
+        if (node.getNode() instanceof AdditionNode) {
+            return visit((AdditionNode) node.getNode());
+        }
         if (node.getNode() instanceof FunctionCallNode) {
             return visit((FunctionCallNode) node.getNode());
         }
