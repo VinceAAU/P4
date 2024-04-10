@@ -3,6 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitVariableDeclaration(ctx.variableDeclaration()));
         } else if (ctx.functionCall() != null) {
             return new StatementNode(visitFunctionCall(ctx.functionCall()));
+        } else if (ctx.functionDefinition() != null) {
+            return new StatementNode(visitFunctionDefinition(ctx.functionDefinition()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -36,7 +39,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitFunctionDefinition(CARLParser.FunctionDefinitionContext ctx) {
-        return super.visitFunctionDefinition(ctx);
+
+        ParameterListNode argumentList = (ParameterListNode) visitParameterList(ctx.parameterList());
+        BlockNode block = (BlockNode) visitBlock(ctx.block());
+        TypeNode returntype = (TypeNode) visitType(ctx.type());
+        return new FunctionDefinitionNode(new IdentifierNode(ctx.IDENTIFIER().getText()),returntype,argumentList,block);
     }
 
     @Override
@@ -80,7 +87,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         //        }
         List<AstNode> arguments = new ArrayList<>();
         for (CARLParser.ExpressionContext expression : ctx.argumentList().expression()) {
-            System.out.println("hello");
             arguments.add(visit(expression));
         }
         return new FunctionCallNode(new IdentifierNode(ctx.IDENTIFIER().getText()), arguments);
@@ -98,7 +104,15 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitParameterList(CARLParser.ParameterListContext ctx) {
-        return super.visitParameterList(ctx);
+        List<ParameterNode> parameters = new ArrayList<>();
+
+        for (int i = 0; i < ctx.getChildCount() / 3; i++) {
+            IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
+            TypeNode type = (TypeNode) visit(ctx.type(i));
+            parameters.add(new ParameterNode(identifier, type));
+        }
+
+        return new ParameterListNode(parameters);
     }
 
     @Override
@@ -271,7 +285,13 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitBlock(CARLParser.BlockContext ctx) {
-        return super.visitBlock(ctx);
+        BlockNode block = new BlockNode();
+        System.out.println("hgahashdfsadgasfas");
+        System.out.println(ctx.getText());
+        for (CARLParser.StatementContext statementContext : ctx.statement()) {
+            block.addStatement((StatementNode) visit(statementContext));
+        }
+        return block;
     }
 
     @Override

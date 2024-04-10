@@ -6,11 +6,11 @@ import java.util.List;
 public class FunctionDefinitionNode extends AstNode {
     private final IdentifierNode identifier;
     private final TypeNode returnType;
-    private List<AstNode> arguments;
-    private List<AstNode> block;
+    private ParameterListNode arguments;
+    private BlockNode block;
 
 
-    public FunctionDefinitionNode(AstNode identifier, TypeNode returnType, List<AstNode> arguments, List<AstNode> block) {
+    public FunctionDefinitionNode(AstNode identifier, TypeNode returnType, ParameterListNode arguments, BlockNode block) {
         this.identifier = (IdentifierNode) identifier;
         this.returnType = returnType;
         this.arguments = arguments;
@@ -25,11 +25,11 @@ public class FunctionDefinitionNode extends AstNode {
         return returnType;
     }
 
-    public List<AstNode> getArguments() {
+    public ParameterListNode getArguments() {
         return arguments;
     }
 
-    public List<AstNode> getBlock() {
+    public BlockNode getBlock() {
         return block;
     }
 }

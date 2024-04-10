@@ -99,7 +99,7 @@ structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER 
 ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' block )? ;
 whileLoop : 'while' expression block ;
 returnStatement : 'return' expression? ;
-block : '{' statement*  | expression* '}' ;
+block : '{' (statement  | expression)* '}' ;
 arrayDefinition : primitiveTypeForArray '[' INT? ']' ('[' INT ']')* IDENTIFIER ;
 arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']')*;
 propertyAccess : IDENTIFIER '.' IDENTIFIER ;
