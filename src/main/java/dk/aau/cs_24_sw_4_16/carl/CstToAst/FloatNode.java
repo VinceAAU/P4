@@ -13,6 +13,6 @@ public class FloatNode extends AstNode{
 
     @Override
     public String toString() {
-        return " value: " + value;
+        return "" + value;
     }
 }

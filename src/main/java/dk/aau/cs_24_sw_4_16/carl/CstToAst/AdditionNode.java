@@ -7,6 +7,7 @@ public class AdditionNode extends AstNode {
     public AdditionNode(AstNode left, AstNode right) {
         this.left = left;
         this.right = right;
+        System.out.println(this);
     }
 
     public AstNode getLeft() {
@@ -17,16 +18,11 @@ public class AdditionNode extends AstNode {
         return right;
     }
 
-    @Override
-    public String toString() {
-        float leftValue = Float.parseFloat(left.toString());
-        float rightValue = Float.parseFloat(right.toString());
-        boolean isInteger = (leftValue == (int)leftValue && rightValue == (int)rightValue);
-        float result = leftValue + rightValue;
-        if (isInteger) {
-            return Integer.toString((int)result);
-        } else {
-            return Float.toString(result);
-        }
-    }
+//    @Override
+//    public String toString() {
+//        return "AdditionNode{" +
+//                "left=" + left +
+//                ", right=" + right +
+//                '}';
+//    }
 }

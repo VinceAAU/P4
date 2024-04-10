@@ -73,7 +73,6 @@ expression
     | '!' expression # Not
     ;
 
-
 structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER ':' expression)*)? '}' ;
 
 //operator

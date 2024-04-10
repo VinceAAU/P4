@@ -81,19 +81,20 @@ public class Interpreter {
         return node;
     }
     public AstNode visit(AdditionNode node) {
-        AstNode left = visit(node.getLeft());
-        AstNode right = visit(node.getRight());
-
-        if (left instanceof IntNode && right instanceof IntNode) {
-            int result = Integer.parseInt(left.toString()) + Integer.parseInt(right.toString());
-            
-            return new IntNode(Integer.toString(result));
-        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-            float result = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
-            return new FloatNode(Float.toString(result));
+        System.out.println("HELLOO FDJIFJDIFSJDFISODJFSIODJFOSIDJFOSIDJFSIODFJSIODJFOSIDJFSIODFJSOIDFJOSIFJD");
+        AstNode left = node.getLeft();
+        AstNode right = node.getRight();
+        if(left instanceof IntNode && right instanceof IntNode) {
+            int leftValue = ((IntNode) left).getValue();
+            int rightValue = ((IntNode) right).getValue();
+            System.out.println(leftValue+rightValue);
+        } else if(left instanceof FloatNode && right instanceof FloatNode) {
+            System.out.println(node);
         }
-        return null;
+        return node;
     }
+
+
 
     public AstNode visit(ExpressionNode node) {
         if (node.getNode() instanceof AdditionNode) {
