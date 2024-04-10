@@ -11,6 +11,9 @@ public class IntNode extends AstNode{
     }
 
 
+    public void setValue(int value) {
+        this.value = value;
+    }
 
     @Override
     public String toString() {

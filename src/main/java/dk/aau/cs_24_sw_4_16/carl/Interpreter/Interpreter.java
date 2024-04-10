@@ -2,16 +2,20 @@ package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class Interpreter {
     HashMap<String, FunctionDefinitionNode> fTable;
     HashMap<String, AstNode> vTable;
+    List<HashMap<String, AstNode>> scopes;
 
     public Interpreter() {
         fTable = new HashMap<>();
         vTable = new HashMap<>();
+        scopes = new ArrayList<>();
+        scopes.add(vTable);
     }
 
     public AstNode visit(AstNode node) {
@@ -28,7 +32,7 @@ public class Interpreter {
 
     public AstNode visit(StatementNode node) {
         if (node.getNode() instanceof AssignmentNode) {
-            return visit((AssignmentNode) node.getNode());
+            visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {
             visit((VariableDeclarationNode) node.getNode());
         } else if (node.getNode() instanceof FunctionCallNode) {
@@ -40,30 +44,43 @@ public class Interpreter {
     }
 
 
-    public AstNode visit(AssignmentNode node) {
-        System.out.println("Assigning " + node.getValue() + " to " + node.getIdentifier());
-        System.out.println(node);
-        return node;
+    public void visit(AssignmentNode node) {
+
+        for (HashMap<String, AstNode> vTable : scopes) {
+            if (vTable.containsKey(node.getIdentifier().toString())) {
+                AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
+                if (nodeToChange instanceof IntNode && node.getValue() instanceof IntNode) {
+                    ((IntNode) nodeToChange).setValue(((IntNode) node.getValue()).getValue());
+                } else if (nodeToChange instanceof FloatNode && node.getValue() instanceof FloatNode) {
+                    ((FloatNode) nodeToChange).setValue(((FloatNode) node.getValue()).getValue());
+                } else if (nodeToChange instanceof StringNode && node.getValue() instanceof StringNode) {
+                    ((StringNode) nodeToChange).setValue(((StringNode) node.getValue()).getValue());
+                }
+                System.out.println("node saved");
+                return;
+            }
+        }
+
+        System.out.println("node does not exist");
+        scopes.getLast().put(node.getIdentifier().toString(), node.getValue());
+
     }
+
 
     public void visit(VariableDeclarationNode node) {
-        if (!vTable.containsKey(node.getIdentifier().toString())) {
+        boolean found = false;
+        for (HashMap<String, AstNode> vTable : scopes) {
+            if (vTable.containsKey(node.getIdentifier().toString())) {
+                found = true;
+            }
+        }
+        if (!found) {
             System.out.println(STR."stored:\{node}");
-            vTable.put(node.getIdentifier().toString(), node.getValue());
+            scopes.getLast().put(node.getIdentifier().toString(), node.getValue());
         } else {
             System.out.println(STR."node already exist:\{node}");
         }
     }
-
-    public void visit(VariableDeclarationNode node, HashMap<String, AstNode> localTable) {
-        if (!vTable.containsKey(node.getIdentifier().toString()) && !localTable.containsKey(node.getIdentifier().toString())) {
-            System.out.println(STR."stored:\{node}");
-            localTable.put(node.getIdentifier().toString(), node.getValue());
-        } else {
-            System.out.println(STR."node already exist:\{node}");
-        }
-    }
-
 
     public AstNode visit(TypeNode node) {
         return node;
@@ -89,16 +106,16 @@ public class Interpreter {
 
     public AstNode visit(FunctionCallNode node) {
         HashMap<String, AstNode> localTable = new HashMap<>();
+        scopes.add(localTable);
         if (fTable.containsKey(node.getFunctionName().getIdentifier())) {
             FunctionDefinitionNode function = fTable.get(node.getFunctionName().getIdentifier());
             List<ParameterNode> arguments = function.getArguments().getParameters();
-            for (int i = 0; i < function.getArguments().getParameters().size(); i++)
-                visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)), localTable);
-            System.out.println("hgfsahsdagasfdsa");
+            for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
+                visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
+            }
             System.out.println(function.getBlock().getStatements());
-            for (AstNode statement:function.getBlock().getStatements())
-            {
-                System.out.println("tgest");
+            for (AstNode statement : function.getBlock().getStatements()) {
+
                 visit((StatementNode) statement);
             }
         }
@@ -114,6 +131,7 @@ public class Interpreter {
             System.out.println(toPrint);
 
         }
+        scopes.remove(localTable);
         return node;
     }
 
