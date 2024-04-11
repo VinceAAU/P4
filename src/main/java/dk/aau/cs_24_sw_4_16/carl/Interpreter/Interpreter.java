@@ -64,7 +64,7 @@ public class Interpreter {
         }
 
         System.out.println("node does not exist");
-        scopes.getLast().put(node.getIdentifier().toString(), node.getValue());
+        scopes.get(scopes.size()-1).put(node.getIdentifier().toString(), node.getValue());
 
     }
 
@@ -78,7 +78,7 @@ public class Interpreter {
         }
         if (!found) {
             System.out.println("stored" + node);
-            scopes.getLast().put(node.getIdentifier().toString(), node.getValue());
+            scopes.get(scopes.size()-1).put(node.getIdentifier().toString(), node.getValue());
         } else {
             System.out.println("node already exist" + node);
         }
