@@ -45,6 +45,17 @@ parameterList : IDENTIFIER ':' type (',' IDENTIFIER ':' type)* ;
 
 //Only way to get precedence in terms of *+- etc.
 expression
+    : primary # DummyPrimary
+    | '!' expression # Not
+    | expression op=('*' | '/' | '%') expression # MultiplicationDivisionModulus
+    | expression op=('+' | '-') expression # AdditionSubtraction
+    | expression op=('<' | '<=' | '>' | '>=' | '==' | '!=') expression # Relation
+    | expression op=('AND' | 'OR') expression # Logical
+    | expression '..' primary # RandomBetween
+    ;
+
+
+primary
     : INT # Int
     | FLOAT # Float
     | STRING # String
@@ -56,22 +67,8 @@ expression
     | arrayAccess # DummyArrayAccessExpr
     | propertyAccess # DummyPropertyAccess
     | structInstantiation # DummyStructInstantiationExpr
-    | expression '*' expression # Multiplication
-    | expression '/' expression # Division
-    | expression '%' expression # Modulus
-    | expression '+' expression # Addition
-    | expression '-' expression # Subtraction
-    | expression '<' expression # LessThan
-    | expression '<=' expression # LessThanOrEqual
-    | expression '>' expression # GreaterThan
-    | expression '>=' expression # GreaterThanOrEqual
-    | expression '==' expression # Equals
-    | expression '!=' expression # NotEquals
-    | expression 'AND' expression # And
-    | expression 'OR' expression # Or
-    | expression '..' expression # RandomBetween
-    | '!' expression # Not
     ;
+
 
 structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER ':' expression)*)? '}' ;
 

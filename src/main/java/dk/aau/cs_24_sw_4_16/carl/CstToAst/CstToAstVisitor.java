@@ -101,29 +101,10 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         return super.visitParameterList(ctx);
     }
 
-    @Override
-    public AstNode visitMultiplication(CARLParser.MultiplicationContext ctx) {
-        return super.visitMultiplication(ctx);
-    }
-
-    @Override
-    public AstNode visitOr(CARLParser.OrContext ctx) {
-        return super.visitOr(ctx);
-    }
-
-    @Override
-    public AstNode visitLessThanOrEqual(CARLParser.LessThanOrEqualContext ctx) {
-        return super.visitLessThanOrEqual(ctx);
-    }
 
     @Override
     public AstNode visitString(CARLParser.StringContext ctx) {
         return new StringNode(ctx.getText());
-    }
-
-    @Override
-    public AstNode visitGreaterThanOrEqual(CARLParser.GreaterThanOrEqualContext ctx) {
-        return super.visitGreaterThanOrEqual(ctx);
     }
 
     @Override
@@ -137,11 +118,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitLessThan(CARLParser.LessThanContext ctx) {
-        return super.visitLessThan(ctx);
-    }
-
-    @Override
     public AstNode visitIdentifier(CARLParser.IdentifierContext ctx) {
         return new IdentifierNode(ctx.IDENTIFIER().getText());
     }
@@ -152,18 +128,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitGreaterThan(CARLParser.GreaterThanContext ctx) {
-        return super.visitGreaterThan(ctx);
-    }
-
-    @Override
     public AstNode visitDummyMethodCall(CARLParser.DummyMethodCallContext ctx) {
         return super.visitDummyMethodCall(ctx);
-    }
-
-    @Override
-    public AstNode visitDivision(CARLParser.DivisionContext ctx) {
-        return super.visitDivision(ctx);
     }
 
     @Override
@@ -172,40 +138,29 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitAddition(CARLParser.AdditionContext ctx) {
+    public AstNode visitMultiplicationDivisionModulus(CARLParser.MultiplicationDivisionModulusContext ctx) {
         AstNode left = visit(ctx.expression(0));
         AstNode right = visit(ctx.expression(1));
-        return new AdditionNode(left, right);
-
-//        AstNode left = visit(ctx.expression(0));
-//        AstNode right = visit(ctx.expression(1));
-//        String op = ctx.getChild(1).getText();
-//        System.out.println(left + " " + op + " " + right);
-//        System.out.println();
-//            if (left instanceof IntNode && right instanceof IntNode) {
-//                int result = Integer.parseInt(left.toString()) + Integer.parseInt(right.toString());
-//                return new IntNode(Integer.toString(result));
-//            } else if (left instanceof FloatNode && right instanceof FloatNode) {
-//                float result = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
-//                return new FloatNode(Float.toString(result));
-//            } else {
-//                throw new IllegalArgumentException("Unsupported types for addition: " + left.getClass() + " and " + right.getClass());
-//            }
+        String op = ctx.op.getText();
+        return new BinaryOperatorNode(left, right, op);
     }
 
     @Override
-    public AstNode visitDummyPropertyAccess(CARLParser.DummyPropertyAccessContext ctx) {
-        return super.visitDummyPropertyAccess(ctx);
+    public AstNode visitRelation(CARLParser.RelationContext ctx) {
+        return super.visitRelation(ctx);
     }
 
     @Override
-    public AstNode visitDummyStructInstantiationExpr(CARLParser.DummyStructInstantiationExprContext ctx) {
-        return super.visitDummyStructInstantiationExpr(ctx);
+    public AstNode visitAdditionSubtraction(CARLParser.AdditionSubtractionContext ctx) {
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        String op = ctx.op.getText();
+        return new BinaryOperatorNode(left, right, op);
     }
 
     @Override
-    public AstNode visitNotEquals(CARLParser.NotEqualsContext ctx) {
-        return super.visitNotEquals(ctx);
+    public AstNode visitLogical(CARLParser.LogicalContext ctx) {
+        return super.visitLogical(ctx);
     }
 
     @Override
@@ -219,33 +174,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitEquals(CARLParser.EqualsContext ctx) {
-        return super.visitEquals(ctx);
-    }
-
-    @Override
     public AstNode visitRandomBetween(CARLParser.RandomBetweenContext ctx) {
         return super.visitRandomBetween(ctx);
-    }
-
-    @Override
-    public AstNode visitSubtraction(CARLParser.SubtractionContext ctx) {
-        return super.visitSubtraction(ctx);
-    }
-
-    @Override
-    public AstNode visitModulus(CARLParser.ModulusContext ctx) {
-        return super.visitModulus(ctx);
-    }
-
-    @Override
-    public AstNode visitAnd(CARLParser.AndContext ctx) {
-        return super.visitAnd(ctx);
-    }
-
-    @Override
-    public AstNode visitDummyArrayAccessExpr(CARLParser.DummyArrayAccessExprContext ctx) {
-        return super.visitDummyArrayAccessExpr(ctx);
     }
 
     @Override

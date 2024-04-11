@@ -80,26 +80,19 @@ public class Interpreter {
         }
         return node;
     }
-    public AstNode visit(AdditionNode node) {
-        System.out.println("HELLOO FDJIFJDIFSJDFISODJFSIODJFOSIDJFOSIDJFSIODFJSIODJFOSIDJFSIODFJSOIDFJOSIFJD");
-        AstNode left = node.getLeft();
-        AstNode right = node.getRight();
-        if(left instanceof IntNode && right instanceof IntNode) {
-            int leftValue = ((IntNode) left).getValue();
-            int rightValue = ((IntNode) right).getValue();
-            System.out.println(leftValue+rightValue);
-        } else if(left instanceof FloatNode && right instanceof FloatNode) {
-            System.out.println(node);
-        }
-        return node;
-    }
+//    public AstNode visit(AdditionNode node) {
+//        AstNode left = node.getLeft();
+//        AstNode right = node.getRight();
+//        node.addingTheValues(left, right);
+//        return node;
+//    }
 
 
 
     public AstNode visit(ExpressionNode node) {
-        if (node.getNode() instanceof AdditionNode) {
-            return visit((AdditionNode) node.getNode());
-        }
+//        if (node.getNode() instanceof AdditionNode) {
+//            return visit((AdditionNode) node.getNode());
+//        }
         if (node.getNode() instanceof FunctionCallNode) {
             return visit((FunctionCallNode) node.getNode());
         }
