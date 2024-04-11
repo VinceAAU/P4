@@ -142,7 +142,13 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         AstNode left = visit(ctx.expression(0));
         AstNode right = visit(ctx.expression(1));
         String op = ctx.op.getText();
-        return new BinaryOperatorNode(left, right, op);
+        AstNode value = new BinaryOperatorNode(left, right, op);
+        if(left instanceof IntNode && right instanceof IntNode) {
+            return new IntNode(String.valueOf(value));
+        } else if (left instanceof FloatNode || right instanceof FloatNode) {
+            return new FloatNode(String.valueOf(value));
+        }
+        return null;
     }
 
     @Override
@@ -155,7 +161,13 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         AstNode left = visit(ctx.expression(0));
         AstNode right = visit(ctx.expression(1));
         String op = ctx.op.getText();
-        return new BinaryOperatorNode(left, right, op);
+        AstNode value = new BinaryOperatorNode(left, right, op);
+        if(left instanceof IntNode && right instanceof IntNode) {
+            return new IntNode(String.valueOf(value));
+        } else if (left instanceof FloatNode || right instanceof FloatNode) {
+            return new FloatNode(String.valueOf(value));
+        }
+        return null;
     }
 
     @Override

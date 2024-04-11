@@ -103,7 +103,7 @@ coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expr
 
 // Lexer rules
 INT : [-]?[0-9]+ ;
-FLOAT : [0-9]* '.' [0-9]+ ;
+FLOAT : [-]?[0-9]* '.' [0-9]+ ;
 STRING : '"' ~["]* '"' ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
 BOOL : ('true' | 'false') ;
