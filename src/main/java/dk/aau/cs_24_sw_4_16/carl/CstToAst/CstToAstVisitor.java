@@ -138,7 +138,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitBool(CARLParser.BoolContext ctx) {
-        return super.visitBool(ctx);
+        return new BoolNode(ctx.BOOL().getText());
     }
 
     @Override
@@ -167,7 +167,10 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitRelation(CARLParser.RelationContext ctx) {
-        return super.visitRelation(ctx);
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        String op = ctx.op.getText();
+        return new RelationsAndLogicalOperatorNode(left, right, op);
     }
 
     @Override
