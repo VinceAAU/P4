@@ -49,15 +49,14 @@ public class Interpreter {
         for (HashMap<String, AstNode> vTable : scopes) {
             if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
-                if (nodeToChange instanceof IntNode && node.getValue() instanceof IntNode) {
-                    ((IntNode) nodeToChange).setValue(((IntNode) node.getValue()).getValue());
-                } else if (nodeToChange instanceof FloatNode && node.getValue() instanceof FloatNode) {
-                    ((FloatNode) nodeToChange).setValue(((FloatNode) node.getValue()).getValue());
-                } else if (nodeToChange instanceof StringNode && node.getValue() instanceof StringNode) {
-                    ((StringNode) nodeToChange).setValue(((StringNode) node.getValue()).getValue());
-                }
-                else{
-                    System.out.println("type mismatch");
+                switch (nodeToChange) {
+                    case IntNode intNode when node.getValue() instanceof IntNode ->
+                            intNode.setValue(((IntNode) node.getValue()).getValue());
+                    case FloatNode floatNode when node.getValue() instanceof FloatNode ->
+                            floatNode.setValue(((FloatNode) node.getValue()).getValue());
+                    case StringNode stringNode when node.getValue() instanceof StringNode ->
+                            stringNode.setValue(((StringNode) node.getValue()).getValue());
+                    case null, default -> System.out.println("type mismatch");
                 }
                 return;
             }
@@ -138,25 +137,8 @@ public class Interpreter {
             visit((StatementNode) statement);
         }
     }
-    public AstNode visit(AdditionNode node) {
-        AstNode left = visit(node.getLeft());
-        AstNode right = visit(node.getRight());
-
-        if (left instanceof IntNode && right instanceof IntNode) {
-            int result = Integer.parseInt(left.toString()) + Integer.parseInt(right.toString());
-
-            return new IntNode(Integer.toString(result));
-        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-            float result = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
-            return new FloatNode(Float.toString(result));
-        }
-        return null;
-    }
 
     public AstNode visit(ExpressionNode node) {
-//        if (node.getNode() instanceof AdditionNode) {
-//            return visit((AdditionNode) node.getNode());
-//        }
         if (node.getNode() instanceof FunctionCallNode) {
             return visit((FunctionCallNode) node.getNode());
         }
