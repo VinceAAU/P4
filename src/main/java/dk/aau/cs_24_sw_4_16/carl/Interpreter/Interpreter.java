@@ -114,10 +114,7 @@ public class Interpreter {
                 visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
             }
             System.out.println(function.getBlock().getStatements());
-            for (AstNode statement : function.getBlock().getStatements()) {
-
-                visit((StatementNode) statement);
-            }
+            visit( function.getBlock());
         }
         if (node.getFunctionName().getIdentifier().equals("print")) {
             String toPrint = "";
@@ -134,7 +131,13 @@ public class Interpreter {
         scopes.remove(localTable);
         return node;
     }
+    public void visit(BlockNode node)
+    {
+        for (AstNode statement : node.getStatements()) {
 
+            visit((StatementNode) statement);
+        }
+    }
     public AstNode visit(AdditionNode node) {
         AstNode left = visit(node.getLeft());
         AstNode right = visit(node.getRight());
