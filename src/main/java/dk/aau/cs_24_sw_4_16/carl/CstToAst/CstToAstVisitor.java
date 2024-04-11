@@ -214,15 +214,33 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitIfStatement(CARLParser.IfStatementContext ctx) {
+        AstNode condition = visit(ctx.expression(0));
+        AstNode thenBranch = visit(ctx.block(0));
+        AstNode elseBranch = null;
+        List<AstNode> elseIfConditions = new ArrayList<>();
+        List<AstNode> elseIfBlocks = new ArrayList<>();
+        int elseIfCount = ctx.expression().size() - 1;
+        for (int i = 1; i <= elseIfCount; i++) {
+            elseIfConditions.add(visit(ctx.expression(i)));
+            elseIfBlocks.add(visit(ctx.block(i)));
+        }
 
-        return super.visitIfStatement(ctx);
+        if (ctx.block().size() > elseIfCount + 1) {
+            elseBranch = visit(ctx.block(ctx.block().size() - 1));
+        }
+
+        return new IfStatementNode(condition, thenBranch, elseBranch, elseIfConditions, elseIfBlocks);
     }
 
     @Override
     public AstNode visitWhileLoop(CARLParser.WhileLoopContext ctx) {
-        return super.visitWhileLoop(ctx);
+        ExpressionNode condition = (ExpressionNode) visit(ctx.expression());
+        List<StatementNode> body = new ArrayList<>();
+        for (CARLParser.StatementContext statementContext : ctx.block().statement()) {
+            body.add((StatementNode) visit(statementContext));
+        }
+        return new WhileLoopNode(condition, body);
     }
-
     @Override
     public AstNode visitReturnStatement(CARLParser.ReturnStatementContext ctx) {
         return super.visitReturnStatement(ctx);
