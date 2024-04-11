@@ -102,7 +102,7 @@ propertyAccess : IDENTIFIER '.' IDENTIFIER ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
 
 // Lexer rules
-INT : [0-9]+ ;
+INT : [-]?[0-9]+ ;
 FLOAT : [0-9]* '.' [0-9]+ ;
 STRING : '"' ~["]* '"' ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
