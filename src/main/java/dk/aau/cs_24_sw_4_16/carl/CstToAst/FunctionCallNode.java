@@ -19,6 +19,9 @@ public class FunctionCallNode extends AstNode {
         return arguments;
     }
 
+    public AstNode getArgument(int i){
+        return arguments.get(i);
+    }
     @Override
     public String toString() {
         return "identifier='" + identifier + '\'' +

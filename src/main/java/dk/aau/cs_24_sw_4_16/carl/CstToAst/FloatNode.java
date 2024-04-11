@@ -10,6 +10,9 @@ public class FloatNode extends AstNode{
         return value;
     }
 
+    public void setValue(float value) {
+        this.value = value;
+    }
 
     @Override
     public String toString() {
