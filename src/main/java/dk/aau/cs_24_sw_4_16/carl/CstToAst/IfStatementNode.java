@@ -10,9 +10,9 @@ public class IfStatementNode extends AstNode {
     private final AstNode thenBranch;
     private final AstNode elseBranch;
     private final List<AstNode> elseIfConditions;
-    private final List<AstNode> elseIfBlocks;
+    private final List<BlockNode> elseIfBlocks;
 
-    public IfStatementNode(AstNode condition, AstNode thenBranch, AstNode elseBranch, List<AstNode> elseIfConditions, List<AstNode> elseIfBlocks) {
+    public IfStatementNode(AstNode condition, AstNode thenBranch, AstNode elseBranch, List<AstNode> elseIfConditions, List<BlockNode> elseIfBlocks) {
         this.condition = condition;
         this.thenBranch = thenBranch;
         this.elseBranch = elseBranch;
