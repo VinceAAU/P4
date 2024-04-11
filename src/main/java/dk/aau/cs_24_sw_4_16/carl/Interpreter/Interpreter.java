@@ -77,10 +77,10 @@ public class Interpreter {
             }
         }
         if (!found) {
-            System.out.println(STR."stored:\{node}");
+            System.out.println("stored" + node);
             scopes.getLast().put(node.getIdentifier().toString(), node.getValue());
         } else {
-            System.out.println(STR."node already exist:\{node}");
+            System.out.println("node already exist" + node);
         }
     }
 
@@ -165,10 +165,10 @@ public class Interpreter {
 
     public AstNode visit(FunctionDefinitionNode node) {
         if (!fTable.containsKey(node.getIdentifier().toString())) {
-            System.out.println(STR."stored:\{node}");
+            System.out.println("stored"+ node);
             fTable.put(node.getIdentifier().toString(), node);
         } else {
-            System.out.println(STR."node already exist:\{node}");
+            System.out.println("node already exist" + node);
         }
         return node;
     }
