@@ -109,15 +109,15 @@ public class Interpreter {
     public AstNode visit(FunctionCallNode node) {
         HashMap<String, AstNode> localTable = new HashMap<>();
         scopes.add(localTable);
-        if (fTable.containsKey(node.getFunctionName().getIdentifier())) {
-            FunctionDefinitionNode function = fTable.get(node.getFunctionName().getIdentifier());
+        if (fTable.containsKey(node.getFunctionName().toString())) {
+            FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
             List<ParameterNode> arguments = function.getArguments().getParameters();
             for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
                 visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
             }
             visit(function.getBlock());
         }
-        if (node.getFunctionName().getIdentifier().equals("print")) {
+        if (node.getFunctionName().toString().equals("print")) {
             String toPrint = "";
             for (AstNode argument : node.getArguments()) {
                 if (argument instanceof StatementNode) {
