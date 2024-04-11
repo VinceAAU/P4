@@ -44,11 +44,6 @@
       <version>4.13.1</version>
       <scope>provided</scope>
     </dependency>
-      <dependency>
-          <groupId>org.antlr</groupId>
-          <artifactId>antlr-runtime</artifactId>
-          <version>3.5.3</version>
-      </dependency>
   </dependencies>
 
   <build>
@@ -80,15 +75,6 @@
           </execution>
         </executions>
       </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <source>22</source>
-                <target>22</target>
-                <compilerArgs>--enable-preview</compilerArgs>
-            </configuration>
-        </plugin>
     </plugins>
   </build>
 </project>
