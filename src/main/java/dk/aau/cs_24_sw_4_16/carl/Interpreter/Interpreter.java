@@ -56,7 +56,9 @@ public class Interpreter {
                 } else if (nodeToChange instanceof StringNode && node.getValue() instanceof StringNode) {
                     ((StringNode) nodeToChange).setValue(((StringNode) node.getValue()).getValue());
                 }
-                System.out.println("node saved");
+                else{
+                    System.out.println("type mismatch");
+                }
                 return;
             }
         }
@@ -113,8 +115,7 @@ public class Interpreter {
             for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
                 visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
             }
-            System.out.println(function.getBlock().getStatements());
-            visit( function.getBlock());
+            visit(function.getBlock());
         }
         if (node.getFunctionName().getIdentifier().equals("print")) {
             String toPrint = "";
@@ -134,7 +135,6 @@ public class Interpreter {
     public void visit(BlockNode node)
     {
         for (AstNode statement : node.getStatements()) {
-
             visit((StatementNode) statement);
         }
     }
