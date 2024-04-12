@@ -20,6 +20,10 @@ public class RelationsAndLogicalOperatorNode extends AstNode {
             float leftValue = ((FloatNode) left).getValue();
             float rightValue = ((FloatNode) right).getValue();
             return performFloatOnFloatOperator(leftValue, rightValue, operator);
+        } else if (left instanceof BoolNode && right instanceof BoolNode) {
+            boolean leftValue = ((BoolNode) left).getValue();
+            boolean rightValue = ((BoolNode) right).getValue();
+            return performBoolOnBoolOperator(leftValue, rightValue, operator);
         }
         return null;
     }
@@ -40,6 +44,15 @@ public class RelationsAndLogicalOperatorNode extends AstNode {
             case ">" -> new BoolNode(String.valueOf(left > right));
             case ">=" -> new BoolNode(String.valueOf(left >= right));
             case "<=" -> new BoolNode(String.valueOf(left <= right));
+            default -> throw new IllegalArgumentException("Invalid operator: " + operator);
+        };
+    }
+
+    private static AstNode performBoolOnBoolOperator(boolean left, boolean right, String operator) {
+        return switch (operator) {
+            case "AND" -> new BoolNode(String.valueOf(left && right));
+            case "OR" -> new BoolNode(String.valueOf(left || right));
+            case "!" -> new BoolNode(String.valueOf(!left));
             default -> throw new IllegalArgumentException("Invalid operator: " + operator);
         };
     }

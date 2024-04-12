@@ -2,10 +2,12 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
+import org.antlr.v4.runtime.Token;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
@@ -148,21 +150,18 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitParentheses(CARLParser.ParenthesesContext ctx) {
-        return super.visitParentheses(ctx);
+        AstNode expressionToFocus = visit(ctx.expression());
+        if (expressionToFocus instanceof IntNode) {
+            return new IntNode(expressionToFocus.toString());
+        } else if (expressionToFocus instanceof FloatNode) {
+            return new FloatNode(expressionToFocus.toString());
+        }
+        return null;
     }
 
     @Override
     public AstNode visitMultiplicationDivisionModulus(CARLParser.MultiplicationDivisionModulusContext ctx) {
-        AstNode left = visit(ctx.expression(0));
-        AstNode right = visit(ctx.expression(1));
-        String op = ctx.op.getText();
-        AstNode value = new BinaryOperatorNode(left, right, op);
-        if(left instanceof IntNode && right instanceof IntNode) {
-            return new IntNode(String.valueOf(value));
-        } else if (left instanceof FloatNode || right instanceof FloatNode) {
-            return new FloatNode(String.valueOf(value));
-        }
-        return null;
+        return getAstNode(ctx.expression(0), ctx.expression(1), ctx.op);
     }
 
     @Override
@@ -175,13 +174,18 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitAdditionSubtraction(CARLParser.AdditionSubtractionContext ctx) {
-        AstNode left = visit(ctx.expression(0));
-        AstNode right = visit(ctx.expression(1));
-        String op = ctx.op.getText();
-        AstNode value = new BinaryOperatorNode(left, right, op);
+        return getAstNode(ctx.expression(0), ctx.expression(1), ctx.op);
+    }
+
+    private AstNode getAstNode(CARLParser.ExpressionContext expression, CARLParser.ExpressionContext expression2, Token op2) {
+        AstNode left = visit(expression);
+        AstNode right = visit(expression2);
+        String op = op2.getText();
         if(left instanceof IntNode && right instanceof IntNode) {
+            AstNode value = new BinaryOperatorNode(left, right, op);
             return new IntNode(String.valueOf(value));
         } else if (left instanceof FloatNode || right instanceof FloatNode) {
+            AstNode value = new BinaryOperatorNode(left, right, op);
             return new FloatNode(String.valueOf(value));
         }
         return null;
@@ -189,7 +193,14 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitLogical(CARLParser.LogicalContext ctx) {
-        return super.visitLogical(ctx);
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        String op = ctx.op.getText();
+        if (left instanceof BoolNode && right instanceof BoolNode) {
+            AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
+            return new BoolNode(value.toString());
+        }
+        return null;
     }
 
     @Override
@@ -199,7 +210,13 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitNot(CARLParser.NotContext ctx) {
-        return super.visitNot(ctx);
+        AstNode left = visit(ctx.expression());
+        System.out.println(left);
+        if (left instanceof BoolNode) {
+            AstNode value = new RelationsAndLogicalOperatorNode(left, null, "!");
+            return new BoolNode(value.toString());
+        }
+        return null;
     }
 
     @Override

@@ -46,7 +46,7 @@ parameterList : IDENTIFIER ':' type (',' IDENTIFIER ':' type)* ;
 //Only way to get precedence in terms of *+- etc.
 expression
     : primary # DummyPrimary
-    | '!' expression # Not
+    | notOperator expression # Not
     | expression op=('*' | '/' | '%') expression # MultiplicationDivisionModulus
     | expression op=('+' | '-') expression # AdditionSubtraction
     | expression op=('<' | '<=' | '>' | '>=' | '==' | '!=') expression # Relation
@@ -54,6 +54,7 @@ expression
     | expression '..' primary # RandomBetween
     ;
 
+notOperator : '!' ;
 
 primary
     : INT # Int

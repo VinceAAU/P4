@@ -56,6 +56,9 @@ public class Interpreter {
                             floatNode.setValue(((FloatNode) node.getValue()).getValue());
                     case StringNode stringNode when node.getValue() instanceof StringNode ->
                             stringNode.setValue(((StringNode) node.getValue()).getValue());
+                    case BoolNode boolNode when node.getValue() instanceof BoolNode ->
+                            boolNode.setValue(((BoolNode) node.getValue()).getValue());
+                    //SOMETHING WRONG HERE. IT STORES IT THEN RETURNS TYPE MISMATCH
                     case null, default -> System.out.println("type mismatch");
                 }
                 return;
