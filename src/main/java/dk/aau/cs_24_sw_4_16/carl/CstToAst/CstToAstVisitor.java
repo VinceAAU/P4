@@ -155,6 +155,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new IntNode(expressionToFocus.toString());
         } else if (expressionToFocus instanceof FloatNode) {
             return new FloatNode(expressionToFocus.toString());
+        } else if (expressionToFocus instanceof BoolNode) {
+            return new BoolNode(expressionToFocus.toString());
         }
         return null;
     }
@@ -198,6 +200,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         String op = ctx.op.getText();
         if (left instanceof BoolNode && right instanceof BoolNode) {
             AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
+            System.out.println(value);
             return new BoolNode(value.toString());
         }
         return null;
@@ -211,9 +214,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitNot(CARLParser.NotContext ctx) {
         AstNode left = visit(ctx.expression());
+        AstNode right = visit(ctx.expression());
         System.out.println(left);
         if (left instanceof BoolNode) {
-            AstNode value = new RelationsAndLogicalOperatorNode(left, null, "!");
+            AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
+            System.out.println(value);
             return new BoolNode(value.toString());
         }
         return null;

@@ -17,6 +17,6 @@ public class BoolNode extends AstNode {
 
     @Override
     public String toString() {
-        return "" + value;
+        return " " + value;
     }
 }

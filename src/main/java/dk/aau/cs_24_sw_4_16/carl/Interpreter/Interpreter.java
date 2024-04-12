@@ -49,6 +49,7 @@ public class Interpreter {
         for (HashMap<String, AstNode> vTable : scopes) {
             if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
+                System.out.println("current value" + nodeToChange + " new value "+ node.getValue());
                 switch (nodeToChange) {
                     case IntNode intNode when node.getValue() instanceof IntNode ->
                             intNode.setValue(((IntNode) node.getValue()).getValue());
@@ -64,10 +65,6 @@ public class Interpreter {
                 return;
             }
         }
-
-        System.out.println("node does not exist");
-        scopes.get(scopes.size()-1).put(node.getIdentifier().toString(), node.getValue());
-
     }
 
 
