@@ -4,10 +4,8 @@ import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import org.antlr.v4.runtime.Token;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
@@ -30,6 +28,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitFunctionCall(ctx.functionCall()));
         } else if (ctx.functionDefinition() != null) {
             return new StatementNode(visitFunctionDefinition(ctx.functionDefinition()));
+        } else if (ctx.whileLoop() != null) {
+            return new StatementNode(visitWhileLoop(ctx.whileLoop()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -84,9 +84,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitFunctionCall(CARLParser.FunctionCallContext ctx) {
-        //        for (CARLParser.StatementContext statementContext : ctx.statement()) {
-        //            programNode.addStatement((StatementNode) visit(statementContext));
-        //        }
         List<AstNode> arguments = new ArrayList<>();
         for (CARLParser.ExpressionContext expression : ctx.argumentList().expression()) {
             arguments.add(visit(expression));
@@ -242,7 +239,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitWhileLoop(CARLParser.WhileLoopContext ctx) {
-        return super.visitWhileLoop(ctx);
+        AstNode expression = visit(ctx.expression());
+        BlockNode block = (BlockNode) visitBlock(ctx.block());
+        System.out.println(expression + "wer gkwergjnerkgwekeg");
+        System.out.println(block);
+//        return null;
+        return new WhileNode(expression, block);
     }
 
     @Override

@@ -39,6 +39,8 @@ public class Interpreter {
             return visit((FunctionCallNode) node.getNode());
         } else if (node.getNode() instanceof FunctionDefinitionNode) {
             return visit((FunctionDefinitionNode) node.getNode());
+        } else if (node.getNode() instanceof WhileNode) {
+            return visit((WhileNode) node.getNode());
         }
         return null;
     }
@@ -87,6 +89,9 @@ public class Interpreter {
         return node;
     }
 
+    public AstNode visit(BoolNode node) {
+        return node;
+    }
 
     public AstNode visit(IntNode node) {
         return node;
@@ -153,5 +158,14 @@ public class Interpreter {
             System.out.println("node already exist" + node);
         }
         return node;
+    }
+
+    public void visit(WhileNode node) {
+        AstNode boolValue = visit(node.getExpression());
+        while ((boolValue instanceof BoolNode) && ((BoolNode) boolValue).getValue()) {
+            visit(node.getBlock());
+            boolValue = visit(node.getExpression());
+        }
+        throw new RuntimeException();
     }
 }
