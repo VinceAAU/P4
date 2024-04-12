@@ -2,19 +2,19 @@ package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 public class Interpreter {
     HashMap<String, FunctionDefinitionNode> fTable;
     HashMap<String, AstNode> vTable;
-    List<HashMap<String, AstNode>> scopes;
+    Stack<HashMap<String, AstNode>> scopes;
 
     public Interpreter() {
         fTable = new HashMap<>();
         vTable = new HashMap<>();
-        scopes = new ArrayList<>();
+        scopes = new Stack<>();
         scopes.add(vTable);
     }
 
@@ -78,7 +78,6 @@ public class Interpreter {
                             stringNode.setValue(((StringNode) finalToChange).getValue());
                     case BoolNode boolNode when finalToChange instanceof BoolNode ->
                             boolNode.setValue(((BoolNode) finalToChange).getValue());
-                    //SOMETHING WRONG HERE. IT STORES IT THEN RETURNS TYPE MISMATCH
                     case null, default -> System.out.println("type mismatch");
                 }
                 return;
