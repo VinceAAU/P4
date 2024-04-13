@@ -1,17 +1,12 @@
 // Valid test cases
-var b : bool = true
 var c : int = 5
 var y : int = c
 var d : int = 3
-d = c
+var b : bool = true
+b = d <= c
+c = y + d
 print(b,c,y,d)
-if(b){
+if  d < c{
     print("setting other if loop")
     b = false
-}
-if(b){
-    print("haha")
-}
-else{
-    print("bahaha")
 }

@@ -46,10 +46,31 @@ public class Interpreter {
     }
 
     public void visit(IfStatementNode node) {
+        Boolean visited = false;
         for (int i = 0; i < node.getExpressions().size(); i++) {
-            System.out.println(node.getExpressions().get(i));
+            AstNode toCheck = node.getExpressions().get(i).getNode();
+            if (node.getExpressions().get(i).getNode() instanceof IdentifierNode) {
+                toCheck = getVariable((IdentifierNode) node.getExpressions().get(i).getNode());
+            }
+            if (toCheck instanceof BoolNode && ((BoolNode) toCheck).getValue()) {
+                visit(node.getBlocks().get(i));
+                visited = true;
+                break;
+            }
         }
+        if(!visited && node.getExpressions().size() < node.getBlocks().size())
+        {
+            visit(node.getBlocks().get(node.getBlocks().size()-1));
+        }
+    }
 
+    public AstNode getVariable(IdentifierNode node) {
+        for (HashMap<String, AstNode> vTable : scopes) {
+            if (vTable.containsKey(node.getIdentifier().toString())) {
+                return vTable.get(node.getIdentifier().toString());
+            }
+        }
+        throw new RuntimeException("could not find the variable " + node.getIdentifier());
     }
 
     public void visit(AssignmentNode node) {
@@ -146,22 +167,7 @@ public class Interpreter {
             visit(function.getBlock());
         }
         if (node.getFunctionName().toString().equals("print")) {
-            String toPrint = "";
-            for (AstNode argument : node.getArguments()) {
-                if (argument instanceof StatementNode) {
-                    toPrint += ((StatementNode) argument).getNode()+ " ";
-                } else if (argument instanceof IdentifierNode) {
-                    for (HashMap<String, AstNode> vTable : scopes) {
-                        if (vTable.containsKey(argument.toString())) {
-                            toPrint += vTable.get(argument.toString()).toString()+ " ";
-                        }
-
-                    }
-
-                }
-            }
-            System.out.println(toPrint);
-
+            InbuildClasses.print(node,scopes);
         }
         scopes.remove(localTable);
         return node;

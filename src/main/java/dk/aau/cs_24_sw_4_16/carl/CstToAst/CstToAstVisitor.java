@@ -191,8 +191,13 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         } else if (left instanceof FloatNode || right instanceof FloatNode) {
             AstNode value = new BinaryOperatorNode(left, right, op);
             return new FloatNode(String.valueOf(value));
+        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
+            System.out.println(left + " " + right);
+            System.out.println(new BinaryOperatorNode(left, right, op) + "weljrgnewjrgkjewngkjewewjk");
+            return new BinaryOperatorNode(left, right, op);
         }
-        return null;
+
+        throw new RuntimeException("getAstode unhandled node");
     }
 
     @Override
@@ -205,7 +210,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             System.out.println(value);
             return new BoolNode(value.toString());
         }
-        return null;
+        throw new RuntimeException("visitLogical unhandled node");
     }
 
     @Override
@@ -240,14 +245,36 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitIfStatement(CARLParser.IfStatementContext ctx) {
         List<ExpressionNode> expressionNodes = new ArrayList<>();
         for (CARLParser.ExpressionContext exp : ctx.expression()) {
-            expressionNodes.add(new ExpressionNode(visit(exp)));
+            if (exp.getChildCount() >= 3) {
+                AstNode left;
+                if (exp.getChild(0) instanceof CARLParser.IdentifierContext) {
+                    left = new IdentifierNode(exp.getChild(0).getText());
+                    System.out.println(left);
+                } else {
+                    left = visit(exp.getChild(0));
+                    System.out.println(left);
+                }
+                AstNode right;
+                if (exp.getChild(2) instanceof CARLParser.IdentifierContext) {
+                    right = new IdentifierNode(exp.getChild(2).getText());
+                    System.out.println(right);
+                } else {
+                    right = visit(exp.getChild(2));
+                    System.out.println(right);
+                }
+                BinaryOperatorNode bin = new BinaryOperatorNode(left, right, exp.getChild(1).getText());
+                expressionNodes.add(new ExpressionNode(bin));
+                System.out.println(bin);
+            } else {
+                expressionNodes.add(new ExpressionNode(visit(exp)));
+            }
         }
+
+        System.out.println(expressionNodes.get(0));
         List<BlockNode> blocks = new ArrayList<>();
         for (CARLParser.BlockContext block : ctx.block()) {
             blocks.add((BlockNode) visitBlock(block));
         }
-
-
         return new IfStatementNode(blocks, expressionNodes);
     }
 
