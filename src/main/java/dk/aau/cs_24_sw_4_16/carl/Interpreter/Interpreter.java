@@ -51,16 +51,32 @@ public class Interpreter {
             AstNode toCheck = node.getExpressions().get(i).getNode();
             if (node.getExpressions().get(i).getNode() instanceof IdentifierNode) {
                 toCheck = getVariable((IdentifierNode) node.getExpressions().get(i).getNode());
+            } else if (node.getExpressions().get(i).getNode() instanceof BinaryOperatorNode) {
+                AstNode left = ((BinaryOperatorNode) node.getExpressions().get(i).getNode()).getLeft();
+                AstNode right = ((BinaryOperatorNode) node.getExpressions().get(i).getNode()).getRight();
+                String symbol = ((BinaryOperatorNode) node.getExpressions().get(i).getNode()).getOperator();
+                if (left instanceof IdentifierNode) {
+                    left = getVariable((IdentifierNode) left);
+                }
+                if (right instanceof IdentifierNode) {
+                    right  = getVariable((IdentifierNode) right);
+                }
+                if(left instanceof IntNode && right instanceof IntNode)
+                {
+                    toCheck = RelationsAndLogicalOperatorNode.getAstNodeValue(left,right,symbol);
+                    System.out.println(toCheck);
+                }
+
             }
+
             if (toCheck instanceof BoolNode && ((BoolNode) toCheck).getValue()) {
                 visit(node.getBlocks().get(i));
                 visited = true;
                 break;
             }
         }
-        if(!visited && node.getExpressions().size() < node.getBlocks().size())
-        {
-            visit(node.getBlocks().get(node.getBlocks().size()-1));
+        if (!visited && node.getExpressions().size() < node.getBlocks().size()) {
+            visit(node.getBlocks().get(node.getBlocks().size() - 1));
         }
     }
 
@@ -167,7 +183,7 @@ public class Interpreter {
             visit(function.getBlock());
         }
         if (node.getFunctionName().toString().equals("print")) {
-            InbuildClasses.print(node,scopes);
+            InbuildClasses.print(node, scopes);
         }
         scopes.remove(localTable);
         return node;

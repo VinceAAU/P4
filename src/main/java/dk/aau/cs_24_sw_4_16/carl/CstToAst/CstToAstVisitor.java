@@ -263,8 +263,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
                     System.out.println(right);
                 }
                 BinaryOperatorNode bin = new BinaryOperatorNode(left, right, exp.getChild(1).getText());
-                expressionNodes.add(new ExpressionNode(bin));
                 System.out.println(bin);
+                expressionNodes.add(new ExpressionNode(bin));
             } else {
                 expressionNodes.add(new ExpressionNode(visit(exp)));
             }
