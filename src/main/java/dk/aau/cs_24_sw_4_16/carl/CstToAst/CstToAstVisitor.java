@@ -179,11 +179,15 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         return getAstNode(ctx.expression(0), ctx.expression(1), ctx.op);
     }
 
-    private AstNode getAstNode(CARLParser.ExpressionContext expression, CARLParser.ExpressionContext expression2, Token op2) {
+    public AstNode getAstNode(CARLParser.ExpressionContext expression, CARLParser.ExpressionContext expression2, Token op2) {
+
+        if (op2 == null) {
+            throw new IllegalArgumentException("Token op2 cannot be null");
+        }
         AstNode left = visit(expression);
         AstNode right = visit(expression2);
         String op = op2.getText();
-        if(left instanceof IntNode && right instanceof IntNode) {
+        if (left instanceof IntNode && right instanceof IntNode) {
             AstNode value = new BinaryOperatorNode(left, right, op);
             return new IntNode(String.valueOf(value));
         } else if (left instanceof FloatNode || right instanceof FloatNode) {
