@@ -160,7 +160,7 @@ public class Interpreter {
         return node;
     }
 
-    public void visit(WhileNode node) {
+    public AstNode visit(WhileNode node) {
         AstNode boolValue = visit(node.getExpression());
         while ((boolValue instanceof BoolNode) && ((BoolNode) boolValue).getValue()) {
             visit(node.getBlock());
