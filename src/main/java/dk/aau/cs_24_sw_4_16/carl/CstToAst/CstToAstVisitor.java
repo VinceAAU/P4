@@ -184,7 +184,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         if (left instanceof IntNode && right instanceof IntNode) {
             AstNode value = new BinaryOperatorNode(left, right, op);
             return new IntNode(String.valueOf(value));
-        } else if (left instanceof FloatNode || right instanceof FloatNode) {
+        } else if (left instanceof FloatNode && right instanceof FloatNode) {
             AstNode value = new BinaryOperatorNode(left, right, op);
             return new FloatNode(String.valueOf(value));
         } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
@@ -201,7 +201,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         String op = ctx.op.getText();
         if (left instanceof BoolNode && right instanceof BoolNode) {
             AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
-            System.out.println(value);
             return new BoolNode(value.toString());
         }
         throw new RuntimeException("visitLogical unhandled node");
@@ -251,7 +250,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
                     right = visit(exp.getChild(2));
                 }
                 RelationsAndLogicalOperatorNode bin = new RelationsAndLogicalOperatorNode(left, right, exp.getChild(1).getText());
-                System.out.println(bin);
                 expressionNodes.add(new ExpressionNode(bin));
             } else {
                 expressionNodes.add(new ExpressionNode(visit(exp)));
@@ -299,8 +297,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitBlock(CARLParser.BlockContext ctx) {
         BlockNode block = new BlockNode();
-        System.out.println("hgahashdfsadgasfas");
-        System.out.println(ctx.getText());
         for (CARLParser.StatementContext statementContext : ctx.statement()) {
             block.addStatement((StatementNode) visit(statementContext));
         }

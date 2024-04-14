@@ -15,7 +15,7 @@ public class CstToAst {
 
     public static void main(String[] args) throws IOException {
         try {
-            FileInputStream fileInput = new FileInputStream("test.ss");
+            FileInputStream fileInput = new FileInputStream("test.carl");
 
             CARLLexer lexer = new CARLLexer(CharStreams.fromStream(fileInput));
             CommonTokenStream tokens = new CommonTokenStream(lexer);

@@ -24,6 +24,8 @@ public class RelationsAndLogicalOperatorNode extends AstNode {
             boolean leftValue = ((BoolNode) left).getValue();
             boolean rightValue = ((BoolNode) right).getValue();
             return performBoolOnBoolOperator(leftValue, rightValue, operator);
+        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
+            return new BinaryOperatorNode(left, right, operator);
         }
         throw new RuntimeException("something went wrong in getAstNodeValue");
     }
