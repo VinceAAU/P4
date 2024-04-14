@@ -61,6 +61,6 @@ public class BinaryOperatorNode extends AstNode {
 
     @Override
     public String toString() {
-        return "" + getAstNodeValue(getLeft(), getRight(), getOperator());
+        return ""+getAstNodeValue(getLeft(), getRight(), getOperator());
     }
 }

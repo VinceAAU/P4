@@ -30,6 +30,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitFunctionDefinition(ctx.functionDefinition()));
         } else if (ctx.whileLoop() != null) {
             return new StatementNode(visitWhileLoop(ctx.whileLoop()));
+        } else if (ctx.ifStatement() != null) {
+            return new StatementNode(visitIfStatement(ctx.ifStatement()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -45,7 +47,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         ParameterListNode argumentList = (ParameterListNode) visitParameterList(ctx.parameterList());
         BlockNode block = (BlockNode) visitBlock(ctx.block());
         TypeNode returntype = (TypeNode) visitType(ctx.type());
-        return new FunctionDefinitionNode(new IdentifierNode(ctx.IDENTIFIER().getText()),returntype,argumentList,block);
+        return new FunctionDefinitionNode(new IdentifierNode(ctx.IDENTIFIER().getText()), returntype, argumentList, block);
     }
 
     @Override
@@ -180,14 +182,19 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         AstNode left = visit(expression);
         AstNode right = visit(expression2);
         String op = op2.getText();
-        if(left instanceof IntNode && right instanceof IntNode) {
+        if (left instanceof IntNode && right instanceof IntNode) {
             AstNode value = new BinaryOperatorNode(left, right, op);
             return new IntNode(String.valueOf(value));
         } else if (left instanceof FloatNode || right instanceof FloatNode) {
             AstNode value = new BinaryOperatorNode(left, right, op);
             return new FloatNode(String.valueOf(value));
+        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
+            System.out.println(left + " " + right);
+            System.out.println(new BinaryOperatorNode(left, right, op) + "weljrgnewjrgkjewngkjewewjk");
+            return new BinaryOperatorNode(left, right, op);
         }
-        return null;
+
+        throw new RuntimeException("getAstode unhandled node");
     }
 
     @Override
@@ -200,7 +207,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             System.out.println(value);
             return new BoolNode(value.toString());
         }
-        return null;
+        throw new RuntimeException("visitLogical unhandled node");
     }
 
     @Override
@@ -233,8 +240,39 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitIfStatement(CARLParser.IfStatementContext ctx) {
+        List<ExpressionNode> expressionNodes = new ArrayList<>();
+        for (CARLParser.ExpressionContext exp : ctx.expression()) {
+            if (exp.getChildCount() >= 3) {
+                AstNode left;
+                if (exp.getChild(0) instanceof CARLParser.IdentifierContext) {
+                    left = new IdentifierNode(exp.getChild(0).getText());
+                    System.out.println(left);
+                } else {
+                    left = visit(exp.getChild(0));
+                    System.out.println(left);
+                }
+                AstNode right;
+                if (exp.getChild(2) instanceof CARLParser.IdentifierContext) {
+                    right = new IdentifierNode(exp.getChild(2).getText());
+                    System.out.println(right);
+                } else {
+                    right = visit(exp.getChild(2));
+                    System.out.println(right);
+                }
+                BinaryOperatorNode bin = new BinaryOperatorNode(left, right, exp.getChild(1).getText());
+                System.out.println(bin);
+                expressionNodes.add(new ExpressionNode(bin));
+            } else {
+                expressionNodes.add(new ExpressionNode(visit(exp)));
+            }
+        }
 
-        return super.visitIfStatement(ctx);
+        System.out.println(expressionNodes.get(0));
+        List<BlockNode> blocks = new ArrayList<>();
+        for (CARLParser.BlockContext block : ctx.block()) {
+            blocks.add((BlockNode) visitBlock(block));
+        }
+        return new IfStatementNode(blocks, expressionNodes);
     }
 
     @Override

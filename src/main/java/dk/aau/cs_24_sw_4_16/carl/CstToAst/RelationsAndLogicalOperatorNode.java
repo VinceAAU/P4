@@ -25,7 +25,7 @@ public class RelationsAndLogicalOperatorNode extends AstNode {
             boolean rightValue = ((BoolNode) right).getValue();
             return performBoolOnBoolOperator(leftValue, rightValue, operator);
         }
-        return null;
+        throw new RuntimeException("something went wrong in getAstNodeValue");
     }
 
     private static AstNode performIntOnIntOperator(int left, int right, String operator) {
