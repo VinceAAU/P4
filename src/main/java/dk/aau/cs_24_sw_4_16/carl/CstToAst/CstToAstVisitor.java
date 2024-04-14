@@ -63,7 +63,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
         TypeNode type = (TypeNode) visit(ctx.type());
         AstNode value = visit(ctx.expression());
-
         return new VariableDeclarationNode(identifierNode, type, value);
     }
 
@@ -189,8 +188,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             AstNode value = new BinaryOperatorNode(left, right, op);
             return new FloatNode(String.valueOf(value));
         } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
-            System.out.println(left + " " + right);
-            System.out.println(new BinaryOperatorNode(left, right, op) + "weljrgnewjrgkjewngkjewewjk");
             return new BinaryOperatorNode(left, right, op);
         }
 
@@ -219,10 +216,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitNot(CARLParser.NotContext ctx) {
         AstNode left = visit(ctx.expression());
         AstNode right = visit(ctx.expression());
-        System.out.println(left);
         if (left instanceof BoolNode) {
             AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
-            System.out.println(value);
             return new BoolNode(value.toString());
         }
         return null;
@@ -246,20 +241,16 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
                 AstNode left;
                 if (exp.getChild(0) instanceof CARLParser.IdentifierContext) {
                     left = new IdentifierNode(exp.getChild(0).getText());
-                    System.out.println(left);
                 } else {
                     left = visit(exp.getChild(0));
-                    System.out.println(left);
                 }
                 AstNode right;
                 if (exp.getChild(2) instanceof CARLParser.IdentifierContext) {
                     right = new IdentifierNode(exp.getChild(2).getText());
-                    System.out.println(right);
                 } else {
                     right = visit(exp.getChild(2));
-                    System.out.println(right);
                 }
-                BinaryOperatorNode bin = new BinaryOperatorNode(left, right, exp.getChild(1).getText());
+                RelationsAndLogicalOperatorNode bin = new RelationsAndLogicalOperatorNode(left, right, exp.getChild(1).getText());
                 System.out.println(bin);
                 expressionNodes.add(new ExpressionNode(bin));
             } else {
@@ -267,7 +258,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             }
         }
 
-        System.out.println(expressionNodes.get(0));
         List<BlockNode> blocks = new ArrayList<>();
         for (CARLParser.BlockContext block : ctx.block()) {
             blocks.add((BlockNode) visitBlock(block));
@@ -277,12 +267,28 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitWhileLoop(CARLParser.WhileLoopContext ctx) {
-        AstNode expression = visit(ctx.expression());
+        AstNode expression;
+        if (ctx.expression().getChildCount() >= 3) {
+            AstNode left;
+            if (ctx.expression().getChild(0) instanceof CARLParser.IdentifierContext) {
+                left = new IdentifierNode(ctx.expression().getChild(0).getText());
+            } else {
+                left = visit(ctx.expression().getChild(0));
+            }
+            AstNode right;
+            if (ctx.expression().getChild(2) instanceof CARLParser.IdentifierContext) {
+                right = new IdentifierNode(ctx.expression().getChild(2).getText());
+            } else {
+                right = visit(ctx.expression().getChild(2));
+            }
+            RelationsAndLogicalOperatorNode bin = new RelationsAndLogicalOperatorNode(left, right, ctx.expression().getChild(1).getText());
+            expression = (new ExpressionNode(bin));
+        } else {
+            expression = (new ExpressionNode(visit(ctx.expression())));
+        }
         BlockNode block = (BlockNode) visitBlock(ctx.block());
-        System.out.println(expression + "wer gkwergjnerkgwekeg");
-        System.out.println(block);
-//        return null;
         return new WhileNode(expression, block);
+
     }
 
     @Override

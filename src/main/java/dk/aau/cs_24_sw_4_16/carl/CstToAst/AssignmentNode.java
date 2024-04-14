@@ -9,7 +9,6 @@ public class AssignmentNode extends AstNode {
         this.identifier = (IdentifierNode) identifier;
 
         this.value = value;
-        System.out.println(this);
     }
 
     public IdentifierNode getIdentifier() {

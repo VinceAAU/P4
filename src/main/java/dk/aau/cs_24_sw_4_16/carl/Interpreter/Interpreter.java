@@ -43,6 +43,8 @@ public class Interpreter {
             return visit((WhileNode) node.getNode());
         } else if (node.getNode() instanceof IfStatementNode) {
             visit((IfStatementNode) node.getNode());
+        } else if (node.getNode() instanceof BinaryOperatorNode) {
+            visit((BinaryOperatorNode) node.getNode());
         }
         return null;
     }
@@ -53,24 +55,9 @@ public class Interpreter {
             AstNode toCheck = node.getExpressions().get(i).getNode();
             if (node.getExpressions().get(i).getNode() instanceof IdentifierNode) {
                 toCheck = getVariable((IdentifierNode) node.getExpressions().get(i).getNode());
-            } else if (node.getExpressions().get(i).getNode() instanceof BinaryOperatorNode) {
-                AstNode left = ((BinaryOperatorNode) node.getExpressions().get(i).getNode()).getLeft();
-                AstNode right = ((BinaryOperatorNode) node.getExpressions().get(i).getNode()).getRight();
-                String symbol = ((BinaryOperatorNode) node.getExpressions().get(i).getNode()).getOperator();
-                if (left instanceof IdentifierNode) {
-                    left = getVariable((IdentifierNode) left);
-                }
-                if (right instanceof IdentifierNode) {
-                    right  = getVariable((IdentifierNode) right);
-                }
-                if(left instanceof IntNode && right instanceof IntNode)
-                {
-                    toCheck = RelationsAndLogicalOperatorNode.getAstNodeValue(left,right,symbol);
-                    System.out.println(toCheck);
-                }
-
+            } else if (node.getExpressions().get(i).getNode() instanceof RelationsAndLogicalOperatorNode) {
+               toCheck = visit((RelationsAndLogicalOperatorNode) node.getExpressions().get(i).getNode());
             }
-
             if (toCheck instanceof BoolNode && ((BoolNode) toCheck).getValue()) {
                 visit(node.getBlocks().get(i));
                 visited = true;
@@ -97,16 +84,13 @@ public class Interpreter {
             if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
+                if(node.getValue() instanceof BinaryOperatorNode) {
+                    toChange = visit((BinaryOperatorNode) node.getValue());
+                }
                 if (toChange instanceof IdentifierNode) {
-                    for (HashMap<String, AstNode> vTable2 : scopes) {
-                        if (vTable2.containsKey(node.getValue().toString())) {
-
-                            toChange = vTable2.get(node.getValue().toString());
-                        }
-                    }
+                    toChange = getVariable((IdentifierNode) node.getValue());
                 }
 
-                System.out.println("current value" + nodeToChange + " new value " + toChange.toString());
                 AstNode finalToChange = toChange;
                 switch (nodeToChange) {
                     case IntNode intNode when finalToChange instanceof IntNode ->
@@ -117,7 +101,7 @@ public class Interpreter {
                             stringNode.setValue(((StringNode) finalToChange).getValue());
                     case BoolNode boolNode when finalToChange instanceof BoolNode ->
                             boolNode.setValue(((BoolNode) finalToChange).getValue());
-                    case null, default -> System.out.println("type mismatch");
+                    case null, default -> throw new RuntimeException("Type mismatch");
                 }
                 return;
             }
@@ -133,21 +117,24 @@ public class Interpreter {
             }
         }
         if (!found) {
-            System.out.println("stored" + node);
-            if (node.getValue() instanceof IdentifierNode) {
+
+            AstNode toChange = node.getValue();
+            if(node.getValue() instanceof BinaryOperatorNode) {
+                toChange = visit((BinaryOperatorNode) node.getValue());
+                scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), toChange);
+            }
+            else if (toChange instanceof IdentifierNode) {
                 for (HashMap<String, AstNode> vTable : scopes) {
-                    if (vTable.containsKey(node.getValue().toString())) {
-                        System.out.println("stored " + node.getIdentifier() + "value " + vTable.get(node.getValue().toString()));
-                        scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), vTable.get(node.getValue().toString()));
+                    if (vTable.containsKey(toChange.toString())) {
+                        scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
                     }
                 }
             } else {
-
-                scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), node.getValue());
+                scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), toChange);
             }
 
         } else {
-            System.out.println("node already exist" + node);
+            throw new RuntimeException("variable " + node.getIdentifier() +" already exists");
         }
     }
 
@@ -203,26 +190,74 @@ public class Interpreter {
     public AstNode visit(ExpressionNode node) {
         if (node.getNode() instanceof FunctionCallNode) {
             return visit((FunctionCallNode) node.getNode());
+        } else if (node.getNode() instanceof RelationsAndLogicalOperatorNode) {
+            return visit((RelationsAndLogicalOperatorNode) node.getNode());
+        } else if (node.getNode() instanceof BinaryOperatorNode) {
+            return visit((BinaryOperatorNode) node.getNode());
         }
         return node;
     }
 
     public AstNode visit(FunctionDefinitionNode node) {
         if (!fTable.containsKey(node.getIdentifier().toString())) {
-            System.out.println("stored" + node);
             fTable.put(node.getIdentifier().toString(), node);
         } else {
-            System.out.println("node already exist" + node);
         }
         return node;
     }
 
-    public AstNode visit(WhileNode node) {
-        AstNode boolValue = visit(node.getExpression());
-        while ((boolValue instanceof BoolNode) && ((BoolNode) boolValue).getValue()) {
-            visit(node.getBlock());
-            boolValue = visit(node.getExpression());
+    public AstNode visit(BinaryOperatorNode node){
+        AstNode left = node.getLeft();
+        AstNode right = node.getRight();
+        if (left instanceof IdentifierNode) {
+            left = getVariable((IdentifierNode) left);
         }
-        throw new RuntimeException();
+        if (right instanceof IdentifierNode) {
+            right  = getVariable((IdentifierNode) right);
+        }
+        if(left instanceof IntNode && right instanceof IntNode)
+        {
+            return BinaryOperatorNode.getAstNodeValue(left,right,node.getOperator());
+        } else if(left instanceof FloatNode && right instanceof FloatNode)
+        {
+            return BinaryOperatorNode.getAstNodeValue(left,right,node.getOperator());
+        }
+        throw new RuntimeException("BinaryOperator not implemented clause");
+    }
+
+    public AstNode visit(RelationsAndLogicalOperatorNode node){
+        AstNode left = node.getLeft();
+        AstNode right = node.getRight();
+        if (left instanceof IdentifierNode) {
+            left = getVariable((IdentifierNode) left);
+        }
+        if (right instanceof IdentifierNode) {
+            right  = getVariable((IdentifierNode) right);
+        }
+        if(left instanceof IntNode && right instanceof IntNode)
+        {
+            return RelationsAndLogicalOperatorNode.getAstNodeValue(left,right,node.getOperator());
+        } else if(left instanceof FloatNode && right instanceof FloatNode)
+        {
+            return RelationsAndLogicalOperatorNode.getAstNodeValue(left,right,node.getOperator());
+        } else if(left instanceof BoolNode && right instanceof BoolNode)
+        {
+            return  RelationsAndLogicalOperatorNode.getAstNodeValue(left,right,node.getOperator());
+        }
+        throw new RuntimeException("BinaryOperator not implemented clause");
+    }
+    public AstNode visit(WhileNode node) {
+        AstNode toCheck = ((ExpressionNode) node.getExpression()).getNode();
+        if (toCheck instanceof IdentifierNode) {
+            toCheck = getVariable((IdentifierNode) node.getExpression());
+        } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
+            toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
+
+        }
+        while ((toCheck instanceof BoolNode) && ((BoolNode) toCheck).getValue()) {
+            visit(node.getBlock());
+            toCheck = visit(((ExpressionNode) node.getExpression()));
+        }
+        throw new RuntimeException("Did not get into while statement");
     }
 }

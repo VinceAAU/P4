@@ -9,7 +9,6 @@ public class VariableDeclarationNode extends AstNode {
         this.identifier =  identifier;
         this.type = type;
         this.value = value;
-        System.out.println(this);
     }
 
     public IdentifierNode getIdentifier() {

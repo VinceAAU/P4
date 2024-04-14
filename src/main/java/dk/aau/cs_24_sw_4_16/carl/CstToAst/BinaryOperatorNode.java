@@ -9,7 +9,6 @@ public class BinaryOperatorNode extends AstNode {
         this.left = left;
         this.right = right;
         this.operator = operator;
-        System.out.println(this);
     }
 
     public static AstNode getAstNodeValue(AstNode left, AstNode right, String operator) {
