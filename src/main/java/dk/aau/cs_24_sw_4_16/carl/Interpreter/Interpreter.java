@@ -90,6 +90,9 @@ public class Interpreter {
                 if (toChange instanceof IdentifierNode) {
                     toChange = getVariable((IdentifierNode) node.getValue());
                 }
+                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+                    toChange = visit((RelationsAndLogicalOperatorNode) node.getValue());
+                }
 
                 AstNode finalToChange = toChange;
                 switch (nodeToChange) {
@@ -103,7 +106,6 @@ public class Interpreter {
                             boolNode.setValue(((BoolNode) finalToChange).getValue());
                     case null, default -> throw new RuntimeException("Type mismatch");
                 }
-                System.out.println(finalToChange);
                 return;
             }
         }
@@ -233,9 +235,13 @@ public class Interpreter {
         AstNode right = node.getRight();
         if (left instanceof IdentifierNode) {
             left = getVariable((IdentifierNode) left);
+        } else if (left instanceof RelationsAndLogicalOperatorNode) {
+            left = visit((RelationsAndLogicalOperatorNode) left);
         }
         if (right instanceof IdentifierNode) {
             right = getVariable((IdentifierNode) right);
+        } else if (right instanceof RelationsAndLogicalOperatorNode) {
+            right = visit((RelationsAndLogicalOperatorNode) right);
         }
         if (left instanceof IntNode && right instanceof IntNode) {
             return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());

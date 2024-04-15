@@ -23,9 +23,11 @@ public class RelationsAndLogicalOperatorNode extends AstNode {
         } else if (left instanceof BoolNode && right instanceof BoolNode) {
             boolean leftValue = ((BoolNode) left).getValue();
             boolean rightValue = ((BoolNode) right).getValue();
-            return performBoolOnBoolOperator(leftValue, rightValue, operator);
+            var value = performBoolOnBoolOperator(leftValue, rightValue, operator);
+            return value;
         } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
-            return new BinaryOperatorNode(left, right, operator);
+            return new RelationsAndLogicalOperatorNode(left, right, operator);
+
         }
         throw new RuntimeException("something went wrong in getAstNodeValue");
     }
@@ -73,6 +75,6 @@ public class RelationsAndLogicalOperatorNode extends AstNode {
 
     @Override
     public String toString() {
-        return " " + getAstNodeValue(getLeft(), getRight(), getOperator());
+        return "gottem";
     }
 }

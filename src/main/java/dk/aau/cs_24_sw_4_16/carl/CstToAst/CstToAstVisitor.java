@@ -4,6 +4,7 @@ import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import org.antlr.v4.runtime.Token;
 
+import java.awt.desktop.SystemEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -150,20 +151,30 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitParentheses(CARLParser.ParenthesesContext ctx) {
         AstNode expressionToFocus = visit(ctx.expression());
-        AstNode left = ((BinaryOperatorNode)expressionToFocus).getLeft();
-        AstNode right = ((BinaryOperatorNode)expressionToFocus).getRight();
-        String op = ((BinaryOperatorNode)expressionToFocus).getOperator();
+        AstNode left;
+        AstNode right;
+        String op;
 
-        if (left instanceof IntNode && right instanceof IntNode) {
-            AstNode value = new BinaryOperatorNode(left, right, op);
-            System.out.println(new IntNode(String.valueOf(value)));
-            return new IntNode(String.valueOf(value));
-        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-            AstNode value = new BinaryOperatorNode(left, right, op);
-            return new FloatNode(String.valueOf(value));
-        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
-            System.out.println(new BinaryOperatorNode(left, right, op));
-            return new BinaryOperatorNode(left, right, op);
+        if (expressionToFocus instanceof BinaryOperatorNode) {
+            left = ((BinaryOperatorNode)expressionToFocus).getLeft();
+            right = ((BinaryOperatorNode)expressionToFocus).getRight();
+            op = ((BinaryOperatorNode)expressionToFocus).getOperator();
+            if (left instanceof IntNode && right instanceof IntNode) {
+                AstNode value = new BinaryOperatorNode(left, right, op);
+                return new IntNode(String.valueOf(value));
+            } else if (left instanceof FloatNode && right instanceof FloatNode) {
+                AstNode value = new BinaryOperatorNode(left, right, op);
+                return new FloatNode(String.valueOf(value));
+            } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
+                return new BinaryOperatorNode(left, right, op);
+            }
+        } else if (expressionToFocus instanceof RelationsAndLogicalOperatorNode) {
+            left = ((RelationsAndLogicalOperatorNode)expressionToFocus).getLeft();
+            right = ((RelationsAndLogicalOperatorNode)expressionToFocus).getRight();
+            op = ((RelationsAndLogicalOperatorNode)expressionToFocus).getOperator();
+
+            return new RelationsAndLogicalOperatorNode(left, right, op);
+
         }
         throw new RuntimeException("Parentheses expression does not match the correct type.");
     }
@@ -192,33 +203,22 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         return new BinaryOperatorNode(left, right, op);
     }
 
-//    private AstNode getAstNode(CARLParser.ExpressionContext expression, CARLParser.ExpressionContext expression2, Token op2) {
-//        AstNode left = visit(expression);
-//        AstNode right = visit(expression2);
-//        String op = op2.getText();
-//        if (left instanceof IntNode && right instanceof IntNode) {
-//            AstNode value = new BinaryOperatorNode(left, right, op);
-//            return new IntNode(String.valueOf(value));
-//        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-//            AstNode value = new BinaryOperatorNode(left, right, op);
-//            return new FloatNode(String.valueOf(value));
-//        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
-//            return new BinaryOperatorNode(left, right, op);
-//        }
-//
-//        throw new RuntimeException("getAstode unhandled node");
-//    }
-
     @Override
     public AstNode visitLogical(CARLParser.LogicalContext ctx) {
         AstNode left = visit(ctx.expression(0));
         AstNode right = visit(ctx.expression(1));
         String op = ctx.op.getText();
-        if (left instanceof BoolNode && right instanceof BoolNode) {
-            AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
-            return new BoolNode(value.toString());
-        }
-        throw new RuntimeException("visitLogical unhandled node");
+        return new RelationsAndLogicalOperatorNode(left,right,op);
+//        if (left instanceof BoolNode && right instanceof BoolNode) {
+//            AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
+//            return new BoolNode(value.toString());
+//        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
+//            AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
+//            return value;
+//        } else if (left instanceof RelationsAndLogicalOperatorNode || right instanceof RelationsAndLogicalOperatorNode){
+//            return new RelationsAndLogicalOperatorNode(left,right,op);
+//        }
+//        throw new RuntimeException("visitLogical unhandled node");
     }
 
     @Override
