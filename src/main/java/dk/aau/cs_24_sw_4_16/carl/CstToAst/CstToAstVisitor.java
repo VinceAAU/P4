@@ -280,11 +280,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitWhileLoop(CARLParser.WhileLoopContext ctx) {
-        AstNode expression;
+        ExpressionNode expression;
         if (ctx.expression().getChildCount() >= 3) {
             AstNode left;
             if (ctx.expression().getChild(0) instanceof CARLParser.IdentifierContext) {
                 left = new IdentifierNode(ctx.expression().getChild(0).getText());
+                System.out.println(left);
             } else {
                 left = visit(ctx.expression().getChild(0));
             }
@@ -298,7 +299,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             expression = (new ExpressionNode(bin));
         } else {
             expression = (new ExpressionNode(visit(ctx.expression())));
+
         }
+        System.out.println("hello");
         BlockNode block = (BlockNode) visitBlock(ctx.block());
         return new WhileNode(expression, block);
 

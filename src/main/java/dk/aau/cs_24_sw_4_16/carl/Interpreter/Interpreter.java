@@ -254,16 +254,21 @@ public class Interpreter {
     }
 
     public AstNode visit(WhileNode node) {
-        AstNode toCheck = ((ExpressionNode) node.getExpression()).getNode();
+        AstNode toCheck = (node.getExpression()).getNode();
         if (toCheck instanceof IdentifierNode) {
-            toCheck = getVariable((IdentifierNode) node.getExpression());
+            toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
         } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
             toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
 
         }
         while ((toCheck instanceof BoolNode) && ((BoolNode) toCheck).getValue()) {
             visit(node.getBlock());
-            toCheck = visit(((ExpressionNode) node.getExpression()));
+            toCheck = visit(node.getExpression().getNode());
+            if (toCheck instanceof IdentifierNode) {
+                toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
+            } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
+                toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
+            }
         }
         throw new RuntimeException("Did not get into while statement");
     }
