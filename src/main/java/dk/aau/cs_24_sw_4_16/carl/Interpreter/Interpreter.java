@@ -211,10 +211,15 @@ public class Interpreter {
         AstNode right = node.getRight();
         if (left instanceof IdentifierNode) {
             left = getVariable((IdentifierNode) left);
+        } else if (left instanceof BinaryOperatorNode) {
+            left = visit((BinaryOperatorNode) left);
         }
         if (right instanceof IdentifierNode) {
             right = getVariable((IdentifierNode) right);
+        } else if (right instanceof BinaryOperatorNode) {
+            right = visit((BinaryOperatorNode) right);
         }
+
         if (left instanceof IntNode && right instanceof IntNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
