@@ -1,19 +1,19 @@
-package dk.aau.cs_24_sw_4_16.carl;
+package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
+import dk.aau.cs_24_sw_4_16.carl.CARLLexer;
+import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
-import lombok.Getter;
-import lombok.Setter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 
-public class Main {
-    public static void main(String... args) {
+public class CstToAst {
+
+    public static void main(String[] args) throws IOException {
         try {
             FileInputStream fileInput = new FileInputStream("test.carl");
 
@@ -26,7 +26,8 @@ public class Main {
             AstNode astRoot = visitor.visit(tree);
             Interpreter inter = new Interpreter();
             inter.visit(astRoot);
-        } catch (Exception e) {
+        }
+        catch (Exception e){
             System.out.println(e.toString());
         }
     }

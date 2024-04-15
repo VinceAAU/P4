@@ -1,0 +1,11 @@
+// Valid test cases
+var c : int = 5
+var y : int = c
+var d : int = 3
+var b : bool = true
+c = (4 + 4) + 4
+print(c,"myC")
+c = (d + d) + 5
+print(c,"My Second C")
+c = (5 + d) * 5
+c = 3 + (d + 5)
