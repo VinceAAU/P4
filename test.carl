@@ -3,17 +3,9 @@ var c : int = 5
 var y : int = c
 var d : int = 3
 var b : bool = true
-d = 5 + 5
-print(b,c,y,d)
-if  d < c{
-    print("setting other if loop")
-    b = false
-}
-else if true {
-    print ("hahaha")
-} else if true {
-      print ("hahaha")
-}
-else {
-    print("ahaha")
-}
+c = (4 + 4) + 4
+print(c)
+c = (d + d) + 5
+print(c)
+c = (5 + d) * 5
+c = 3 + (d + 5)

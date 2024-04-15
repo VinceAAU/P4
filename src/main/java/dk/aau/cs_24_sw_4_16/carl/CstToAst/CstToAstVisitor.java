@@ -146,22 +146,34 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         return super.visitDummyMethodCall(ctx);
     }
 
+    //This does not work
     @Override
     public AstNode visitParentheses(CARLParser.ParenthesesContext ctx) {
         AstNode expressionToFocus = visit(ctx.expression());
-        if (expressionToFocus instanceof IntNode) {
-            return new IntNode(expressionToFocus.toString());
-        } else if (expressionToFocus instanceof FloatNode) {
-            return new FloatNode(expressionToFocus.toString());
-        } else if (expressionToFocus instanceof BoolNode) {
-            return new BoolNode(expressionToFocus.toString());
+        AstNode left = ((BinaryOperatorNode)expressionToFocus).getLeft();
+        AstNode right = ((BinaryOperatorNode)expressionToFocus).getRight();
+        String op = ((BinaryOperatorNode)expressionToFocus).getOperator();
+
+        if (left instanceof IntNode && right instanceof IntNode) {
+            AstNode value = new BinaryOperatorNode(left, right, op);
+            System.out.println(new IntNode(String.valueOf(value)));
+            return new IntNode(String.valueOf(value));
+        } else if (left instanceof FloatNode && right instanceof FloatNode) {
+            AstNode value = new BinaryOperatorNode(left, right, op);
+            return new FloatNode(String.valueOf(value));
+        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
+            System.out.println(new BinaryOperatorNode(left, right, op));
+            return new BinaryOperatorNode(left, right, op);
         }
-        return null;
+        throw new RuntimeException("Parentheses expression does not match the correct type.");
     }
 
     @Override
     public AstNode visitMultiplicationDivisionModulus(CARLParser.MultiplicationDivisionModulusContext ctx) {
-        return getAstNode(ctx.expression(0), ctx.expression(1), ctx.op);
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        String op = ctx.op.getText();
+        return new BinaryOperatorNode(left, right, op);
     }
 
     @Override
@@ -174,25 +186,28 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitAdditionSubtraction(CARLParser.AdditionSubtractionContext ctx) {
-        return getAstNode(ctx.expression(0), ctx.expression(1), ctx.op);
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        String op = ctx.op.getText();
+        return new BinaryOperatorNode(left, right, op);
     }
 
-    private AstNode getAstNode(CARLParser.ExpressionContext expression, CARLParser.ExpressionContext expression2, Token op2) {
-        AstNode left = visit(expression);
-        AstNode right = visit(expression2);
-        String op = op2.getText();
-        if (left instanceof IntNode && right instanceof IntNode) {
-            AstNode value = new BinaryOperatorNode(left, right, op);
-            return new IntNode(String.valueOf(value));
-        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-            AstNode value = new BinaryOperatorNode(left, right, op);
-            return new FloatNode(String.valueOf(value));
-        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
-            return new BinaryOperatorNode(left, right, op);
-        }
-
-        throw new RuntimeException("getAstode unhandled node");
-    }
+//    private AstNode getAstNode(CARLParser.ExpressionContext expression, CARLParser.ExpressionContext expression2, Token op2) {
+//        AstNode left = visit(expression);
+//        AstNode right = visit(expression2);
+//        String op = op2.getText();
+//        if (left instanceof IntNode && right instanceof IntNode) {
+//            AstNode value = new BinaryOperatorNode(left, right, op);
+//            return new IntNode(String.valueOf(value));
+//        } else if (left instanceof FloatNode && right instanceof FloatNode) {
+//            AstNode value = new BinaryOperatorNode(left, right, op);
+//            return new FloatNode(String.valueOf(value));
+//        } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
+//            return new BinaryOperatorNode(left, right, op);
+//        }
+//
+//        throw new RuntimeException("getAstode unhandled node");
+//    }
 
     @Override
     public AstNode visitLogical(CARLParser.LogicalContext ctx) {
