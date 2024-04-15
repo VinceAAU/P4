@@ -4,7 +4,7 @@ import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import org.antlr.v4.runtime.Token;
 
-import javax.swing.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +30,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitFunctionCall(ctx.functionCall()));
         } else if (ctx.functionDefinition() != null) {
             return new StatementNode(visitFunctionDefinition(ctx.functionDefinition()));
+        } else if (ctx.ifStatement() != null) {
+            return visitIfStatement(ctx.ifStatement());
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -240,15 +242,42 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitIfStatement(CARLParser.IfStatementContext ctx) {
+        ExpressionNode condition = (ExpressionNode) visit(ctx.expression(0));
+        BlockNode thenBranch = (BlockNode) visit(ctx.block(0));
 
-        return super.visitIfStatement(ctx);
+        BlockNode elseBranch = null;
+        if (ctx.block().size() > 1) {
+            elseBranch = (BlockNode) visit(ctx.block(ctx.block().size() - 1));
+        }
+        List<AstNode> elseIfConditions = new ArrayList<>();
+        List<BlockNode> elseIfBlocks = new ArrayList<>();
+        int numberOfElseIfBlocks = (ctx.block().size() - (elseBranch != null ? 2 : 1)) / 2;
+        for (int i = 1; i <= numberOfElseIfBlocks; i++) {
+            elseIfConditions.add(visit(ctx.expression(i)));
+            elseIfBlocks.add((BlockNode) visit(ctx.block(i)));
+        }
+        IfStatementNode ifStatement = new IfStatementNode(condition, thenBranch, elseBranch, elseIfConditions, elseIfBlocks);
+        return new StatementNode(ifStatement);
     }
+
+
 
     @Override
     public AstNode visitWhileLoop(CARLParser.WhileLoopContext ctx) {
-        return super.visitWhileLoop(ctx);
+        AstNode conditionRaw = visit(ctx.expression());
+        if (!(conditionRaw instanceof ExpressionNode condition)) {
+            throw new RuntimeException("Expected condition to be an ExpressionNode");
+        }
+        List<StatementNode> body = new ArrayList<>();
+        for (CARLParser.StatementContext statementContext : ctx.block().statement()) {
+            AstNode statementRaw = visit(statementContext);
+            if (!(statementRaw instanceof StatementNode)) {
+                throw new RuntimeException("Expected statements within while loop to be StatementNodes");
+            }
+            body.add((StatementNode) statementRaw);
+        }
+        return new WhileLoopNode(condition, body);
     }
-
     @Override
     public AstNode visitReturnStatement(CARLParser.ReturnStatementContext ctx) {
         return super.visitReturnStatement(ctx);
