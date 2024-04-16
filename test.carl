@@ -9,3 +9,24 @@ c = (d + d) + 5
 print(c,"My Second C")
 c = (5 + d) * 5
 c = 3 + (d + 5)
+
+while d <= 5{
+    print(d)
+    d= d+1
+}
+if false{
+    print("false")
+}
+else if b{
+    print("else if")
+    b = false
+}
+if false{
+    print("false")
+}
+else if b{
+    print("else if")
+}
+else{
+    print("else case")
+}
