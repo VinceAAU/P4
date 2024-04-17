@@ -2,19 +2,20 @@ package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class Interpreter {
     HashMap<String, FunctionDefinitionNode> fTable;
     HashMap<String, AstNode> vTable;
     Stack<HashMap<String, AstNode>> scopes;
+    Deque<Integer> activeScope;
 
     public Interpreter() {
         fTable = new HashMap<>();
         vTable = new HashMap<>();
         scopes = new Stack<>();
+        activeScope = new ArrayDeque<>();
+        activeScope.push(0);
         scopes.add(vTable);
     }
 
@@ -50,7 +51,9 @@ public class Interpreter {
     }
 
     public void visit(IfStatementNode node) {
-        Boolean visited = false;
+        HashMap<String, AstNode> localTable = new HashMap<>();
+        scopes.add(localTable);
+        boolean visited = false;
         for (int i = 0; i < node.getExpressions().size(); i++) {
             AstNode toCheck = node.getExpressions().get(i).getNode();
             if (node.getExpressions().get(i).getNode() instanceof IdentifierNode) {
@@ -67,12 +70,18 @@ public class Interpreter {
         if (!visited && node.getExpressions().size() < node.getBlocks().size()) {
             visit(node.getBlocks().get(node.getBlocks().size() - 1));
         }
+        scopes.remove(localTable);
     }
 
     public AstNode getVariable(IdentifierNode node) {
-        for (HashMap<String, AstNode> vTable : scopes) {
-            if (vTable.containsKey(node.getIdentifier().toString())) {
-                return vTable.get(node.getIdentifier().toString());
+//        for (HashMap<String, AstNode> vTable : scopes) {
+        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
+            return scopes.getFirst().get(node.getIdentifier().toString());
+        }
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
+                return scopes.get(i).get(node.getIdentifier().toString());
             }
         }
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
@@ -114,8 +123,12 @@ public class Interpreter {
 
     public void visit(VariableDeclarationNode node) {
         boolean found = false;
-        for (HashMap<String, AstNode> vTable : scopes) {
-            if (vTable.containsKey(node.getIdentifier().toString())) {
+        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
+            found = true;
+        }
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 found = true;
             }
         }
@@ -124,15 +137,15 @@ public class Interpreter {
             AstNode toChange = node.getValue();
             if (node.getValue() instanceof BinaryOperatorNode) {
                 toChange = visit((BinaryOperatorNode) node.getValue());
-                scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else if (toChange instanceof IdentifierNode) {
                 for (HashMap<String, AstNode> vTable : scopes) {
                     if (vTable.containsKey(toChange.toString())) {
-                        scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
+                        scopes.getLast().put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
                     }
                 }
             } else {
-                scopes.get(scopes.size() - 1).put(node.getIdentifier().toString(), toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }
 
         } else {
@@ -168,6 +181,7 @@ public class Interpreter {
     public AstNode visit(FunctionCallNode node) {
         HashMap<String, AstNode> localTable = new HashMap<>();
         scopes.add(localTable);
+        activeScope.add(scopes.size()-1);
         if (fTable.containsKey(node.getFunctionName().toString())) {
             FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
             List<ParameterNode> arguments = function.getArguments().getParameters();
@@ -175,11 +189,15 @@ public class Interpreter {
                 visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
             }
             visit(function.getBlock());
+            scopes.remove(localTable);
+            activeScope.removeLast();
         }
         if (node.getFunctionName().toString().equals("print")) {
-            InbuildClasses.print(node, scopes);
+            scopes.remove(localTable);
+            activeScope.removeLast();
+            InbuildClasses.print(node, scopes, activeScope);
         }
-        scopes.remove(localTable);
+
         return node;
     }
 
@@ -254,6 +272,8 @@ public class Interpreter {
     }
 
     public AstNode visit(WhileNode node) {
+        HashMap<String, AstNode> localTable = new HashMap<>();
+        scopes.add(localTable);
         AstNode toCheck = (node.getExpression()).getNode();
         if (toCheck instanceof IdentifierNode) {
             toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
@@ -262,8 +282,7 @@ public class Interpreter {
 
         }
         while ((toCheck instanceof BoolNode)) {
-            if(((BoolNode) toCheck).getValue())
-            {
+            if (((BoolNode) toCheck).getValue()) {
                 visit(node.getBlock());
                 toCheck = visit(node.getExpression().getNode());
                 if (toCheck instanceof IdentifierNode) {
@@ -271,8 +290,8 @@ public class Interpreter {
                 } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
                     toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
                 }
-            }
-            else{
+            } else {
+                scopes.remove(localTable);
                 return node;
             }
 
