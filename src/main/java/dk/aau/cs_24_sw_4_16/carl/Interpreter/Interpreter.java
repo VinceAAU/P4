@@ -49,8 +49,16 @@ public class Interpreter {
             visit((BinaryOperatorNode) node.getNode());
         } else if (node.getNode() instanceof ReturnStatementNode) {
             return visit((ReturnStatementNode) node.getNode());
+        } else if (node.getNode() instanceof StructureDefinitionNode) {
+            visit((StructureDefinitionNode) node.getNode());
         }
         return null;
+    }
+
+    public void visit(StructureDefinitionNode node) {
+        for (var variable : node.getVariableDeclarations()) {
+            System.out.println(variable);
+        }
     }
 
     public AstNode visit(ReturnStatementNode node) {

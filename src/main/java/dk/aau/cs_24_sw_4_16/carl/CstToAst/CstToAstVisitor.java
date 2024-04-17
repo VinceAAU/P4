@@ -35,7 +35,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitIfStatement(ctx.ifStatement()));
         } else if (ctx.returnStatement() != null) {
             return new StatementNode(visitReturnStatement(ctx.returnStatement()));
-
+        } else if (ctx.structureDefinition() != null) {
+            return new StatementNode(visitStructureDefinition(ctx.structureDefinition()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -56,7 +57,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitStructureDefinition(CARLParser.StructureDefinitionContext ctx) {
-        return super.visitStructureDefinition(ctx);
+        List<VariableDeclarationNode> variableDeclarationNodes = new ArrayList<>();
+        for (var variableDeclaration : ctx.variableDeclaration()) {
+            variableDeclarationNodes.add((VariableDeclarationNode) visit(variableDeclaration));
+        }
+        return new StructureDefinitionNode( visit(ctx.IDENTIFIER()),variableDeclarationNodes);
     }
 
     @Override
@@ -159,9 +164,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         String op;
 
         if (expressionToFocus instanceof BinaryOperatorNode) {
-            left = ((BinaryOperatorNode)expressionToFocus).getLeft();
-            right = ((BinaryOperatorNode)expressionToFocus).getRight();
-            op = ((BinaryOperatorNode)expressionToFocus).getOperator();
+            left = ((BinaryOperatorNode) expressionToFocus).getLeft();
+            right = ((BinaryOperatorNode) expressionToFocus).getRight();
+            op = ((BinaryOperatorNode) expressionToFocus).getOperator();
             if (left instanceof IntNode && right instanceof IntNode) {
                 AstNode value = new BinaryOperatorNode(left, right, op);
                 return new IntNode(String.valueOf(value));
@@ -172,9 +177,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
                 return new BinaryOperatorNode(left, right, op);
             }
         } else if (expressionToFocus instanceof RelationsAndLogicalOperatorNode) {
-            left = ((RelationsAndLogicalOperatorNode)expressionToFocus).getLeft();
-            right = ((RelationsAndLogicalOperatorNode)expressionToFocus).getRight();
-            op = ((RelationsAndLogicalOperatorNode)expressionToFocus).getOperator();
+            left = ((RelationsAndLogicalOperatorNode) expressionToFocus).getLeft();
+            right = ((RelationsAndLogicalOperatorNode) expressionToFocus).getRight();
+            op = ((RelationsAndLogicalOperatorNode) expressionToFocus).getOperator();
 
             return new RelationsAndLogicalOperatorNode(left, right, op);
 
@@ -211,7 +216,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         AstNode left = visit(ctx.expression(0));
         AstNode right = visit(ctx.expression(1));
         String op = ctx.op.getText();
-        return new RelationsAndLogicalOperatorNode(left,right,op);
+        return new RelationsAndLogicalOperatorNode(left, right, op);
 //        if (left instanceof BoolNode && right instanceof BoolNode) {
 //            AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
 //            return new BoolNode(value.toString());
@@ -288,7 +293,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             AstNode left;
             if (ctx.expression().getChild(0) instanceof CARLParser.IdentifierContext) {
                 left = new IdentifierNode(ctx.expression().getChild(0).getText());
-                System.out.println(left);
+
             } else {
                 left = visit(ctx.expression().getChild(0));
             }
@@ -304,7 +309,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             expression = (new ExpressionNode(visit(ctx.expression())));
 
         }
-        System.out.println("hello");
         BlockNode block = (BlockNode) visitBlock(ctx.block());
         return new WhileNode(expression, block);
 
