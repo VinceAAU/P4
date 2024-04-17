@@ -33,6 +33,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitWhileLoop(ctx.whileLoop()));
         } else if (ctx.ifStatement() != null) {
             return new StatementNode(visitIfStatement(ctx.ifStatement()));
+        } else if (ctx.returnStatement() != null) {
+            return new StatementNode(visitReturnStatement(ctx.returnStatement()));
+
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -309,7 +312,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitReturnStatement(CARLParser.ReturnStatementContext ctx) {
-        return super.visitReturnStatement(ctx);
+        AstNode expression = visit(ctx.expression());
+        return new ReturnStatementNode(expression);
     }
 
     @Override

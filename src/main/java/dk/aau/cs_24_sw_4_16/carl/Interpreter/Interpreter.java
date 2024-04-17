@@ -1,5 +1,6 @@
 package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
+import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
 import java.util.*;
@@ -46,8 +47,14 @@ public class Interpreter {
             visit((IfStatementNode) node.getNode());
         } else if (node.getNode() instanceof BinaryOperatorNode) {
             visit((BinaryOperatorNode) node.getNode());
+        } else if (node.getNode() instanceof ReturnStatementNode) {
+            return visit((ReturnStatementNode) node.getNode());
         }
         return null;
+    }
+
+    public AstNode visit(ReturnStatementNode node) {
+        return node;
     }
 
     public void visit(IfStatementNode node) {
@@ -93,14 +100,17 @@ public class Interpreter {
             if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
-                if (node.getValue() instanceof BinaryOperatorNode) {
-                    toChange = visit((BinaryOperatorNode) node.getValue());
+                if (toChange instanceof BinaryOperatorNode) {
+                    toChange = visit((BinaryOperatorNode) toChange);
+                }
+                if (toChange instanceof FunctionCallNode) {
+                    toChange = visit((FunctionCallNode) toChange);
                 }
                 if (toChange instanceof IdentifierNode) {
-                    toChange = getVariable((IdentifierNode) node.getValue());
+                    toChange = getVariable((IdentifierNode) toChange);
                 }
                 if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
-                    toChange = visit((RelationsAndLogicalOperatorNode) node.getValue());
+                    toChange = visit((RelationsAndLogicalOperatorNode) toChange);
                 }
 
                 AstNode finalToChange = toChange;
@@ -181,30 +191,43 @@ public class Interpreter {
     public AstNode visit(FunctionCallNode node) {
         HashMap<String, AstNode> localTable = new HashMap<>();
         scopes.add(localTable);
-        activeScope.add(scopes.size()-1);
+        activeScope.add(scopes.size() - 1);
         if (fTable.containsKey(node.getFunctionName().toString())) {
             FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
             List<ParameterNode> arguments = function.getArguments().getParameters();
             for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
                 visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
             }
-            visit(function.getBlock());
-            scopes.remove(localTable);
-            activeScope.removeLast();
+            AstNode test = visit(function.getBlock());
+
+            if (test instanceof ReturnStatementNode) {
+                AstNode returnValue = ((ReturnStatementNode) test).getReturnValue();
+                if (returnValue instanceof IdentifierNode) {
+                    returnValue = getVariable((IdentifierNode) returnValue);
+                }
+                scopes.remove(localTable);
+                activeScope.removeLast();
+                return returnValue;
+            }
         }
         if (node.getFunctionName().toString().equals("print")) {
             scopes.remove(localTable);
             activeScope.removeLast();
             InbuildClasses.print(node, scopes, activeScope);
         }
-
         return node;
     }
 
-    public void visit(BlockNode node) {
+    public AstNode visit(BlockNode node) {
         for (AstNode statement : node.getStatements()) {
-            visit((StatementNode) statement);
+
+            if (((StatementNode) statement).getNode() instanceof ReturnStatementNode) {
+                return visit((StatementNode) statement);
+            } else {
+                visit((StatementNode) statement);
+            }
         }
+        return node;
     }
 
     public AstNode visit(ExpressionNode node) {
