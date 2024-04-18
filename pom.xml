@@ -18,6 +18,7 @@
   </properties>
 
   <dependencies>
+    <!-- Used for the getters and setters -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -25,21 +26,12 @@
       <scope>provided</scope>
     </dependency>
 
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-    </dependency>
-
-
-
+    <!-- Antlr stuff -->
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
       <version>4.13.1</version>
     </dependency>
-
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4</artifactId>
@@ -47,6 +39,7 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Used for testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -57,29 +50,46 @@
 
   <build>
     <plugins>
+      <!-- The assembly plugin, dictates how the resulting .jar looks -->
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
         <version>3.3.0</version>
+
+        <executions>
+          <execution>
+            <phase>package</phase> <!-- This means that the assembler runs under the package phase -->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef> <!-- This means that we include antlr in the jar itself -->
+          </descriptorRefs>
           <archive>
-            <manifest>
-              <mainClass>${project.groupId}.Main</mainClass>
+            <manifest> <!-- Configures MANIFEST.MF -->
+              <mainClass>${project.groupId}.Main</mainClass> <!-- Specifies what our main class is -->
             </manifest>
           </archive>
+          <appendAssemblyId>false</appendAssemblyId> <!-- If you set this to true, two jars will be generated: One with and one without antlr -->
         </configuration>
       </plugin>
+
+      <!-- Plugin for automatically generating antlr files -->
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
         <version>4.13.1</version>
         <configuration>
-          <visitor>true</visitor>
+          <visitor>true</visitor> <!-- Makes sure that the visitor classes are generated -->
         </configuration>
         <executions>
           <execution>
             <id>antlr</id>
             <goals>
-              <goal>antlr4</goal>
+              <goal>antlr4</goal> <!-- I guess this means that this can be run with `mvn antlr4`, but I haven't actually checked -->
             </goals>
           </execution>
         </executions>
