@@ -13,7 +13,7 @@ statement
     | structureDefinition
     | importStatement
     | variableDeclaration
-    | arrayDefinition
+    | arrayDeclaration
     | coordinateDeclaration
     | methodCall
     ;
@@ -22,20 +22,25 @@ importStatement : 'import' STRING ;
 functionDefinition : 'fn' IDENTIFIER '(' parameterList? ')' '->' type block ;
 structureDefinition : 'struct' IDENTIFIER '{' variableDeclaration* '}' ;
 variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression | structInstantiation) ;
+arrayDeclaration : 'var' IDENTIFIER ':' legalArrayType arrayOptionalIndex+;
 
-primitiveTypeForArray
-    : 'int'
-    | 'float'
+arrayOptionalIndex : '[' INT? ']' ;
+
+legalArrayType :
+    'bool'
+    | 'coord'
+    | 'int'
     | 'string'
-    ;
+    | 'float'
+    | IDENTIFIER ;
 
-type
-    : primitiveTypeForArray
-    | 'bool'
+
+type :
+    'bool'
     | 'coord'
     | 'void'
     | IDENTIFIER
-    | primitiveTypeForArray '[' ']'('[' ']')*
+    | legalArrayType '[' INT? ']' ('[' INT? ']')*
     ;
 assignment : (IDENTIFIER | arrayAccess) '=' expression ;
 functionCall : IDENTIFIER '(' argumentList? ')' ;
@@ -63,7 +68,7 @@ primary
     | '(' expression ')' # Parentheses
     | functionCall # DummyFunctionCallExpr
     | methodCall # DummyMethodCall
-    | arrayAccess # DummyArrayAccessExpr
+    | arrayAccess # DummyArrayAccess
     | propertyAccess # DummyPropertyAccess
     | structInstantiation # DummyStructInstantiationExpr
     ;
@@ -95,7 +100,6 @@ ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' blo
 whileLoop : 'while' expression block ;
 returnStatement : 'return' expression? ;
 block : '{' (statement  | expression)* '}' ;
-arrayDefinition : primitiveTypeForArray '[' INT? ']' ('[' INT ']')* IDENTIFIER ;
 arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']')*;
 propertyAccess : IDENTIFIER '.' IDENTIFIER ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
