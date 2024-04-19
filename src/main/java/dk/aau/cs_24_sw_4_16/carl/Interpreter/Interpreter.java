@@ -2,7 +2,6 @@ package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
