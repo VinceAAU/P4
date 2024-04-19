@@ -128,6 +128,8 @@ public class Interpreter {
                 return;
             }
         }
+
+        throw new RuntimeException("Variable '" + node.getIdentifier() + "' has not been defined yet.");
     }
 
 
