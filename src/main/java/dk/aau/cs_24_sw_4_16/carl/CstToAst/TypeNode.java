@@ -1,6 +1,9 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
+import lombok.Getter;
+
 public class TypeNode extends AstNode {
+    @Getter
     String type;
 
     public TypeNode(String type) {

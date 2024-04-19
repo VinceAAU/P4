@@ -1,6 +1,5 @@
 package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
-import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
 import java.util.*;
@@ -134,17 +133,8 @@ public class Interpreter {
 
 
     public void visit(VariableDeclarationNode node) {
-        boolean found = false;
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            found = true;
-        }
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                found = true;
-            }
-        }
-        if (!found) {
+        if (!idExists(node.getIdentifier().toString())) {
 
             AstNode toChange = node.getValue();
             if (node.getValue() instanceof BinaryOperatorNode) {
@@ -163,6 +153,47 @@ public class Interpreter {
         } else {
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists");
         }
+    }
+
+
+    //I hate Java for forcing me to make this function
+    //It is as stupid as its name makes it sound
+    private int[] integerListToIntArray(List<Integer> ints){
+        return Arrays.stream(ints.toArray(new Integer[0])).mapToInt(i -> i).toArray();
+    }
+
+    public AstNode visit(ArrayAccessNode node) {
+        return
+                ((ArrayNode) getVariable(node.getIdentifier()))
+                .get(integerListToIntArray(node.getIndices()));
+    }
+
+    public void visit(ArrayAssignmentNode node){
+        ((ArrayNode) getVariable(node.getIdentifier()))
+        .set(node.getValue(), integerListToIntArray(node.getIndices()));
+    }
+
+    public void visit(ArrayDefinitionNode node) {
+        if(idExists(node.getIdentifier())){
+            throw new RuntimeException("Variable '" + node.getIdentifier() + "' already exists.");
+        }
+
+        scopes.getLast().put(node.getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes())));
+    }
+
+    private boolean idExists(String id){
+        boolean found = false;
+        if (scopes.getFirst().containsKey(id)) {
+            found = true;
+        }
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(id)) {
+                found = true;
+            }
+        }
+
+        return found;
     }
 
     public AstNode visit(TypeNode node) {
