@@ -51,8 +51,8 @@ public class IfStatementTest {
 
         List<ExpressionNode> expressionList = result.getExpressions();
 
-        Assert.assertEquals("First expression should be 10", 10, expressionList.get(0).getValue());
-        Assert.assertEquals("Second expression should be 20", 20, expressionList.get(1).getValue());
+        Assert.assertEquals("First expression should be 10", 10, ((IntNode) expressionList.get(0).getNode()).getValue());
+        Assert.assertEquals("Second expression should be 20", 20,  ((IntNode)expressionList.get(1).getNode()).getValue());
 
         Assert.assertNotNull("First block should not be null", result.getBlocks().get(0));
         Assert.assertNotNull("Second block should not be null", result.getBlocks().get(1));
