@@ -13,4 +13,12 @@ public class TypeNodeTest {
 
         Assertions.assertEquals(" type: " + expectedType, typeNode.toString());
     }
+
+    @Test
+    public void testGetType() {
+        String expectedType = "int";
+        TypeNode typeNode = new TypeNode(expectedType);
+
+        Assertions.assertEquals(expectedType, typeNode.getType());
+    }
 }
