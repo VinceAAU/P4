@@ -28,7 +28,7 @@ public class ArrayNode extends AstNode {
             value = new AstNode[sizes.getFirst()];
 
             for (int i = 0; i < sizes.getFirst(); i++) {
-                value[i] = new ArrayNode(type, (ArrayList<Integer>) sizes.subList(1, sizes.size() - 1));
+                value[i] = new ArrayNode(type, new ArrayList<>(sizes.subList(1, sizes.size())));
             }
 
         } else {
@@ -78,10 +78,12 @@ public class ArrayNode extends AstNode {
             if(!(this.value[i] instanceof ArrayNode)) throw new RuntimeException("Cannot get index of non-array type");
 
             ((ArrayNode) this.value[i]) .set(value, Arrays.copyOfRange(indices, 1, indices.length));
+        } else {
+            this.value[i] = value;
         }
 
         //Potential todo: type checking
 
-        this.value[i] = value;
+
     }
 }

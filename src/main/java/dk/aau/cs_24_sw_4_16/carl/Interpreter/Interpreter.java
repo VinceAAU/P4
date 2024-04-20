@@ -48,6 +48,12 @@ public class Interpreter {
             visit((BinaryOperatorNode) node.getNode());
         } else if (node.getNode() instanceof ReturnStatementNode) {
             return visit((ReturnStatementNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayDefinitionNode) {
+            visit((ArrayDefinitionNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayAssignmentNode) {
+            visit((ArrayAssignmentNode) node.getNode());
+        } else {
+            throw new RuntimeException("Line 56 of Interpreter.java. Ya got something funky goin' on here, buckaroo.");
         }
         return null;
     }
