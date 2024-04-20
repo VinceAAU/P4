@@ -37,9 +37,9 @@ public class AdditionSubtractionTest {
         Assert.assertTrue("Result should be an instance of BinaryOperatorNode", result instanceof BinaryOperatorNode);
 
         BinaryOperatorNode binaryNode = (BinaryOperatorNode) result;
-        Assert.assertEquals("Left node value should be 5", 5, ((IntNode) binaryNode.left).getValue());
-        Assert.assertEquals("Right node value should be 3", 3, ((IntNode) binaryNode.right).getValue());
-        Assert.assertEquals("Operator should be addition", "+", binaryNode.operator);
+        Assert.assertEquals("Left node value should be 5", 5, ((IntNode) binaryNode.getLeft()).getValue());
+        Assert.assertEquals("Right node value should be 3", 3, ((IntNode) binaryNode.getRight()).getValue());
+        Assert.assertEquals("Operator should be addition", "+", binaryNode.getOperator());
         Assert.assertEquals("BinaryOperatorNode toString should match calculated value", "8", result.toString());
     }
 
@@ -56,9 +56,9 @@ public class AdditionSubtractionTest {
         Assert.assertTrue("Result should be an instance of BinaryOperatorNode", result instanceof BinaryOperatorNode);
 
         BinaryOperatorNode binaryNode = (BinaryOperatorNode) result;
-        Assert.assertEquals("Left node value should be 10", 10, ((IntNode) binaryNode.left).getValue());
-        Assert.assertEquals("Right node value should be 2", 2, ((IntNode) binaryNode.right).getValue());
-        Assert.assertEquals("Operator should be subtraction", "-", binaryNode.operator);
+        Assert.assertEquals("Left node value should be 10", 10, ((IntNode) binaryNode.getLeft()).getValue());
+        Assert.assertEquals("Right node value should be 2", 2, ((IntNode) binaryNode.getRight()).getValue());
+        Assert.assertEquals("Operator should be subtraction", "-", binaryNode.getOperator());
         Assert.assertEquals("BinaryOperatorNode toString should match calculated value", "8", result.toString());
     }
 }

@@ -37,9 +37,9 @@ public class MultiplicationDivisionTest {
         Assert.assertTrue("Result should be an instance of BinaryOperatorNode", result instanceof BinaryOperatorNode);
 
         BinaryOperatorNode binaryNode = (BinaryOperatorNode) result;
-        Assert.assertEquals("Left node value should be 3", 3, ((IntNode) binaryNode.left).getValue());
-        Assert.assertEquals("Right node value should be 4", 4, ((IntNode) binaryNode.right).getValue());
-        Assert.assertEquals("Operator should be multiplication", "*", binaryNode.operator);
+        Assert.assertEquals("Left node value should be 3", 3, ((IntNode) binaryNode.getLeft()).getValue());
+        Assert.assertEquals("Right node value should be 4", 4, ((IntNode) binaryNode.getRight()).getValue());
+        Assert.assertEquals("Operator should be multiplication", "*", binaryNode.getOperator());
         Assert.assertEquals("BinaryOperatorNode toString should match calculated value", "12", result.toString());
     }
 
@@ -56,9 +56,9 @@ public class MultiplicationDivisionTest {
         Assert.assertTrue("Result should be an instance of BinaryOperatorNode", result instanceof BinaryOperatorNode);
 
         BinaryOperatorNode binaryNode = (BinaryOperatorNode) result;
-        Assert.assertEquals("Left node value should be 12", 12, ((IntNode) binaryNode.left).getValue());
-        Assert.assertEquals("Right node value should be 3", 3, ((IntNode) binaryNode.right).getValue());
-        Assert.assertEquals("Operator should be division", "/", binaryNode.operator);
+        Assert.assertEquals("Left node value should be 12", 12, ((IntNode) binaryNode.getLeft()).getValue());
+        Assert.assertEquals("Right node value should be 3", 3, ((IntNode) binaryNode.getRight()).getValue());
+        Assert.assertEquals("Operator should be division", "/", binaryNode.getOperator());
         Assert.assertEquals("BinaryOperatorNode toString should match calculated value", "4", result.toString());
     }
 }
