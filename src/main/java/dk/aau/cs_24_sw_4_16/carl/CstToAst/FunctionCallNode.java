@@ -1,9 +1,12 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
+import lombok.Getter;
+
 import java.util.List;
 
 public class FunctionCallNode extends AstNode {
     private final IdentifierNode identifier;
+    @Getter
     private final List<AstNode> arguments;
 
     public FunctionCallNode(AstNode identifier, List<AstNode> arguments) {
@@ -13,10 +16,6 @@ public class FunctionCallNode extends AstNode {
 
     public IdentifierNode getFunctionName() {
         return identifier;
-    }
-
-    public List<AstNode> getArguments() {
-        return arguments;
     }
 
     public AstNode getArgument(int i){
