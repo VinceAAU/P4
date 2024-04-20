@@ -112,7 +112,6 @@ public class Interpreter {
                 if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
                     toChange = visit((RelationsAndLogicalOperatorNode) toChange);
                 }
-
                 AstNode finalToChange = toChange;
                 switch (nodeToChange) {
                     case IntNode intNode when finalToChange instanceof IntNode ->
@@ -209,6 +208,13 @@ public class Interpreter {
                 }
                 scopes.remove(localTable);
                 activeScope.removeLast();
+                if (function.getReturnType().getType().equals("void")) {
+                    if(returnValue != null){
+                        throw new RuntimeException("cannot return a value in void function call or have code after return statement");
+                    }
+                    return node;
+                }
+
                 return returnValue;
             }
         }
