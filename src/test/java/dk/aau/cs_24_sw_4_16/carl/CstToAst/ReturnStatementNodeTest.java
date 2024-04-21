@@ -29,6 +29,7 @@ public class ReturnStatementNodeTest {
     void returnStatementToString() {
         AstNode expression = new IntNode("5");
         ReturnStatementNode returnStatement = new ReturnStatementNode(expression);
-        assertEquals("dk.aau.cs_24_sw_4_16.carl.CstToAst.ReturnStatementNode@7b227d8d", returnStatement.toString(), "ReturnStatementNode toString should match expected format");
+        assertTrue(returnStatement.toString().contains("5"), "ReturnStatementNode toString should include expression value");
     }
+
 }
