@@ -37,6 +37,8 @@ legalArrayType :
 
 type :
     'bool'
+    | 'int'
+    | 'float'
     | 'coord'
     | 'void'
     | IDENTIFIER
