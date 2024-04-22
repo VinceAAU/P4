@@ -49,7 +49,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitFunctionDefinition(CARLParser.FunctionDefinitionContext ctx) {
 
+
         ParameterListNode argumentList = (ParameterListNode) visitParameterList(ctx.parameterList());
+
         BlockNode block = (BlockNode) visitBlock(ctx.block());
         TypeNode returntype = (TypeNode) visitType(ctx.type());
         return new FunctionDefinitionNode(new IdentifierNode(ctx.IDENTIFIER().getText()), returntype, argumentList, block);
@@ -95,8 +97,10 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitFunctionCall(CARLParser.FunctionCallContext ctx) {
         List<AstNode> arguments = new ArrayList<>();
-        for (CARLParser.ExpressionContext expression : ctx.argumentList().expression()) {
-            arguments.add(visit(expression));
+        if (ctx.argumentList() != null) {
+            for (CARLParser.ExpressionContext expression : ctx.argumentList().expression()) {
+                arguments.add(visit(expression));
+            }
         }
         return new FunctionCallNode(new IdentifierNode(ctx.IDENTIFIER().getText()), arguments);
     }
@@ -114,11 +118,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitParameterList(CARLParser.ParameterListContext ctx) {
         List<ParameterNode> parameters = new ArrayList<>();
-
-        for (int i = 0; i < ctx.getChildCount() / 3; i++) {
-            IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
-            TypeNode type = (TypeNode) visit(ctx.type(i));
-            parameters.add(new ParameterNode(identifier, type));
+        if (ctx != null) {
+            for (int i = 0; i < ctx.getChildCount() / 3; i++) {
+                IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
+                TypeNode type = (TypeNode) visit(ctx.type(i));
+                parameters.add(new ParameterNode(identifier, type));
+            }
         }
 
         return new ParameterListNode(parameters);
@@ -293,7 +298,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             AstNode left;
             if (ctx.expression().getChild(0) instanceof CARLParser.IdentifierContext) {
                 left = new IdentifierNode(ctx.expression().getChild(0).getText());
-
             } else {
                 left = visit(ctx.expression().getChild(0));
             }
@@ -316,7 +320,13 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitReturnStatement(CARLParser.ReturnStatementContext ctx) {
-        AstNode expression = visit(ctx.expression());
+
+        AstNode expression;
+        if (ctx.expression() != null) {
+            expression = visit(ctx.expression());
+        } else {
+            expression = null;
+        }
         return new ReturnStatementNode(expression);
     }
 

@@ -1,7 +1,10 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class IfStatementNode extends AstNode {
     List<BlockNode> blocks;
     List<ExpressionNode> expressions;
@@ -9,6 +12,7 @@ public class IfStatementNode extends AstNode {
     public IfStatementNode(List<BlockNode> blocks, List<ExpressionNode> expressions) {
         this.blocks = blocks;
         this.expressions = expressions;
+
     }
 
     public List<BlockNode> getBlocks() {
@@ -17,5 +21,7 @@ public class IfStatementNode extends AstNode {
 
     public List<ExpressionNode> getExpressions() {
         return expressions;
+
+
     }
 }
