@@ -2,9 +2,7 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
-import org.antlr.v4.runtime.Token;
 
-import java.awt.desktop.SystemEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -309,7 +307,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
         }
         BlockNode block = (BlockNode) visitBlock(ctx.block());
-        return new WhileNode(expression, block);
+        return new WhileLoopNode(expression, block);
 
     }
 

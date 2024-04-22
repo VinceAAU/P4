@@ -1,10 +1,10 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
-public class WhileNode extends AstNode {
+public class WhileLoopNode extends AstNode {
     private ExpressionNode expression;
     private BlockNode block;
 
-    public WhileNode(ExpressionNode expression, BlockNode block) {
+    public WhileLoopNode(ExpressionNode expression, BlockNode block) {
         this.expression = expression;
         this.block = block;
     }
