@@ -8,7 +8,7 @@ public class ArrayDefinitionNode extends AstNode {
     // we need this only if dynamic sizing is allowed
     private final int size;
 
-    private  IdentifierNode identifier;
+    private final IdentifierNode identifier;
 
     public ArrayDefinitionNode(TypeNode type, int size, IdentifierNode identifier) {
         this.type = type;

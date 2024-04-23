@@ -81,13 +81,13 @@ public class Interpreter {
 
     public AstNode getVariable(IdentifierNode node) {
 //        for (HashMap<String, AstNode> vTable : scopes) {
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            return scopes.getFirst().get(node.getIdentifier().toString());
+        if (scopes.getFirst().containsKey(node.getIdentifier())) {
+            return scopes.getFirst().get(node.getIdentifier());
         }
 
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                return scopes.get(i).get(node.getIdentifier().toString());
+            if (scopes.get(i).containsKey(node.getIdentifier())) {
+                return scopes.get(i).get(node.getIdentifier());
             }
         }
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
@@ -132,10 +132,7 @@ public class Interpreter {
 
 
     public void visit(VariableDeclarationNode node) {
-        boolean found = false;
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            found = true;
-        }
+        boolean found = scopes.getFirst().containsKey(node.getIdentifier().toString());
 
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {

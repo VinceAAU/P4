@@ -350,7 +350,6 @@ public class SimpleFunctionIntegrationTest {
         ParseTree tree = parser.program();
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
-        ;
 
         Interpreter interpreter = new Interpreter();
         interpreter.visit(astRoot);
