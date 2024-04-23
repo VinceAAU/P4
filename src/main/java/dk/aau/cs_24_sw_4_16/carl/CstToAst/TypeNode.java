@@ -10,6 +10,10 @@ public class TypeNode extends AstNode {
         this.type = type;
     }
 
+    public String getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return " type: " + type;

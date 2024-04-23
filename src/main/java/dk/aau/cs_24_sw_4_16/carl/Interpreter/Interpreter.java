@@ -40,8 +40,8 @@ public class Interpreter {
             return visit((FunctionCallNode) node.getNode());
         } else if (node.getNode() instanceof FunctionDefinitionNode) {
             return visit((FunctionDefinitionNode) node.getNode());
-        } else if (node.getNode() instanceof WhileNode) {
-            return visit((WhileNode) node.getNode());
+        } else if (node.getNode() instanceof WhileLoopNode) {
+            return visit((WhileLoopNode) node.getNode());
         } else if (node.getNode() instanceof IfStatementNode) {
             visit((IfStatementNode) node.getNode());
         } else if (node.getNode() instanceof BinaryOperatorNode) {
@@ -87,13 +87,13 @@ public class Interpreter {
 
     public AstNode getVariable(IdentifierNode node) {
 //        for (HashMap<String, AstNode> vTable : scopes) {
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            return scopes.getFirst().get(node.getIdentifier().toString());
+        if (scopes.getFirst().containsKey(node.getIdentifier())) {
+            return scopes.getFirst().get(node.getIdentifier());
         }
 
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                return scopes.get(i).get(node.getIdentifier().toString());
+            if (scopes.get(i).containsKey(node.getIdentifier())) {
+                return scopes.get(i).get(node.getIdentifier());
             }
         }
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
@@ -145,6 +145,9 @@ public class Interpreter {
         if (!idExists(node.getIdentifier().toString())) {
 
             AstNode toChange = node.getValue();
+            if (toChange instanceof FunctionCallNode) {
+                toChange = visit((FunctionCallNode) toChange);
+            }
             if (node.getValue() instanceof BinaryOperatorNode) {
                 toChange = visit((BinaryOperatorNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
@@ -254,31 +257,38 @@ public class Interpreter {
     }
 
     public AstNode visit(FunctionCallNode node) {
-        HashMap<String, AstNode> localTable = new HashMap<>();
-        scopes.add(localTable);
-        activeScope.add(scopes.size() - 1);
-        if (fTable.containsKey(node.getFunctionName().toString())) {
-            FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
-            List<ParameterNode> arguments = function.getArguments().getParameters();
-            for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
-                visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
-            }
-            AstNode test = visit(function.getBlock());
-
-            if (test instanceof ReturnStatementNode) {
-                AstNode returnValue = ((ReturnStatementNode) test).getReturnValue();
-                if (returnValue instanceof IdentifierNode) {
-                    returnValue = getVariable((IdentifierNode) returnValue);
-                }
-                scopes.remove(localTable);
-                activeScope.removeLast();
-                return returnValue;
-            }
-        }
         if (node.getFunctionName().toString().equals("print")) {
-            scopes.remove(localTable);
-            activeScope.removeLast();
             InbuildClasses.print(node, scopes, activeScope);
+        } else {
+            HashMap<String, AstNode> localTable = new HashMap<>();
+            scopes.add(localTable);
+            activeScope.add(scopes.size() - 1);
+
+            if (fTable.containsKey(node.getFunctionName().toString())) {
+                FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
+                List<ParameterNode> arguments = function.getArguments().getParameters();
+                for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
+                    visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
+                }
+                AstNode test = visit(function.getBlock());
+
+                if (test instanceof ReturnStatementNode) {
+                    AstNode returnValue = ((ReturnStatementNode) test).getReturnValue();
+                    if (returnValue instanceof IdentifierNode) {
+                        returnValue = getVariable((IdentifierNode) returnValue);
+                    }
+                    scopes.remove(localTable);
+                    activeScope.removeLast();
+                    if (function.getReturnType().getType().equals("void")) {
+                        if (returnValue != null) {
+                            throw new RuntimeException("cannot return a value in void function call or have code after return statement");
+                        }
+                        return node;
+                    }
+
+                    return returnValue;
+                }
+            }
         }
         return node;
     }
@@ -310,6 +320,7 @@ public class Interpreter {
         if (!fTable.containsKey(node.getIdentifier().toString())) {
             fTable.put(node.getIdentifier().toString(), node);
         } else {
+            throw new RuntimeException("function " + node.getIdentifier() + " already exists");
         }
         return node;
     }
@@ -359,18 +370,18 @@ public class Interpreter {
         throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
     }
 
-    public AstNode visit(WhileNode node) {
-        HashMap<String, AstNode> localTable = new HashMap<>();
-        scopes.add(localTable);
+
+    public AstNode visit(WhileLoopNode node) {
         AstNode toCheck = (node.getExpression()).getNode();
         if (toCheck instanceof IdentifierNode) {
             toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
         } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
             toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
-
         }
         while ((toCheck instanceof BoolNode)) {
             if (((BoolNode) toCheck).getValue()) {
+                HashMap<String, AstNode> localTable = new HashMap<>();
+                scopes.add(localTable);
                 visit(node.getBlock());
                 toCheck = visit(node.getExpression().getNode());
                 if (toCheck instanceof IdentifierNode) {
@@ -378,8 +389,8 @@ public class Interpreter {
                 } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
                     toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
                 }
-            } else {
                 scopes.remove(localTable);
+            } else {
                 return node;
             }
 
