@@ -244,7 +244,7 @@ public class SimpleFunctionIntegrationTest {
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
-        assertTrue(true, "Expected the interpreter to run without errors."); // this one is temporary until functions return a value
+        assertEquals("42".trim(), outContent.toString().trim(), "Expected the output to be 42");
     }
 
 
@@ -315,6 +315,90 @@ public class SimpleFunctionIntegrationTest {
     }
 
 
+    @Test
+    public void testingInt() throws Exception {
+        String code = """
+                var x : int = 42
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+        assertEquals("42".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testingFloat() throws Exception {
+        String code = """
+                var x : float = 42.5
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+        ;
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+        assertEquals("42.5".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testingString() throws Exception {
+        String code = """
+                var x : string = "test"
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+        assertEquals("\"test\"".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testingBool() throws Exception {
+        String code = """
+                var x : bool = true
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+        assertEquals("true".trim(), outContent.toString().trim());
+    }
 //    @Test
 //    public void testingRelationalOperators() throws Exception {
 //        String code = """
