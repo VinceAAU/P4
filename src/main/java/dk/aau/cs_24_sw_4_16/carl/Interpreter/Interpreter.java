@@ -303,7 +303,7 @@ public class Interpreter {
     }
 
 
-    public AstNode visit(WhileNode node) {
+    public AstNode visit(WhileLoopNode node) {
         AstNode toCheck = (node.getExpression()).getNode();
         if (toCheck instanceof IdentifierNode) {
             toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
