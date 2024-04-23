@@ -10,6 +10,10 @@ print(c,"My Second C")
 c = (5 + d) * 5
 c = 3 + (d + 5)
 
+var p : int = c + y
+
+print(p, "CARLS PRINT" )
+
 while d <= 5{
     print(d)
     var b2 : int = d
