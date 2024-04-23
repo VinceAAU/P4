@@ -4,6 +4,8 @@ package dk.aau.cs_24_sw_4_16.carl;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
 import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -25,7 +27,7 @@ public class Main {
             Interpreter inter = new Interpreter();
             inter.visit(astRoot);
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.toString());
         }
     }
 }

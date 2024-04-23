@@ -8,14 +8,14 @@ public class BinaryOperatorNodeTest {
     @Test
     public void testPerformOperationInt() {
         AstNode node = BinaryOperatorNode.performOperation(3, 2, "+");
-        Assertions.assertInstanceOf(IntNode.class, node);
+        Assertions.assertTrue(node instanceof IntNode);
         Assertions.assertEquals("5", node.toString());
     }
 
     @Test
     public void testPerformOperationFloat() {
         AstNode node = BinaryOperatorNode.performOperation(3.0f, 2.0f, "+");
-        Assertions.assertInstanceOf(FloatNode.class, node);
+        Assertions.assertTrue(node instanceof FloatNode);
         Assertions.assertEquals("5.0", node.toString());
     }
 

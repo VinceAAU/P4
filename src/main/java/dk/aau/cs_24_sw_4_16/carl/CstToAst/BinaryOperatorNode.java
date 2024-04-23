@@ -1,9 +1,9 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 public class BinaryOperatorNode extends AstNode {
-    private final AstNode left;
-    private final AstNode right;
-    private final String operator;
+    private AstNode left;
+    private AstNode right;
+    private String operator;
 
     public BinaryOperatorNode(AstNode left, AstNode right, String operator) {
         this.left = left;
