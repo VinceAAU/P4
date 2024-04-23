@@ -1,5 +1,8 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
+import lombok.Getter;
+
+@Getter
 public class IdentifierNode extends AstNode {
 
 
@@ -7,10 +10,6 @@ public class IdentifierNode extends AstNode {
 
     public IdentifierNode(String identifier) {
         this.identifier = identifier;
-    }
-
-    public String getIdentifier() {
-        return identifier;
     }
 
     @Override

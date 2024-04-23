@@ -2,9 +2,7 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
-import org.antlr.v4.runtime.Token;
 
-import java.awt.desktop.SystemEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +31,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitWhileLoop(ctx.whileLoop()));
         } else if (ctx.ifStatement() != null) {
             return new StatementNode(visitIfStatement(ctx.ifStatement()));
+        } else if (ctx.returnStatement() != null) {
+            return new StatementNode(visitReturnStatement(ctx.returnStatement()));
+
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -45,7 +46,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitFunctionDefinition(CARLParser.FunctionDefinitionContext ctx) {
 
+
         ParameterListNode argumentList = (ParameterListNode) visitParameterList(ctx.parameterList());
+
         BlockNode block = (BlockNode) visitBlock(ctx.block());
         TypeNode returntype = (TypeNode) visitType(ctx.type());
         return new FunctionDefinitionNode(new IdentifierNode(ctx.IDENTIFIER().getText()), returntype, argumentList, block);
@@ -87,8 +90,10 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitFunctionCall(CARLParser.FunctionCallContext ctx) {
         List<AstNode> arguments = new ArrayList<>();
-        for (CARLParser.ExpressionContext expression : ctx.argumentList().expression()) {
-            arguments.add(visit(expression));
+        if (ctx.argumentList() != null) {
+            for (CARLParser.ExpressionContext expression : ctx.argumentList().expression()) {
+                arguments.add(visit(expression));
+            }
         }
         return new FunctionCallNode(new IdentifierNode(ctx.IDENTIFIER().getText()), arguments);
     }
@@ -106,11 +111,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitParameterList(CARLParser.ParameterListContext ctx) {
         List<ParameterNode> parameters = new ArrayList<>();
-
-        for (int i = 0; i < ctx.getChildCount() / 3; i++) {
-            IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
-            TypeNode type = (TypeNode) visit(ctx.type(i));
-            parameters.add(new ParameterNode(identifier, type));
+        if (ctx != null) {
+            for (int i = 0; i < ctx.getChildCount() / 3; i++) {
+                IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
+                TypeNode type = (TypeNode) visit(ctx.type(i));
+                parameters.add(new ParameterNode(identifier, type));
+            }
         }
 
         return new ParameterListNode(parameters);
@@ -156,9 +162,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         String op;
 
         if (expressionToFocus instanceof BinaryOperatorNode) {
-            left = ((BinaryOperatorNode)expressionToFocus).getLeft();
-            right = ((BinaryOperatorNode)expressionToFocus).getRight();
-            op = ((BinaryOperatorNode)expressionToFocus).getOperator();
+            left = ((BinaryOperatorNode) expressionToFocus).getLeft();
+            right = ((BinaryOperatorNode) expressionToFocus).getRight();
+            op = ((BinaryOperatorNode) expressionToFocus).getOperator();
             if (left instanceof IntNode && right instanceof IntNode) {
                 AstNode value = new BinaryOperatorNode(left, right, op);
                 return new IntNode(String.valueOf(value));
@@ -169,9 +175,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
                 return new BinaryOperatorNode(left, right, op);
             }
         } else if (expressionToFocus instanceof RelationsAndLogicalOperatorNode) {
-            left = ((RelationsAndLogicalOperatorNode)expressionToFocus).getLeft();
-            right = ((RelationsAndLogicalOperatorNode)expressionToFocus).getRight();
-            op = ((RelationsAndLogicalOperatorNode)expressionToFocus).getOperator();
+            left = ((RelationsAndLogicalOperatorNode) expressionToFocus).getLeft();
+            right = ((RelationsAndLogicalOperatorNode) expressionToFocus).getRight();
+            op = ((RelationsAndLogicalOperatorNode) expressionToFocus).getOperator();
 
             return new RelationsAndLogicalOperatorNode(left, right, op);
 
@@ -208,7 +214,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         AstNode left = visit(ctx.expression(0));
         AstNode right = visit(ctx.expression(1));
         String op = ctx.op.getText();
-        return new RelationsAndLogicalOperatorNode(left,right,op);
+        return new RelationsAndLogicalOperatorNode(left, right, op);
 //        if (left instanceof BoolNode && right instanceof BoolNode) {
 //            AstNode value = new RelationsAndLogicalOperatorNode(left, right, op);
 //            return new BoolNode(value.toString());
@@ -280,7 +286,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitWhileLoop(CARLParser.WhileLoopContext ctx) {
-        AstNode expression;
+        ExpressionNode expression;
         if (ctx.expression().getChildCount() >= 3) {
             AstNode left;
             if (ctx.expression().getChild(0) instanceof CARLParser.IdentifierContext) {
@@ -298,15 +304,23 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             expression = (new ExpressionNode(bin));
         } else {
             expression = (new ExpressionNode(visit(ctx.expression())));
+
         }
         BlockNode block = (BlockNode) visitBlock(ctx.block());
-        return new WhileNode(expression, block);
+        return new WhileLoopNode(expression, block);
 
     }
 
     @Override
     public AstNode visitReturnStatement(CARLParser.ReturnStatementContext ctx) {
-        return super.visitReturnStatement(ctx);
+
+        AstNode expression;
+        if (ctx.expression() != null) {
+            expression = visit(ctx.expression());
+        } else {
+            expression = null;
+        }
+        return new ReturnStatementNode(expression);
     }
 
     @Override

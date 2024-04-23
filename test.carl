@@ -9,3 +9,44 @@ c = (d + d) + 5
 print(c,"My Second C")
 c = (5 + d) * 5
 c = 3 + (d + 5)
+
+while d <= 5{
+    print(d)
+    var b2 : int = d
+    print(b2, "got it")
+    d= d+1
+}
+fn test (haha : int, baba : bool) -> void{
+    print(haha)
+    print(baba)
+    test2(69,false)
+}
+fn test2 (haha : int, baba : bool) -> void{
+    print(haha)
+    print(baba)
+}
+test(69420,true)
+if false{
+    print("false")
+}
+else if b{
+    print("else if")
+    b = false
+    var holy : bool = false
+    if true{
+        holy = false
+        print(holy)
+    }
+    if true{
+        holy = true
+        print(holy)
+    }
+    if true{
+        holy = false
+        print(holy)
+    }
+    if true{
+        holy = true
+        print(holy)
+    }
+}
