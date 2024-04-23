@@ -84,4 +84,35 @@ public class SimpleFunctionIntegrationTest {
         // Assertions can be extended based on the print output or internal state checks
         assertTrue(true, "Expected the interpreter to run without errors.");
     }
+
+
+
+    @Test
+    public void testingFunction() throws Exception {
+        String code = """
+                       fn calculate() -> int {
+                           return 42
+                       }
+                       var result = calculate()
+                       print(result)
+                       """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertTrue(true, "Expected the interpreter to run without errors.");
+    }
+
+
+
+
 }
