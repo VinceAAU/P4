@@ -1,6 +1,5 @@
 package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
-import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
 import java.util.*;
@@ -41,8 +40,8 @@ public class Interpreter {
             return visit((FunctionCallNode) node.getNode());
         } else if (node.getNode() instanceof FunctionDefinitionNode) {
             return visit((FunctionDefinitionNode) node.getNode());
-        } else if (node.getNode() instanceof WhileNode) {
-            return visit((WhileNode) node.getNode());
+        } else if (node.getNode() instanceof WhileLoopNode) {
+            return visit((WhileLoopNode) node.getNode());
         } else if (node.getNode() instanceof IfStatementNode) {
             visit((IfStatementNode) node.getNode());
         } else if (node.getNode() instanceof BinaryOperatorNode) {
@@ -302,6 +301,7 @@ public class Interpreter {
         }
         throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
     }
+
 
     public AstNode visit(WhileNode node) {
         AstNode toCheck = (node.getExpression()).getNode();

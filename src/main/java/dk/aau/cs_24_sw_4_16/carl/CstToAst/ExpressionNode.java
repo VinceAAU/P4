@@ -16,4 +16,8 @@ public class ExpressionNode extends AstNode{
     public String toString() {
         return " " + this.node;
     }
+
+    public int getValue() {
+        return 0;
+    }
 }
