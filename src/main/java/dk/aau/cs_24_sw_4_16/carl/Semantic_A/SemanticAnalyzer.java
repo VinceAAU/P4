@@ -1,30 +1,17 @@
 package dk.aau.cs_24_sw_4_16.carl.Semantic_A;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
-// ... (other necessary imports)
-
 public class SemanticAnalyzer {
 
+    public boolean printTest =true;
     public void analyze(AstNode root) throws SemanticException {
-        if (root != null) {
-            visit(root);
-        }
+      
     }
 
-    private void visit(AstNode node) throws SemanticException {
-        // Implement type checking logic for each relevant node type
-        if (node instanceof BinaryExpressionNode) {
-            checkBinaryExpression((BinaryExpressionNode) node);
-        }
-        // You can add more checks here for different types of nodes as needed
 
-        // Recursively visit all children of the current node
-        for (AstNode child : node.getChildren()) {
-            visit(child);
-        }
-    }
 
-    private void checkBinaryExpression(BinaryExpressionNode node) throws SemanticException {
+    
+    private void checkBinaryExpression(BinaryOperatorNode node) throws SemanticException {
         AstNode left = node.getLeft();
         AstNode right = node.getRight();
 
@@ -64,7 +51,7 @@ public class SemanticAnalyzer {
             return Type.FLOAT;
         } else if (node instanceof StringNode) {
             return Type.STRING;
-        } else if (node instanceof VariableReferenceNode) {
+        } else if (node instanceof IdentifierNode) {
             // Lookup variable type in symbol table
             // Assuming you have a method to get the variable type
             // return getVariableTypeFromSymbolTable(((VariableReferenceNode) node).getName());
