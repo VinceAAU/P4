@@ -93,7 +93,7 @@ public class SimpleFunctionIntegrationTest {
                        fn calculate() -> int {
                            return 42
                        }
-                       var result = calculate()
+                       var result: int = calculate()
                        print(result)
                        """;
 
