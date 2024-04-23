@@ -117,6 +117,8 @@ public class Interpreter {
                 if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
                     toChange = visit((RelationsAndLogicalOperatorNode) toChange);
                 }
+                if (node.getValue() instanceof ArrayAccessNode)
+                    toChange = visit((ArrayAccessNode) toChange);
 
                 AstNode finalToChange = toChange;
                 switch (nodeToChange) {
@@ -152,7 +154,10 @@ public class Interpreter {
                         scopes.getLast().put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
                     }
                 }
-            } else {
+            }  else if (toChange instanceof ArrayAccessNode) {
+                toChange = visit((ArrayAccessNode) node.getValue());
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+            }else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }
 
@@ -175,8 +180,29 @@ public class Interpreter {
     }
 
     public void visit(ArrayAssignmentNode node){
+
+        int[] indices = integerListToIntArray(node.getIndices());
+
+        AstNode value;
+
+        if (node.getValue() instanceof BinaryOperatorNode){
+            value = visit((BinaryOperatorNode) node.getValue());
+        } else if (node.getValue() instanceof IdentifierNode){
+            value = visit((IdentifierNode) node.getValue());
+        } else if (node.getValue() instanceof FunctionCallNode) {
+            value = visit((FunctionCallNode) node.getValue());
+        } else if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+            value = visit((RelationsAndLogicalOperatorNode) node.getValue());
+        } else {
+            //Those were all the checks made by visit(AssignmentNode)
+            //Surely there can't be any other checks that need to be made
+            value = node.getValue();
+        }
+
+        //These are the only checks made in
+
         ((ArrayNode) getVariable(node.getIdentifier()))
-        .set(node.getValue(), integerListToIntArray(node.getIndices()));
+        .set(value, indices);
     }
 
     public void visit(ArrayDefinitionNode node) {
