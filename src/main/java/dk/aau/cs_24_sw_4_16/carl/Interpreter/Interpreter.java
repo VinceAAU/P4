@@ -142,6 +142,9 @@ public class Interpreter {
         if (!found) {
 
             AstNode toChange = node.getValue();
+            if (toChange instanceof FunctionCallNode) {
+                toChange = visit((FunctionCallNode) toChange);
+            }
             if (node.getValue() instanceof BinaryOperatorNode) {
                 toChange = visit((BinaryOperatorNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
