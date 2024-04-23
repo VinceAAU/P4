@@ -25,7 +25,7 @@ public class Main {
             Interpreter inter = new Interpreter();
             inter.visit(astRoot);
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e);
         }
     }
 }

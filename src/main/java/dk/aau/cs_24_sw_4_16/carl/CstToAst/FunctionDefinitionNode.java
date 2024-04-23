@@ -3,8 +3,8 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 public class FunctionDefinitionNode extends AstNode {
     private final IdentifierNode identifier;
     private final TypeNode returnType;
-    private ParameterListNode arguments;
-    private BlockNode block;
+    private final ParameterListNode arguments;
+    private final BlockNode block;
 
 
     public FunctionDefinitionNode(AstNode identifier, TypeNode returnType, ParameterListNode arguments, BlockNode block) {
