@@ -1,7 +1,5 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
-import lombok.Getter;
-
 public class ArrayDefinitionNode extends AstNode {
     private final TypeNode type;
 
