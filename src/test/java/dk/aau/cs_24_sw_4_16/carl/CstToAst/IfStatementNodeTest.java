@@ -1,11 +1,9 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class IfStatementNodeTest {
 

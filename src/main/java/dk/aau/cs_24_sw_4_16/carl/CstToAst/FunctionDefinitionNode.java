@@ -1,5 +1,8 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FunctionDefinitionNode extends AstNode {
     private final IdentifierNode identifier;
     private final TypeNode returnType;
