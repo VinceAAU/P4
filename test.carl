@@ -1,53 +1,6 @@
-struct Orc {
+var Orc : enemy = {
     var difficulty : int = 1
-    var health :int = 200
-    var letter :string= "O"
-    var type : enemy = "enemy"
-
-    //custom attibutes for manual identification
-    //ScalingFactor : int = 1..5
-    //Names : String = ["Orc lord", "Blixen", "Mister dangerpants"]
-    //Name : String = Names[0..3] // each new level that gets generated will give the orc type enemy a random name.
-
-
+    var health : int = 200
+    var symbol : string= "O"
 }
-while d <= 5{
-    print(d)
-    var b2 : int = d
-    print(b2, "got it")
-    d= d+1
-}
-fn test (haha : int, baba : bool) -> void{
-    print(haha)
-    print(baba)
-    test2(69,false)
-}
-fn test2 (haha : int, baba : bool) -> void{
-    print(haha)
-    print(baba)
-}
-test(69420,true)
-if false{
-    print("false")
-}
-else if b{
-    print("else if")
-    b = false
-    var holy : bool = false
-    if true{
-        holy = false
-        print(holy)
-    }
-    if true{
-        holy = true
-        print(holy)
-    }
-    if true{
-        holy = false
-        print(holy)
-    }
-    if true{
-        holy = true
-        print(holy)
-    }
-}
+enemy.orc.health = 500

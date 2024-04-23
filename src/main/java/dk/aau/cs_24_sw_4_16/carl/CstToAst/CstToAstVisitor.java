@@ -3,6 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.awt.desktop.SystemEventListener;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitReturnStatement(ctx.returnStatement()));
         } else if (ctx.structureDefinition() != null) {
             return new StatementNode(visitStructureDefinition(ctx.structureDefinition()));
+        } else if (ctx.propertyAssignment() != null) {
+            return new StatementNode(visitPropertyAssignment(ctx.propertyAssignment()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -59,11 +62,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitStructureDefinition(CARLParser.StructureDefinitionContext ctx) {
+        String type = ctx.structType().getText();
         List<VariableDeclarationNode> variableDeclarationNodes = new ArrayList<>();
         for (var variableDeclaration : ctx.variableDeclaration()) {
             variableDeclarationNodes.add((VariableDeclarationNode) visit(variableDeclaration));
         }
-        return new StructureDefinitionNode( visit(ctx.IDENTIFIER()),variableDeclarationNodes);
+        return new StructureDefinitionNode(new IdentifierNode(ctx.IDENTIFIER().getText()), type, variableDeclarationNodes);
     }
 
     @Override
@@ -255,10 +259,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         return super.visitRandomBetween(ctx);
     }
 
-    @Override
-    public AstNode visitStructInstantiation(CARLParser.StructInstantiationContext ctx) {
-        return super.visitStructInstantiation(ctx);
-    }
 
     @Override
     public AstNode visitIfStatement(CARLParser.IfStatementContext ctx) {
@@ -351,7 +351,17 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitPropertyAccess(CARLParser.PropertyAccessContext ctx) {
-        return super.visitPropertyAccess(ctx);
+        List<IdentifierNode> identifiers = new ArrayList<>();
+        for (TerminalNode identifier : ctx.IDENTIFIER()) {
+            identifiers.add((IdentifierNode) visit(identifier));
+        }
+        return new PropertyAccessNode(ctx.structType().getText(), identifiers);
+    }
+
+    @Override
+    public AstNode visitPropertyAssignment(CARLParser.PropertyAssignmentContext ctx) {
+        System.out.println(ctx.getText());
+        return super.visitPropertyAssignment(ctx);
     }
 
     @Override

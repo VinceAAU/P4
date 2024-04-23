@@ -16,12 +16,13 @@ statement
     | arrayDefinition
     | coordinateDeclaration
     | methodCall
+    | propertyAssignment
     ;
 
 importStatement : 'import' STRING ;
 functionDefinition : 'fn' IDENTIFIER '(' parameterList? ')' '->' type block ;
-structureDefinition : 'struct' IDENTIFIER '{' variableDeclaration* '}' ;
-variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression | structInstantiation) ;
+structureDefinition : 'var' IDENTIFIER ':' structType '=' '{' variableDeclaration* '}' ;
+variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression) ;
 
 primitiveTypeForArray
     : 'int'
@@ -29,6 +30,11 @@ primitiveTypeForArray
     | 'string'
     ;
 
+structType
+    : 'enemy'
+    | 'floor'
+    | 'wall'
+    ;
 type
     : primitiveTypeForArray
     | 'bool'
@@ -38,6 +44,7 @@ type
     | primitiveTypeForArray '[' ']'('[' ']')*
     ;
 assignment : (IDENTIFIER | arrayAccess) '=' expression ;
+propertyAssignment :  propertyAccess '=' expression ;
 functionCall : IDENTIFIER '(' argumentList? ')' ;
 methodCall : propertyAccess '(' argumentList? ')' ;
 argumentList : expression (',' expression)* ;
@@ -65,11 +72,10 @@ primary
     | methodCall # DummyMethodCall
     | arrayAccess # DummyArrayAccessExpr
     | propertyAccess # DummyPropertyAccess
-    | structInstantiation # DummyStructInstantiationExpr
     ;
 
 
-structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER ':' expression)*)? '}' ;
+
 
 //operator
 //    : '!' # Not
@@ -97,7 +103,7 @@ returnStatement : 'return' expression? ;
 block : '{' statement* '}' ;
 arrayDefinition : primitiveTypeForArray '[' INT? ']' ('[' INT ']')* IDENTIFIER ;
 arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']')*;
-propertyAccess : IDENTIFIER '.' IDENTIFIER ;
+propertyAccess : structType '.' IDENTIFIER ('.' IDENTIFIER)? ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
 
 // Lexer rules

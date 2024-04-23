@@ -10,10 +10,16 @@ public class Interpreter {
     HashMap<String, AstNode> vTable;
     Stack<HashMap<String, AstNode>> scopes;
     Deque<Integer> activeScope;
+    HashMap<String, HashMap<String, AstNode>> tileInformationEnemy;
+    HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
+    HashMap<String, HashMap<String, AstNode>> tileInformationWall;
 
     public Interpreter() {
         fTable = new HashMap<>();
         vTable = new HashMap<>();
+        tileInformationEnemy = new HashMap<>();
+        tileInformationFloor = new HashMap<>();
+        tileInformationWall = new HashMap<>();
         scopes = new Stack<>();
         activeScope = new ArrayDeque<>();
         activeScope.push(0);
@@ -56,11 +62,21 @@ public class Interpreter {
     }
 
     public void visit(StructureDefinitionNode node) {
+        HashMap<String, AstNode> object = new HashMap<>();
         for (var variable : node.getVariableDeclarations()) {
-            System.out.println(variable);
+            object.put(variable.getIdentifier().toString(), variable.getValue());
+        }
+        if (node.getType().equals("enemy")) {
+            tileInformationEnemy.put(node.getIdentifier().toString(), object);
+        } else if (node.getType().equals("wall")) {
+            tileInformationWall.put(node.getIdentifier().toString(), object);
+        } else if (node.getType().equals("floor")) {
+            tileInformationFloor.put(node.getIdentifier().toString(), object);
         }
     }
-
+    AstNode visit(PropertyAccessNode node){
+        return node;
+    }
     public AstNode visit(ReturnStatementNode node) {
         return node;
     }
