@@ -205,7 +205,7 @@ public class SimpleFunctionIntegrationTest {
                     d = d + 1
                 }
                 print(d)
-                       """;
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
