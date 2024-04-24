@@ -36,7 +36,8 @@ legalArrayType :
     | 'int'
     | 'string'
     | 'float'
-    | IDENTIFIER ;
+    | IDENTIFIER
+    ;
 
 
 structType
@@ -59,7 +60,7 @@ type :
 assignment : (IDENTIFIER | arrayAccess) '=' expression ;
 propertyAssignment :  propertyAccess '=' expression ;
 functionCall : IDENTIFIER '(' argumentList? ')' ;
-methodCall : propertyAccess '(' argumentList? ')' ;
+methodCall : propertyAccess '(' argumentList? ')' ('.' IDENTIFIER)? ;
 argumentList : expression (',' expression)* ;
 parameterList : IDENTIFIER ':' type (',' IDENTIFIER ':' type)* ;
 

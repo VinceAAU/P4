@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
@@ -93,7 +94,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
         List<Integer> sizes = ctx.arrayOptionalIndex().stream()
                 .map(arrayOptionalIndexContext -> {
-                    if(arrayOptionalIndexContext.INT()==null)
+                    if (arrayOptionalIndexContext.INT() == null)
                         return -1;
                     else
                         return Integer.parseInt(arrayOptionalIndexContext.INT().getText()); //And on this line, we pray that the int is indeed an int...
@@ -120,16 +121,16 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitAssignment(CARLParser.AssignmentContext ctx) {
         AstNode value = visit(ctx.expression());
 
-        if(ctx.IDENTIFIER()!=null)
+        if (ctx.IDENTIFIER() != null)
             return new AssignmentNode(new IdentifierNode(ctx.IDENTIFIER().getText()), value);
-        else if (ctx.arrayAccess()!=null)
+        else if (ctx.arrayAccess() != null)
             return new ArrayAssignmentNode((ArrayAccessNode) visit(ctx.arrayAccess()), value);
         else
             throw new Error("Neither an array access nor an identifier");
     }
 
     @Override
-    public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx){
+    public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
         IdentifierNode id = new IdentifierNode(ctx.IDENTIFIER().getText());
 
         List<Integer> indices = ctx.INT().stream().map(tn -> Integer.parseInt(tn.getText())).toList();
@@ -150,12 +151,22 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitMethodCall(CARLParser.MethodCallContext ctx) {
-        return super.visitMethodCall(ctx);
+        ctx.argumentList();
+        if (ctx.IDENTIFIER() != null) {
+            return new MethodCallNode((PropertyAccessNode) visitPropertyAccess(ctx.propertyAccess()), visitArgumentList(ctx.argumentList()), new IdentifierNode(ctx.IDENTIFIER().getText()));
+        }
+        return new MethodCallNode((PropertyAccessNode) visitPropertyAccess(ctx.propertyAccess()), visitArgumentList(ctx.argumentList()));
     }
 
     @Override
     public AstNode visitArgumentList(CARLParser.ArgumentListContext ctx) {
-        return super.visitArgumentList(ctx);
+        List<AstNode> list = new ArrayList<>();
+        if (ctx != null) {
+            for (CARLParser.ExpressionContext exp : ctx.expression()) {
+                list.add(visit(exp));
+            }
+        }
+        return new ArgumentListNode(list);
     }
 
     @Override

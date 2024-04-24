@@ -36,6 +36,27 @@ public class Interpreter {
         return node;
     }
 
+    public AstNode visit(MethodCallNode node) {
+        HashMap<String, HashMap<String, AstNode>> list;
+        switch (node.getPropertyAccessContext().getList()) {
+            case "enemy" -> list = tileInformationEnemy;
+            case "wall" -> list = tileInformationWall;
+            case "floor" -> list = tileInformationFloor;
+            default -> throw new RuntimeException("list doesnt exist");
+        }
+        if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
+            return new IntNode(list.size());
+        } else if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("get")) {
+            int index = ((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue();
+            if (index < list.size()) {
+                var key = list.keySet().toArray()[index];
+                return list.get(key).get(node.getIdentifierNode().toString());
+            } else {
+                throw new RuntimeException("out of bounds");
+            }
+        }
+        throw new RuntimeException("method call went wrong");
+    }
 
     public AstNode visit(StatementNode node) {
         if (node.getNode() instanceof AssignmentNode) {
@@ -98,9 +119,12 @@ public class Interpreter {
         }
         if (list.containsKey(node.getIdentifiers().get(0).toString())) {
             HashMap<String, AstNode> secondList = list.get(node.getIdentifiers().get(0).toString());
-            if (secondList.containsKey(node.getIdentifiers().get(1).toString())) {
+            if (node.getIdentifiers().size() > 1 && secondList.containsKey(node.getIdentifiers().get(1).toString())) {
                 return secondList.get(node.getIdentifiers().get(1).toString());
+            } else {
+                throw new RuntimeException("you need 3 arguments");
             }
+
         }
         throw new RuntimeException("could not find the object");
     }
@@ -126,8 +150,11 @@ public class Interpreter {
         if (toChange instanceof PropertyAccessNode) {
             toChange = visit((PropertyAccessNode) toChange);
         }
+        if (toChange instanceof MethodCallNode) {
+            toChange = visit((MethodCallNode) toChange);
+        }
         if (toChange instanceof ArrayAccessNode)
-        toChange = visit((ArrayAccessNode) toChange);
+            toChange = visit((ArrayAccessNode) toChange);
 
         AstNode finalToChange = toChange;
         switch (node) {
@@ -239,11 +266,11 @@ public class Interpreter {
             } else if (toChange instanceof PropertyAccessNode) {
                 toChange = visit((PropertyAccessNode) toChange);
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            
-            }  else if (toChange instanceof ArrayAccessNode) {
+
+            } else if (toChange instanceof ArrayAccessNode) {
                 toChange = visit((ArrayAccessNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            }else {
+            } else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }
 
@@ -255,25 +282,25 @@ public class Interpreter {
 
     //I hate Java for forcing me to make this function
     //It is as stupid as its name makes it sound
-    private int[] integerListToIntArray(List<Integer> ints){
+    private int[] integerListToIntArray(List<Integer> ints) {
         return Arrays.stream(ints.toArray(new Integer[0])).mapToInt(i -> i).toArray();
     }
 
     public AstNode visit(ArrayAccessNode node) {
         return
                 ((ArrayNode) getVariable(node.getIdentifier()))
-                .get(integerListToIntArray(node.getIndices()));
+                        .get(integerListToIntArray(node.getIndices()));
     }
 
-    public void visit(ArrayAssignmentNode node){
+    public void visit(ArrayAssignmentNode node) {
 
         int[] indices = integerListToIntArray(node.getIndices());
 
         AstNode value;
 
-        if (node.getValue() instanceof BinaryOperatorNode){
+        if (node.getValue() instanceof BinaryOperatorNode) {
             value = visit((BinaryOperatorNode) node.getValue());
-        } else if (node.getValue() instanceof IdentifierNode){
+        } else if (node.getValue() instanceof IdentifierNode) {
             value = visit((IdentifierNode) node.getValue());
         } else if (node.getValue() instanceof FunctionCallNode) {
             value = visit((FunctionCallNode) node.getValue());
@@ -288,18 +315,18 @@ public class Interpreter {
         //These are the only checks made in
 
         ((ArrayNode) getVariable(node.getIdentifier()))
-        .set(value, indices);
+                .set(value, indices);
     }
 
     public void visit(ArrayDefinitionNode node) {
-        if(idExists(node.getIdentifier())){
+        if (idExists(node.getIdentifier())) {
             throw new RuntimeException("Variable '" + node.getIdentifier() + "' already exists.");
         }
 
         scopes.getLast().put(node.getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes())));
     }
 
-    private boolean idExists(String id){
+    private boolean idExists(String id) {
         boolean found = false;
         if (scopes.getFirst().containsKey(id)) {
             found = true;

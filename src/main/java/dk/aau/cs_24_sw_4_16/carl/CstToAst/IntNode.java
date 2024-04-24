@@ -6,6 +6,11 @@ public class IntNode extends AstNode{
     public IntNode(String value) {
         this.value = Integer.parseInt(value);
     }
+
+    public IntNode(int value) {
+        this.value = value;
+    }
+
     public int getValue() {
         return value;
     }
