@@ -47,12 +47,16 @@ public class Interpreter {
         if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
             return new IntNode(list.size());
         } else if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("get")) {
-            int index = ((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue();
-            if (index < list.size()) {
-                var key = list.keySet().toArray()[index];
-                return list.get(key).get(node.getIdentifierNode().toString());
+            if (((ArgumentListNode) node.getValue()).getList().get(0) instanceof IntNode) {
+                int index = ((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue();
+                if (index < list.size()) {
+                    var key = list.keySet().toArray()[index];
+                    return list.get(key).get(node.getIdentifierNode().toString());
+                } else {
+                    throw new RuntimeException("out of bounds");
+                }
             } else {
-                throw new RuntimeException("out of bounds");
+                throw new RuntimeException("parameter must be an int");
             }
         }
         throw new RuntimeException("method call went wrong");
@@ -153,8 +157,7 @@ public class Interpreter {
         if (toChange instanceof MethodCallNode) {
             toChange = visit((MethodCallNode) toChange);
         }
-        if (toChange instanceof ArrayAccessNode)
-            toChange = visit((ArrayAccessNode) toChange);
+        if (toChange instanceof ArrayAccessNode) toChange = visit((ArrayAccessNode) toChange);
 
         AstNode finalToChange = toChange;
         switch (node) {
@@ -287,9 +290,7 @@ public class Interpreter {
     }
 
     public AstNode visit(ArrayAccessNode node) {
-        return
-                ((ArrayNode) getVariable(node.getIdentifier()))
-                        .get(integerListToIntArray(node.getIndices()));
+        return ((ArrayNode) getVariable(node.getIdentifier())).get(integerListToIntArray(node.getIndices()));
     }
 
     public void visit(ArrayAssignmentNode node) {
@@ -314,8 +315,7 @@ public class Interpreter {
 
         //These are the only checks made in
 
-        ((ArrayNode) getVariable(node.getIdentifier()))
-                .set(value, indices);
+        ((ArrayNode) getVariable(node.getIdentifier())).set(value, indices);
     }
 
     public void visit(ArrayDefinitionNode node) {
