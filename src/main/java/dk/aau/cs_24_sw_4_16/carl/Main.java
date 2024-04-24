@@ -42,7 +42,7 @@ public class Main {
             CstToAstVisitor visitor = new CstToAstVisitor();
             // The visit method walks the parse tree and constructs the AST
             AstNode astRoot = visitor.visit(tree);
-
+            System.out.println(astRoot);
 
             SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
             semanticAnalyzer.analyze(astRoot);

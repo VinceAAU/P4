@@ -270,7 +270,7 @@ public class Interpreter {
         } else if (right instanceof BinaryOperatorNode) {
             right = visit((BinaryOperatorNode) right);
         }
-
+       
         if (left instanceof IntNode && right instanceof IntNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof FloatNode && right instanceof FloatNode) {

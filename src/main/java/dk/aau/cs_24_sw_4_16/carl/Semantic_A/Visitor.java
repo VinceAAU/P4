@@ -5,13 +5,13 @@ import java.util.*;
 import dk.aau.cs_24_sw_4_16.carl.Interpreter.InbuildClasses;;
 
 public class Visitor {
-    HashMap<String, FunctionDefinitionNode> fTable;
-    HashMap<String, AstNode> vTable;
-    Stack<HashMap<String, AstNode>> scopes;
-    Deque<Integer> activeScope;
+    HashMap<String, FunctionDefinitionNode> fTable; // function table, identifier(x) og node
+    HashMap<String, AstNode> vTable;// variable table, identifier(x) og node(int)
+    Stack<HashMap<String, AstNode>> scopes; // scope table, variable identifier(x) og node
+    Deque<Integer> activeScope;// Hvilket scope vi er i nu
 
-    boolean printyes = true;
-    
+    boolean printyes = true;// ! SLET SENERE
+
     public AstNode visit(AstNode node) {
         if (node instanceof ProgramNode) {
             if (printyes) {
@@ -62,13 +62,15 @@ public class Visitor {
     }
 
     public void visit(IfStatementNode node) {
-        HashMap<String, AstNode> localTable = new HashMap<>();
-        scopes.add(localTable);
+        HashMap<String, AstNode> localTable = new HashMap<>(); // ny lokalt value table
+        scopes.add(localTable); // Tilføjer det til stacken med scopes
         boolean visited = false;
-        for (int i = 0; i < node.getExpressions().size(); i++) {
+        for (int i = 0; i < node.getExpressions().size(); i++) { // Hver expression er en if statement. Ligesom hver
+                                                                 // block er til den if statement
             AstNode toCheck = node.getExpressions().get(i).getNode();
             if (node.getExpressions().get(i).getNode() instanceof IdentifierNode) {
-                toCheck = getVariable((IdentifierNode) node.getExpressions().get(i).getNode());
+                toCheck = getVariable((IdentifierNode) node.getExpressions().get(i).getNode());// Hvis det er x så giv
+                                                                                               // mig xnode
             } else if (node.getExpressions().get(i).getNode() instanceof RelationsAndLogicalOperatorNode) {
                 toCheck = visit((RelationsAndLogicalOperatorNode) node.getExpressions().get(i).getNode());
             }
@@ -86,13 +88,13 @@ public class Visitor {
 
     public AstNode getVariable(IdentifierNode node) {
         // for (HashMap<String, AstNode> vTable : scopes) {
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            return scopes.getFirst().get(node.getIdentifier().toString());
+        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) { // Tester om x er der, ev til bool
+            return scopes.getFirst().get(node.getIdentifier().toString());// i scope, giv mig x node
         }
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {// for at gå igennem hvert scope og tjekke for x
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                return scopes.get(i).get(node.getIdentifier().toString());
+                return scopes.get(i).get(node.getIdentifier().toString());// i i scope, giv mig x node
             }
         }
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
@@ -101,19 +103,19 @@ public class Visitor {
     public void visit(AssignmentNode node) {
 
         for (HashMap<String, AstNode> vTable : scopes) {
-            if (vTable.containsKey(node.getIdentifier().toString())) {
-                AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
-                AstNode toChange = node.getValue();
+            if (vTable.containsKey(node.getIdentifier().toString())) { // tjek if variable x is scopes bool
+                AstNode nodeToChange = vTable.get(node.getIdentifier().toString());// retunere node
+                AstNode toChange = node.getValue(); // Højre side af assignmen x= tochange vil retunere node
                 if (toChange instanceof BinaryOperatorNode) {
-                    toChange = visit((BinaryOperatorNode) toChange);
+                    toChange = visit((BinaryOperatorNode) toChange); // if x= 20+20
                 }
                 if (toChange instanceof FunctionCallNode) {
-                    toChange = visit((FunctionCallNode) toChange);
+                    toChange = visit((FunctionCallNode) toChange); // if x= functioncall(10)
                 }
                 if (toChange instanceof IdentifierNode) {
-                    toChange = getVariable((IdentifierNode) toChange);
+                    toChange = getVariable((IdentifierNode) toChange); // if x = y
                 }
-                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) { // if x= 10<5
                     toChange = visit((RelationsAndLogicalOperatorNode) toChange);
                 }
                 AstNode finalToChange = toChange;
@@ -137,32 +139,33 @@ public class Visitor {
 
     public void visit(VariableDeclarationNode node) {
         boolean found = false;
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
+        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {// finder x i scope FY FY
             found = true;
         }
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {// finder x i et scope FY FY
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 found = true;
             }
         }
-        if (!found) {
+        if (!found) { // kunne ikke finde x i scope så kan gemme den
 
-            AstNode toChange = node.getValue();
-            if (node.getValue() instanceof BinaryOperatorNode) {
-                toChange = visit((BinaryOperatorNode) node.getValue());
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof IdentifierNode) {
-                for (HashMap<String, AstNode> vTable : scopes) {
-                    if (vTable.containsKey(toChange.toString())) {
+            AstNode toChange = node.getValue(); // x=value value = node eller 5
+            if (node.getValue() instanceof BinaryOperatorNode) { // hvis x=2+2
+                toChange = visit((BinaryOperatorNode) node.getValue()); // Henter type node efter operation node
+                scopes.getLast().put(node.getIdentifier().toString(), toChange); // Her sætter vi x til type node i
+                                                                                 // scope hash map
+            } else if (toChange instanceof IdentifierNode) { // Vis x=y
+                for (HashMap<String, AstNode> vTable : scopes) {// For hvert scope skal vi prøve at finde variable
+                    if (vTable.containsKey(toChange.toString())) {// Vis vi finder den i et scope
                         scopes.getLast().put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
                     }
                 }
             } else {
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange); // case hvor x=4
             }
 
-        } else {
+        } else { // Fy fy den findes allerede
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists");
         }
     }
@@ -261,24 +264,26 @@ public class Visitor {
         return node;
     }
 
-    public AstNode visit(BinaryOperatorNode node) {
-        if (true) {
-            System.out.println("Hej jeg kommer int i binarty2");
-        }
-        AstNode left = node.getLeft();
-        AstNode right = node.getRight();
+    public AstNode visit(BinaryOperatorNode node) {// her bliver + og sådan evalueret.
+
+        AstNode left = node.getLeft(); // Får venstre x som i result=x+y i node form
+        AstNode right = node.getRight();// Får højre y i node form
+        boolean valid_type_left = false;
+        boolean valid_type_right = false;
+        
         if (left instanceof IdentifierNode) {
-            left = getVariable((IdentifierNode) left);
+            left = getVariable((IdentifierNode) left); // Vis x giv mig x value
         } else if (left instanceof BinaryOperatorNode) {
             left = visit((BinaryOperatorNode) left);
         }
         if (right instanceof IdentifierNode) {
-            right = getVariable((IdentifierNode) right);
+            right = getVariable((IdentifierNode) right);// Vis y giv mig y value
         } else if (right instanceof BinaryOperatorNode) {
             right = visit((BinaryOperatorNode) right);
         }
+        // Lav type check her.
 
-        if (left instanceof IntNode && right instanceof IntNode) {
+        if (left instanceof IntNode && right instanceof IntNode) { // Her at udregning sker, som ikke burde ske.
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());

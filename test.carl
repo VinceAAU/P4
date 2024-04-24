@@ -9,8 +9,10 @@ c = (d + d) + 5
 print(c,"My Second C")
 c = (5 + d) * 5
 c = 3 + (d + 5)
-
-var p : int = c + y
+print("Her starter Carls test")
+var poop : int =2
+var poop2 : int =2
+var p : int = poop+poop2
 
 print(p, "CARLS PRINT" )
 
