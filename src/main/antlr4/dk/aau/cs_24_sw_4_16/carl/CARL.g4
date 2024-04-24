@@ -58,7 +58,7 @@ expression
     | expression op=('+' | '-') expression # AdditionSubtraction
     | expression op=('<' | '<=' | '>' | '>=' | '==' | '!=') expression # Relation
     | expression op=('AND' | 'OR') expression # Logical
-    | expression '..' primary # RandomBetween
+    | expression '..' expression # RandomBetween
     ;
 
 primary
