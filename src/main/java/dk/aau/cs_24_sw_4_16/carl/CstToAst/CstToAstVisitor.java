@@ -353,15 +353,16 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitPropertyAccess(CARLParser.PropertyAccessContext ctx) {
         List<IdentifierNode> identifiers = new ArrayList<>();
         for (TerminalNode identifier : ctx.IDENTIFIER()) {
-            identifiers.add((IdentifierNode) visit(identifier));
+            identifiers.add(new IdentifierNode(identifier.toString()));
         }
         return new PropertyAccessNode(ctx.structType().getText(), identifiers);
     }
 
     @Override
     public AstNode visitPropertyAssignment(CARLParser.PropertyAssignmentContext ctx) {
-        System.out.println(ctx.getText());
-        return super.visitPropertyAssignment(ctx);
+        AstNode property = visitPropertyAccess(ctx.propertyAccess());
+        AstNode value = visit(ctx.expression());
+        return new PropertyAssignmentNode((PropertyAccessNode) property, value);
     }
 
     @Override

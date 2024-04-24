@@ -3,4 +3,8 @@ var Orc : enemy = {
     var health : int = 200
     var symbol : string= "O"
 }
-enemy.orc.health = 500
+var test : int = enemy.Orc.health
+print(test)
+enemy.Orc.health = enemy.Orc.difficulty
+test = enemy.Orc.health
+print(test)

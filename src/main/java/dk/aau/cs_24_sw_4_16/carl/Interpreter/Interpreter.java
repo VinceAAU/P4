@@ -57,6 +57,10 @@ public class Interpreter {
             return visit((ReturnStatementNode) node.getNode());
         } else if (node.getNode() instanceof StructureDefinitionNode) {
             visit((StructureDefinitionNode) node.getNode());
+        } else if (node.getNode() instanceof PropertyAccessNode) {
+            visit((PropertyAccessNode) node.getNode());
+        } else if (node.getNode() instanceof PropertyAssignmentNode) {
+            visit((PropertyAssignmentNode) node.getNode());
         }
         return null;
     }
@@ -74,11 +78,61 @@ public class Interpreter {
             tileInformationFloor.put(node.getIdentifier().toString(), object);
         }
     }
-    AstNode visit(PropertyAccessNode node){
-        return node;
+
+    public void visit(PropertyAssignmentNode node) {
+        replaceValue(visit(node.getPropertyAccessNode()), node.getValue());
     }
+
+    AstNode visit(PropertyAccessNode node) {
+        HashMap<String, HashMap<String, AstNode>> list;
+        switch (node.getList()) {
+            case "enemy" -> list = tileInformationEnemy;
+            case "wall" -> list = tileInformationWall;
+            case "floor" -> list = tileInformationFloor;
+            default -> throw new RuntimeException("list doesnt exist");
+        }
+        if (list.containsKey(node.getIdentifiers().get(0).toString())) {
+            HashMap<String, AstNode> secondList = list.get(node.getIdentifiers().get(0).toString());
+            if (secondList.containsKey(node.getIdentifiers().get(1).toString())) {
+                return secondList.get(node.getIdentifiers().get(1).toString());
+            }
+        }
+        throw new RuntimeException("could not find the object");
+    }
+
     public AstNode visit(ReturnStatementNode node) {
         return node;
+    }
+
+    public void replaceValue(AstNode node, AstNode node2) {
+        AstNode toChange = node2;
+        if (toChange instanceof BinaryOperatorNode) {
+            toChange = visit((BinaryOperatorNode) toChange);
+        }
+        if (toChange instanceof FunctionCallNode) {
+            toChange = visit((FunctionCallNode) toChange);
+        }
+        if (toChange instanceof IdentifierNode) {
+            toChange = getVariable((IdentifierNode) toChange);
+        }
+        if (toChange instanceof RelationsAndLogicalOperatorNode) {
+            toChange = visit((RelationsAndLogicalOperatorNode) toChange);
+        }
+        if (toChange instanceof PropertyAccessNode) {
+            toChange = visit((PropertyAccessNode) toChange);
+        }
+        AstNode finalToChange = toChange;
+        switch (node) {
+            case IntNode intNode when finalToChange instanceof IntNode ->
+                    intNode.setValue(((IntNode) finalToChange).getValue());
+            case FloatNode floatNode when finalToChange instanceof FloatNode ->
+                    floatNode.setValue(((FloatNode) finalToChange).getValue());
+            case StringNode stringNode when finalToChange instanceof StringNode ->
+                    stringNode.setValue(((StringNode) finalToChange).getValue());
+            case BoolNode boolNode when finalToChange instanceof BoolNode ->
+                    boolNode.setValue(((BoolNode) finalToChange).getValue());
+            case null, default -> throw new RuntimeException("Type mismatch");
+        }
     }
 
     public void visit(IfStatementNode node) {
@@ -119,35 +173,35 @@ public class Interpreter {
     }
 
     public void visit(AssignmentNode node) {
-
         for (HashMap<String, AstNode> vTable : scopes) {
             if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
-                if (toChange instanceof BinaryOperatorNode) {
-                    toChange = visit((BinaryOperatorNode) toChange);
-                }
-                if (toChange instanceof FunctionCallNode) {
-                    toChange = visit((FunctionCallNode) toChange);
-                }
-                if (toChange instanceof IdentifierNode) {
-                    toChange = getVariable((IdentifierNode) toChange);
-                }
-                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
-                    toChange = visit((RelationsAndLogicalOperatorNode) toChange);
-                }
-                AstNode finalToChange = toChange;
-                switch (nodeToChange) {
-                    case IntNode intNode when finalToChange instanceof IntNode ->
-                            intNode.setValue(((IntNode) finalToChange).getValue());
-                    case FloatNode floatNode when finalToChange instanceof FloatNode ->
-                            floatNode.setValue(((FloatNode) finalToChange).getValue());
-                    case StringNode stringNode when finalToChange instanceof StringNode ->
-                            stringNode.setValue(((StringNode) finalToChange).getValue());
-                    case BoolNode boolNode when finalToChange instanceof BoolNode ->
-                            boolNode.setValue(((BoolNode) finalToChange).getValue());
-                    case null, default -> throw new RuntimeException("Type mismatch");
-                }
+                replaceValue(nodeToChange, toChange);
+//                if (toChange instanceof BinaryOperatorNode) {
+//                    toChange = visit((BinaryOperatorNode) toChange);
+//                }
+//                if (toChange instanceof FunctionCallNode) {
+//                    toChange = visit((FunctionCallNode) toChange);
+//                }
+//                if (toChange instanceof IdentifierNode) {
+//                    toChange = getVariable((IdentifierNode) toChange);
+//                }
+//                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+//                    toChange = visit((RelationsAndLogicalOperatorNode) toChange);
+//                }
+//                AstNode finalToChange = toChange;
+//                switch (nodeToChange) {
+//                    case IntNode intNode when finalToChange instanceof IntNode ->
+//                            intNode.setValue(((IntNode) finalToChange).getValue());
+//                    case FloatNode floatNode when finalToChange instanceof FloatNode ->
+//                            floatNode.setValue(((FloatNode) finalToChange).getValue());
+//                    case StringNode stringNode when finalToChange instanceof StringNode ->
+//                            stringNode.setValue(((StringNode) finalToChange).getValue());
+//                    case BoolNode boolNode when finalToChange instanceof BoolNode ->
+//                            boolNode.setValue(((BoolNode) finalToChange).getValue());
+//                    case null, default -> throw new RuntimeException("Type mismatch");
+//                }
                 return;
             }
         }
@@ -179,6 +233,10 @@ public class Interpreter {
                         scopes.getLast().put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
                     }
                 }
+
+            } else if (toChange instanceof PropertyAccessNode) {
+                toChange = visit((PropertyAccessNode) toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }

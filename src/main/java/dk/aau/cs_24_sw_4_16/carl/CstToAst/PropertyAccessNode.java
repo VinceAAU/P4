@@ -7,6 +7,15 @@ public class PropertyAccessNode extends AstNode {
     List<IdentifierNode> identifiers;
 
     PropertyAccessNode(String list, List<IdentifierNode> identifiers) {
+        this.list = list;
         this.identifiers = identifiers;
+    }
+
+    public String getList() {
+        return list;
+    }
+
+    public List<IdentifierNode> getIdentifiers() {
+        return identifiers;
     }
 }
