@@ -13,6 +13,13 @@ public class Interpreter {
     HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
     HashMap<String, HashMap<String, AstNode>> tileInformationWall;
 
+    //This will be the same instance for all instances of Interpreter
+    //This might have unexpected consequences if we expand the program to use
+    //more than one instance of Interpreter at a time, but it doesn't yet, so
+    //it doesn't really matter. There's no better way of doing this, and in
+    //the worst case we just get worse randomness.
+    public static Random rand = new Random();
+
     public Interpreter() {
         fTable = new HashMap<>();
         vTable = new HashMap<>();
