@@ -35,6 +35,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitReturnStatement(ctx.returnStatement()));
         } else if (ctx.arrayDeclaration() != null) {
             return new StatementNode(visitArrayDeclaration(ctx.arrayDeclaration()));
+        } else if (ctx.coordinateDeclaration() != null) {
+            return new StatementNode(visitCoordinateDeclaration(ctx.coordinateDeclaration()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -377,6 +379,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitCoordinateDeclaration(CARLParser.CoordinateDeclarationContext ctx) {
-        return super.visitCoordinateDeclaration(ctx);
+        IdentifierNode id = new IdentifierNode(ctx.IDENTIFIER().getText());
+        //If the cast fails here, there's probably something wrong with the grammar
+        AstNode x = visit(ctx.expression(0));
+        AstNode y = visit(ctx.expression(1));
+
+        return new CoordinateDeclarationNode(id, x, y);
     }
 }
