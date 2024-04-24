@@ -1,6 +1,5 @@
 package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
-import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
 import java.util.*;
@@ -47,8 +46,8 @@ public class Interpreter {
             return visit((FunctionCallNode) node.getNode());
         } else if (node.getNode() instanceof FunctionDefinitionNode) {
             return visit((FunctionDefinitionNode) node.getNode());
-        } else if (node.getNode() instanceof WhileNode) {
-            return visit((WhileNode) node.getNode());
+        } else if (node.getNode() instanceof WhileLoopNode) {
+            return visit((WhileLoopNode) node.getNode());
         } else if (node.getNode() instanceof IfStatementNode) {
             visit((IfStatementNode) node.getNode());
         } else if (node.getNode() instanceof BinaryOperatorNode) {
@@ -61,6 +60,12 @@ public class Interpreter {
             visit((PropertyAccessNode) node.getNode());
         } else if (node.getNode() instanceof PropertyAssignmentNode) {
             visit((PropertyAssignmentNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayDefinitionNode) {
+            visit((ArrayDefinitionNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayAssignmentNode) {
+            visit((ArrayAssignmentNode) node.getNode());
+        } else {
+            throw new RuntimeException("Line 56 of Interpreter.java. Ya got something funky goin' on here, buckaroo.");
         }
         return null;
     }
@@ -121,6 +126,9 @@ public class Interpreter {
         if (toChange instanceof PropertyAccessNode) {
             toChange = visit((PropertyAccessNode) toChange);
         }
+        if (node.getValue() instanceof ArrayAccessNode)
+        toChange = visit((ArrayAccessNode) toChange);
+
         AstNode finalToChange = toChange;
         switch (node) {
             case IntNode intNode when finalToChange instanceof IntNode ->
@@ -160,13 +168,13 @@ public class Interpreter {
 
     public AstNode getVariable(IdentifierNode node) {
 //        for (HashMap<String, AstNode> vTable : scopes) {
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            return scopes.getFirst().get(node.getIdentifier().toString());
+        if (scopes.getFirst().containsKey(node.getIdentifier())) {
+            return scopes.getFirst().get(node.getIdentifier());
         }
 
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                return scopes.get(i).get(node.getIdentifier().toString());
+            if (scopes.get(i).containsKey(node.getIdentifier())) {
+                return scopes.get(i).get(node.getIdentifier());
             }
         }
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
@@ -211,19 +219,13 @@ public class Interpreter {
 
 
     public void visit(VariableDeclarationNode node) {
-        boolean found = false;
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            found = true;
-        }
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                found = true;
-            }
-        }
-        if (!found) {
+        if (!idExists(node.getIdentifier().toString())) {
 
             AstNode toChange = node.getValue();
+            if (toChange instanceof FunctionCallNode) {
+                toChange = visit((FunctionCallNode) toChange);
+            }
             if (node.getValue() instanceof BinaryOperatorNode) {
                 toChange = visit((BinaryOperatorNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
@@ -237,13 +239,79 @@ public class Interpreter {
             } else if (toChange instanceof PropertyAccessNode) {
                 toChange = visit((PropertyAccessNode) toChange);
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else {
+            
+            }  else if (toChange instanceof ArrayAccessNode) {
+                toChange = visit((ArrayAccessNode) node.getValue());
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+            }else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }
 
         } else {
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists");
         }
+    }
+
+
+    //I hate Java for forcing me to make this function
+    //It is as stupid as its name makes it sound
+    private int[] integerListToIntArray(List<Integer> ints){
+        return Arrays.stream(ints.toArray(new Integer[0])).mapToInt(i -> i).toArray();
+    }
+
+    public AstNode visit(ArrayAccessNode node) {
+        return
+                ((ArrayNode) getVariable(node.getIdentifier()))
+                .get(integerListToIntArray(node.getIndices()));
+    }
+
+    public void visit(ArrayAssignmentNode node){
+
+        int[] indices = integerListToIntArray(node.getIndices());
+
+        AstNode value;
+
+        if (node.getValue() instanceof BinaryOperatorNode){
+            value = visit((BinaryOperatorNode) node.getValue());
+        } else if (node.getValue() instanceof IdentifierNode){
+            value = visit((IdentifierNode) node.getValue());
+        } else if (node.getValue() instanceof FunctionCallNode) {
+            value = visit((FunctionCallNode) node.getValue());
+        } else if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+            value = visit((RelationsAndLogicalOperatorNode) node.getValue());
+        } else {
+            //Those were all the checks made by visit(AssignmentNode)
+            //Surely there can't be any other checks that need to be made
+            value = node.getValue();
+        }
+
+        //These are the only checks made in
+
+        ((ArrayNode) getVariable(node.getIdentifier()))
+        .set(value, indices);
+    }
+
+    public void visit(ArrayDefinitionNode node) {
+        if(idExists(node.getIdentifier())){
+            throw new RuntimeException("Variable '" + node.getIdentifier() + "' already exists.");
+        }
+
+        scopes.getLast().put(node.getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes())));
+    }
+
+    private boolean idExists(String id){
+        boolean found = false;
+        if (scopes.getFirst().containsKey(id)) {
+            found = true;
+        }
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(id)) {
+                found = true;
+            }
+        }
+
+        return found;
     }
 
     public AstNode visit(TypeNode node) {
@@ -385,7 +453,8 @@ public class Interpreter {
         throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
     }
 
-    public AstNode visit(WhileNode node) {
+
+    public AstNode visit(WhileLoopNode node) {
         AstNode toCheck = (node.getExpression()).getNode();
         if (toCheck instanceof IdentifierNode) {
             toCheck = getVariable((IdentifierNode) node.getExpression().getNode());

@@ -5,7 +5,7 @@ import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.awt.desktop.SystemEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +40,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitStructureDefinition(ctx.structureDefinition()));
         } else if (ctx.propertyAssignment() != null) {
             return new StatementNode(visitPropertyAssignment(ctx.propertyAssignment()));
+        } else if (ctx.arrayDeclaration() != null) {
+            return new StatementNode(visitArrayDeclaration(ctx.arrayDeclaration()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -82,8 +84,30 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitPrimitiveTypeForArray(CARLParser.PrimitiveTypeForArrayContext ctx) {
-        return super.visitPrimitiveTypeForArray(ctx);
+    public AstNode visitArrayDeclaration(CARLParser.ArrayDeclarationContext ctx) {
+        String identifier = ctx.IDENTIFIER().getText();
+
+        IdentifierNode identifierNode = new IdentifierNode(identifier);
+
+        TypeNode type = (TypeNode) /*This is the part where we pray to God that it does indeed return a TypeNode */ visit(ctx.legalArrayType());
+
+        List<Integer> sizes = ctx.arrayOptionalIndex().stream()
+                .map(arrayOptionalIndexContext -> {
+                    if(arrayOptionalIndexContext.INT()==null)
+                        return -1;
+                    else
+                        return Integer.parseInt(arrayOptionalIndexContext.INT().getText()); //And on this line, we pray that the int is indeed an int...
+                })
+                .toList();
+
+        return new ArrayDefinitionNode(type, sizes, identifierNode);
+
+
+    }
+
+    @Override
+    public AstNode visitLegalArrayType(CARLParser.LegalArrayTypeContext ctx) {
+        return new TypeNode(ctx.getText());
     }
 
     @Override
@@ -95,7 +119,22 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitAssignment(CARLParser.AssignmentContext ctx) {
         AstNode value = visit(ctx.expression());
-        return new AssignmentNode(new IdentifierNode(ctx.IDENTIFIER().getText()), value);
+
+        if(ctx.IDENTIFIER()!=null)
+            return new AssignmentNode(new IdentifierNode(ctx.IDENTIFIER().getText()), value);
+        else if (ctx.arrayAccess()!=null)
+            return new ArrayAssignmentNode((ArrayAccessNode) visit(ctx.arrayAccess()), value);
+        else
+            throw new Error("Neither an array access nor an identifier");
+    }
+
+    @Override
+    public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx){
+        IdentifierNode id = new IdentifierNode(ctx.IDENTIFIER().getText());
+
+        List<Integer> indices = ctx.INT().stream().map(tn -> Integer.parseInt(tn.getText())).toList();
+
+        return new ArrayAccessNode(id, indices);
     }
 
     @Override
@@ -314,7 +353,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
         }
         BlockNode block = (BlockNode) visitBlock(ctx.block());
-        return new WhileNode(expression, block);
+        return new WhileLoopNode(expression, block);
 
     }
 
@@ -337,16 +376,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             block.addStatement((StatementNode) visit(statementContext));
         }
         return block;
-    }
-
-    @Override
-    public AstNode visitArrayDefinition(CARLParser.ArrayDefinitionContext ctx) {
-        return super.visitArrayDefinition(ctx);
-    }
-
-    @Override
-    public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
-        return super.visitArrayAccess(ctx);
     }
 
     @Override

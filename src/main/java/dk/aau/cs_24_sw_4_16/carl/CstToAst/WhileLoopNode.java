@@ -1,30 +1,24 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
-import java.util.List;
-
 public class WhileLoopNode extends AstNode {
-    private final ExpressionNode condition;
-    private final List<StatementNode> body;
+    private final ExpressionNode expression;
+    private final BlockNode block;
 
-    public WhileLoopNode(ExpressionNode condition, List<StatementNode> body) {
-        this.condition = condition;
-        this.body = body;
+    public WhileLoopNode(ExpressionNode expression, BlockNode block) {
+        this.expression = expression;
+        this.block = block;
     }
 
-    public ExpressionNode getCondition() {
-        return condition;
+    public ExpressionNode getExpression() {
+        return expression;
     }
 
-    public List<StatementNode> getBody() {
-        return body;
+    public BlockNode getBlock() {
+        return block;
     }
-
 
     @Override
     public String toString() {
-        return "WhileLoopNode{" +
-                "condition=" + condition +
-                ", body=" + body +
-                '}';
+        return "" + getBlock();
     }
 }
