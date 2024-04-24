@@ -10,8 +10,20 @@ public class Visitor {
     Stack<HashMap<String, AstNode>> scopes;
     Deque<Integer> activeScope;
 
+    boolean printyes = true;
+    
     public AstNode visit(AstNode node) {
         if (node instanceof ProgramNode) {
+            if (printyes) {
+                System.out.println("Hej jeg kommer int i visitor");
+            }
+            fTable = new HashMap<>();
+            vTable = new HashMap<>();
+            scopes = new Stack<>();
+            activeScope = new ArrayDeque<>();
+            activeScope.push(0);
+            scopes.add(vTable);
+
             return visit((ProgramNode) node);
         } else if (node instanceof StatementNode) {
             return visit((StatementNode) node);

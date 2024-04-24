@@ -1,7 +1,6 @@
 package dk.aau.cs_24_sw_4_16.carl.Semantic_A;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
-
 public class SemanticAnalyzer {
 
     public boolean printTest = true;
@@ -10,12 +9,17 @@ public class SemanticAnalyzer {
         if (printTest) {
             System.out.println("Hej jeg kommer her ind");
         }
+        System.out.println("Her starter visitor class");
+        Visitor visitor = new Visitor();
+        visitor.visit(root);
+        System.out.println("Her stopper visitor class");
 
         if (root != null) {
             visit(root);
         }
     }
 
+    
     private void visit(AstNode node) throws SemanticException {
         if (node instanceof ProgramNode) {
             visitProgram((ProgramNode) node);
