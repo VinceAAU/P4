@@ -126,7 +126,7 @@ public class Interpreter {
         if (toChange instanceof PropertyAccessNode) {
             toChange = visit((PropertyAccessNode) toChange);
         }
-        if (node.getValue() instanceof ArrayAccessNode)
+        if (toChange instanceof ArrayAccessNode)
         toChange = visit((ArrayAccessNode) toChange);
 
         AstNode finalToChange = toChange;

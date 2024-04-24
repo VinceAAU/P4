@@ -52,6 +52,7 @@ type :
     | 'float'
     | 'coord'
     | 'void'
+    | 'string'
     | IDENTIFIER
     | legalArrayType '[' INT? ']' ('[' INT? ']')*
     ;
