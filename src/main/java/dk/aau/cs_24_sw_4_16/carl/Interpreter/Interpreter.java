@@ -48,6 +48,12 @@ public class Interpreter {
             visit((BinaryOperatorNode) node.getNode());
         } else if (node.getNode() instanceof ReturnStatementNode) {
             return visit((ReturnStatementNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayDefinitionNode) {
+            visit((ArrayDefinitionNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayAssignmentNode) {
+            visit((ArrayAssignmentNode) node.getNode());
+        } else {
+            throw new RuntimeException("Line 56 of Interpreter.java. Ya got something funky goin' on here, buckaroo.");
         }
         return null;
     }
@@ -111,6 +117,9 @@ public class Interpreter {
                 if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
                     toChange = visit((RelationsAndLogicalOperatorNode) toChange);
                 }
+                if (node.getValue() instanceof ArrayAccessNode)
+                    toChange = visit((ArrayAccessNode) toChange);
+
                 AstNode finalToChange = toChange;
                 switch (nodeToChange) {
                     case IntNode intNode when finalToChange instanceof IntNode ->
@@ -132,14 +141,8 @@ public class Interpreter {
 
 
     public void visit(VariableDeclarationNode node) {
-        boolean found = scopes.getFirst().containsKey(node.getIdentifier().toString());
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                found = true;
-            }
-        }
-        if (!found) {
+        if (!idExists(node.getIdentifier().toString())) {
 
             AstNode toChange = node.getValue();
             if (toChange instanceof FunctionCallNode) {
@@ -154,13 +157,78 @@ public class Interpreter {
                         scopes.getLast().put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
                     }
                 }
-            } else {
+            }  else if (toChange instanceof ArrayAccessNode) {
+                toChange = visit((ArrayAccessNode) node.getValue());
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+            }else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }
 
         } else {
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists");
         }
+    }
+
+
+    //I hate Java for forcing me to make this function
+    //It is as stupid as its name makes it sound
+    private int[] integerListToIntArray(List<Integer> ints){
+        return Arrays.stream(ints.toArray(new Integer[0])).mapToInt(i -> i).toArray();
+    }
+
+    public AstNode visit(ArrayAccessNode node) {
+        return
+                ((ArrayNode) getVariable(node.getIdentifier()))
+                .get(integerListToIntArray(node.getIndices()));
+    }
+
+    public void visit(ArrayAssignmentNode node){
+
+        int[] indices = integerListToIntArray(node.getIndices());
+
+        AstNode value;
+
+        if (node.getValue() instanceof BinaryOperatorNode){
+            value = visit((BinaryOperatorNode) node.getValue());
+        } else if (node.getValue() instanceof IdentifierNode){
+            value = visit((IdentifierNode) node.getValue());
+        } else if (node.getValue() instanceof FunctionCallNode) {
+            value = visit((FunctionCallNode) node.getValue());
+        } else if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+            value = visit((RelationsAndLogicalOperatorNode) node.getValue());
+        } else {
+            //Those were all the checks made by visit(AssignmentNode)
+            //Surely there can't be any other checks that need to be made
+            value = node.getValue();
+        }
+
+        //These are the only checks made in
+
+        ((ArrayNode) getVariable(node.getIdentifier()))
+        .set(value, indices);
+    }
+
+    public void visit(ArrayDefinitionNode node) {
+        if(idExists(node.getIdentifier())){
+            throw new RuntimeException("Variable '" + node.getIdentifier() + "' already exists.");
+        }
+
+        scopes.getLast().put(node.getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes())));
+    }
+
+    private boolean idExists(String id){
+        boolean found = false;
+        if (scopes.getFirst().containsKey(id)) {
+            found = true;
+        }
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(id)) {
+                found = true;
+            }
+        }
+
+        return found;
     }
 
     public AstNode visit(TypeNode node) {
