@@ -234,7 +234,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitNot(CARLParser.NotContext ctx) {
-        AstNode left = visit(ctx.expression());
+        AstNode left = visit(ctx.expression()); //Why do we need both a left and a right if they're the same? -Vincent
         AstNode right = visit(ctx.expression());
         if (left instanceof BoolNode) {
             AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
@@ -245,7 +245,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitRandomBetween(CARLParser.RandomBetweenContext ctx) {
-        return super.visitRandomBetween(ctx);
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        return new BinaryOperatorNode(left, right, "..");
     }
 
     @Override
