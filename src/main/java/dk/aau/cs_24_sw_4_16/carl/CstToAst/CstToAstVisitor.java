@@ -2,13 +2,10 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
+
 
 public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
