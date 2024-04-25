@@ -60,6 +60,15 @@ var Goblin : enemy ={
     var health : int = 500
     var symbol : string= "O"
 }
-var test : int = 5
-test = enemy.get(1).health
+var Goblin2 : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
+}
+var Goblin3 : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
+}
+var test : int = 1..enemy.size()
 print(test)

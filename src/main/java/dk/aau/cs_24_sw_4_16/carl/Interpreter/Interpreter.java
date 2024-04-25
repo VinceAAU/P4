@@ -455,11 +455,19 @@ public class Interpreter {
             left = getVariable((IdentifierNode) left);
         } else if (left instanceof BinaryOperatorNode) {
             left = visit((BinaryOperatorNode) left);
+        } else if (left instanceof MethodCallNode) {
+            left = visit((MethodCallNode) left);
+        } else if (left instanceof PropertyAccessNode) {
+            left = visit((PropertyAccessNode) left);
         }
         if (right instanceof IdentifierNode) {
             right = getVariable((IdentifierNode) right);
         } else if (right instanceof BinaryOperatorNode) {
             right = visit((BinaryOperatorNode) right);
+        } else if (right instanceof MethodCallNode) {
+            right = visit((MethodCallNode) right);
+        } else if (right instanceof PropertyAccessNode) {
+            right = visit((PropertyAccessNode) right);
         }
 
         if (left instanceof IntNode && right instanceof IntNode) {
