@@ -63,9 +63,3 @@ var Goblin : enemy ={
 var test : int = 5
 test = enemy.get(1).health
 print(test)
-            var difficulty : int = 1
-            var health : int = 5300
-            var symbol : string= "O"
-        }
-            var test : int = enemy.get(0).health
-        print(test)
