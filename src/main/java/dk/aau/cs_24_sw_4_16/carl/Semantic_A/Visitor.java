@@ -86,7 +86,7 @@ public class Visitor {
         scopes.remove(localTable);
     }
 
-    public AstNode getVariable(IdentifierNode node) {
+    public Type getVariable(IdentifierNode node) {
         // for (HashMap<String, AstNode> vTable : scopes) {
         if (scopes.getFirst().containsKey(node.getIdentifier().toString())) { // Tester om x er der, ev til bool
             return scopes.getFirst().get(node.getIdentifier().toString());// i scope, giv mig x node
@@ -264,31 +264,73 @@ public class Visitor {
         return node;
     }
 
-    public AstNode visit(BinaryOperatorNode node) {// her bliver + og sådan evalueret.
-
+    public Type binaryoperator_type_check(BinaryOperatorNode node) {
         AstNode left = node.getLeft(); // Får venstre x som i result=x+y i node form
         AstNode right = node.getRight();// Får højre y i node form
+
         boolean valid_type_left = false;
         boolean valid_type_right = false;
-        
+
+        Type left_type = Type.VOID;
+        Type right_Type= Type.VOID;
+
         if (left instanceof IdentifierNode) {
-            left = getVariable((IdentifierNode) left); // Vis x giv mig x value
+            left_type = getVariable((IdentifierNode) left); // Vis x giv mig x value
         } else if (left instanceof BinaryOperatorNode) {
-            left = visit((BinaryOperatorNode) left);
+            left_type = binaryoperator_type_check((BinaryOperatorNode) left);
+        } else if (left instanceof IntNode) {
+            left_type = Type.INT;
+        } else if (left instanceof FloatNode) {
+            left_type = Type.FLOAT;
         }
+
         if (right instanceof IdentifierNode) {
-            right = getVariable((IdentifierNode) right);// Vis y giv mig y value
+            right_Type = getVariable((IdentifierNode) right);// Vis y giv mig y value //! Jeg vil gerne have det
+                                                             // retunere type istedet for
         } else if (right instanceof BinaryOperatorNode) {
-            right = visit((BinaryOperatorNode) right);
+            right_Type = binaryoperator_type_check((BinaryOperatorNode) right); // ! Jeg vil gerne have det retunere                                                                       // type istedet for
         }
+        else if (right instanceof IntNode) {
+            right_Type = Type.INT;
+        }else if (right instanceof FloatNode) {
+            right_Type = Type.FLOAT;
+        }
+
         // Lav type check her.
 
-        if (left instanceof IntNode && right instanceof IntNode) { // Her at udregning sker, som ikke burde ske.
-            return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
-        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-            return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
+        if (left_type == Type.INT && right_Type == Type.INT) { // Her at udregning sker, som ikke burde ske.
+            return Type.INT;
+        } else if (left_type == Type.FLOAT && right_Type == Type.FLOAT) {
+            return Type.FLOAT;
         }
-        throw new RuntimeException("BinaryOperator not implemented clause");
+        System.out.println("Wrong types for binnary operation:"+left_type+":"+left+" And:"+right+":"+right_Type);
+        return Type.VOID;
+    }
+
+    public Type relationOperator_Type_check(RelationsAndLogicalOperatorNode node){
+
+        AstNode left = node.getLeft();
+        AstNode right = node.getRight();
+        
+        if (left instanceof IdentifierNode) {
+            left = getVariable((IdentifierNode) left);
+        } else if (left instanceof RelationsAndLogicalOperatorNode) {
+            left = visit((RelationsAndLogicalOperatorNode) left);
+        }
+        if (right instanceof IdentifierNode) {
+            right = getVariable((IdentifierNode) right);
+        } else if (right instanceof RelationsAndLogicalOperatorNode) {
+            right = visit((RelationsAndLogicalOperatorNode) right);
+        }
+        if (left instanceof IntNode && right instanceof IntNode) {
+            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
+        } else if (left instanceof FloatNode && right instanceof FloatNode) {
+            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
+        } else if (left instanceof BoolNode && right instanceof BoolNode) {
+            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
+        }
+        throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
+        return Type.VOID;
     }
 
     public AstNode visit(RelationsAndLogicalOperatorNode node) {
