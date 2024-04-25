@@ -2,6 +2,7 @@ package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Interpreter {
@@ -12,7 +13,7 @@ public class Interpreter {
     HashMap<String, HashMap<String, AstNode>> tileInformationEnemy;
     HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
     HashMap<String, HashMap<String, AstNode>> tileInformationWall;
-
+    List<HashMap<String, AstNode>> rooms;
     //This will be the same instance for all instances of Interpreter
     //This might have unexpected consequences if we expand the program to use
     //more than one instance of Interpreter at a time, but it doesn't yet, so
@@ -30,6 +31,7 @@ public class Interpreter {
         activeScope = new ArrayDeque<>();
         activeScope.push(0);
         scopes.add(vTable);
+        rooms = new ArrayList<>();
     }
 
     public AstNode visit(AstNode node) {
@@ -280,9 +282,6 @@ public class Interpreter {
             } else if (toChange instanceof ArrayAccessNode) {
                 toChange = visit((ArrayAccessNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof PropertyAccessNode) {
-                toChange = visit((PropertyAccessNode) toChange);
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else if (toChange instanceof MethodCallNode) {
                 toChange = visit((MethodCallNode) toChange);
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
@@ -382,11 +381,28 @@ public class Interpreter {
     public AstNode visit(FunctionCallNode node) {
         if (node.getFunctionName().toString().equals("print")) {
             InbuildClasses.print(node, scopes, activeScope);
-        } else {
+        } else if (node.getFunctionName().toString().equals("generateMap")) {
+            InbuildClasses.generateGrid(node, scopes, tileInformationWall);
+
+        } else if (node.getFunctionName().toString().equals("generateRooms")) {
+            InbuildClasses.generateRooms(node, scopes, tileInformationFloor, rooms);
+        } else if (node.getFunctionName().toString().equals("generateCorridors")) {
+            InbuildClasses.generateCorridors(node, scopes, tileInformationFloor, rooms);
+        } else if (node.getFunctionName().toString().equals("generateSpawns")) {
+            InbuildClasses.generateSpawns(node, scopes, tileInformationEnemy, rooms);
+        } else if (node.getFunctionName().toString().equals("printMap")) {
+            InbuildClasses.printMap(scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy);
+        } else if(node.getFunctionName().toString().equals("writeToFile")){
+            try {
+                InbuildClasses.writeToFile(node, scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }else {
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
             activeScope.add(scopes.size() - 1);
-
             if (fTable.containsKey(node.getFunctionName().toString())) {
                 FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
                 List<ParameterNode> arguments = function.getArguments().getParameters();
@@ -408,7 +424,6 @@ public class Interpreter {
                         }
                         return node;
                     }
-
                     return returnValue;
                 }
             }
