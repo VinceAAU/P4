@@ -9,10 +9,23 @@ public class Interpreter {
     HashMap<String, AstNode> vTable;
     Stack<HashMap<String, AstNode>> scopes;
     Deque<Integer> activeScope;
+    HashMap<String, HashMap<String, AstNode>> tileInformationEnemy;
+    HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
+    HashMap<String, HashMap<String, AstNode>> tileInformationWall;
+
+    //This will be the same instance for all instances of Interpreter
+    //This might have unexpected consequences if we expand the program to use
+    //more than one instance of Interpreter at a time, but it doesn't yet, so
+    //it doesn't really matter. There's no better way of doing this, and in
+    //the worst case we just get worse randomness.
+    public static Random rand = new Random();
 
     public Interpreter() {
         fTable = new HashMap<>();
         vTable = new HashMap<>();
+        tileInformationEnemy = new HashMap<>();
+        tileInformationFloor = new HashMap<>();
+        tileInformationWall = new HashMap<>();
         scopes = new Stack<>();
         activeScope = new ArrayDeque<>();
         activeScope.push(0);
@@ -30,6 +43,31 @@ public class Interpreter {
         return node;
     }
 
+    public AstNode visit(MethodCallNode node) {
+        HashMap<String, HashMap<String, AstNode>> list;
+        switch (node.getPropertyAccessContext().getList()) {
+            case "enemy" -> list = tileInformationEnemy;
+            case "wall" -> list = tileInformationWall;
+            case "floor" -> list = tileInformationFloor;
+            default -> throw new RuntimeException("list doesnt exist");
+        }
+        if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
+            return new IntNode(list.size());
+        } else if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("get")) {
+            if (((ArgumentListNode) node.getValue()).getList().get(0) instanceof IntNode) {
+                int index = ((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue();
+                if (index < list.size()) {
+                    var key = list.keySet().toArray()[index];
+                    return list.get(key).get(node.getIdentifierNode().toString());
+                } else {
+                    throw new RuntimeException("out of bounds");
+                }
+            } else {
+                throw new RuntimeException("parameter must be an int");
+            }
+        }
+        throw new RuntimeException("method call went wrong");
+    }
 
     public AstNode visit(StatementNode node) {
         if (node.getNode() instanceof AssignmentNode) {
@@ -48,12 +86,98 @@ public class Interpreter {
             visit((BinaryOperatorNode) node.getNode());
         } else if (node.getNode() instanceof ReturnStatementNode) {
             return visit((ReturnStatementNode) node.getNode());
+        } else if (node.getNode() instanceof StructureDefinitionNode) {
+            visit((StructureDefinitionNode) node.getNode());
+        } else if (node.getNode() instanceof PropertyAccessNode) {
+            visit((PropertyAccessNode) node.getNode());
+        } else if (node.getNode() instanceof PropertyAssignmentNode) {
+            visit((PropertyAssignmentNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayDefinitionNode) {
+            visit((ArrayDefinitionNode) node.getNode());
+        } else if (node.getNode() instanceof ArrayAssignmentNode) {
+            visit((ArrayAssignmentNode) node.getNode());
+        } else {
+            throw new RuntimeException("Line 56 of Interpreter.java. Ya got something funky goin' on here, buckaroo.");
         }
         return null;
     }
 
+    public void visit(StructureDefinitionNode node) {
+        HashMap<String, AstNode> object = new HashMap<>();
+        for (var variable : node.getVariableDeclarations()) {
+            object.put(variable.getIdentifier().toString(), variable.getValue());
+        }
+        if (node.getType().equals("enemy")) {
+            tileInformationEnemy.put(node.getIdentifier().toString(), object);
+        } else if (node.getType().equals("wall")) {
+            tileInformationWall.put(node.getIdentifier().toString(), object);
+        } else if (node.getType().equals("floor")) {
+            tileInformationFloor.put(node.getIdentifier().toString(), object);
+        }
+    }
+
+    public void visit(PropertyAssignmentNode node) {
+        replaceValue(visit(node.getPropertyAccessNode()), node.getValue());
+    }
+
+    AstNode visit(PropertyAccessNode node) {
+        HashMap<String, HashMap<String, AstNode>> list;
+        switch (node.getList()) {
+            case "enemy" -> list = tileInformationEnemy;
+            case "wall" -> list = tileInformationWall;
+            case "floor" -> list = tileInformationFloor;
+            default -> throw new RuntimeException("list doesnt exist");
+        }
+        if (list.containsKey(node.getIdentifiers().get(0).toString())) {
+            HashMap<String, AstNode> secondList = list.get(node.getIdentifiers().get(0).toString());
+            if (node.getIdentifiers().size() > 1 && secondList.containsKey(node.getIdentifiers().get(1).toString())) {
+                return secondList.get(node.getIdentifiers().get(1).toString());
+            } else {
+                throw new RuntimeException("you need 3 arguments");
+            }
+
+        }
+        throw new RuntimeException("could not find the object");
+    }
+
     public AstNode visit(ReturnStatementNode node) {
         return node;
+    }
+
+    public void replaceValue(AstNode node, AstNode node2) {
+        AstNode toChange = node2;
+        if (toChange instanceof BinaryOperatorNode) {
+            toChange = visit((BinaryOperatorNode) toChange);
+        }
+        if (toChange instanceof FunctionCallNode) {
+            toChange = visit((FunctionCallNode) toChange);
+        }
+        if (toChange instanceof IdentifierNode) {
+            toChange = getVariable((IdentifierNode) toChange);
+        }
+        if (toChange instanceof RelationsAndLogicalOperatorNode) {
+            toChange = visit((RelationsAndLogicalOperatorNode) toChange);
+        }
+        if (toChange instanceof PropertyAccessNode) {
+            toChange = visit((PropertyAccessNode) toChange);
+        }
+        if (toChange instanceof MethodCallNode) {
+            toChange = visit((MethodCallNode) toChange);
+        }
+        if (toChange instanceof ArrayAccessNode) toChange = visit((ArrayAccessNode) toChange);
+
+        AstNode finalToChange = toChange;
+        switch (node) {
+            case IntNode intNode when finalToChange instanceof IntNode ->
+                    intNode.setValue(((IntNode) finalToChange).getValue());
+            case FloatNode floatNode when finalToChange instanceof FloatNode ->
+                    floatNode.setValue(((FloatNode) finalToChange).getValue());
+            case StringNode stringNode when finalToChange instanceof StringNode ->
+                    stringNode.setValue(((StringNode) finalToChange).getValue());
+            case BoolNode boolNode when finalToChange instanceof BoolNode ->
+                    boolNode.setValue(((BoolNode) finalToChange).getValue());
+            case null, default -> throw new RuntimeException("Type mismatch");
+        }
     }
 
     public void visit(IfStatementNode node) {
@@ -81,48 +205,48 @@ public class Interpreter {
 
     public AstNode getVariable(IdentifierNode node) {
 //        for (HashMap<String, AstNode> vTable : scopes) {
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            return scopes.getFirst().get(node.getIdentifier().toString());
+        if (scopes.getFirst().containsKey(node.getIdentifier())) {
+            return scopes.getFirst().get(node.getIdentifier());
         }
 
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                return scopes.get(i).get(node.getIdentifier().toString());
+            if (scopes.get(i).containsKey(node.getIdentifier())) {
+                return scopes.get(i).get(node.getIdentifier());
             }
         }
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
     }
 
     public void visit(AssignmentNode node) {
-
         for (HashMap<String, AstNode> vTable : scopes) {
             if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
-                if (toChange instanceof BinaryOperatorNode) {
-                    toChange = visit((BinaryOperatorNode) toChange);
-                }
-                if (toChange instanceof FunctionCallNode) {
-                    toChange = visit((FunctionCallNode) toChange);
-                }
-                if (toChange instanceof IdentifierNode) {
-                    toChange = getVariable((IdentifierNode) toChange);
-                }
-                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
-                    toChange = visit((RelationsAndLogicalOperatorNode) toChange);
-                }
-                AstNode finalToChange = toChange;
-                switch (nodeToChange) {
-                    case IntNode intNode when finalToChange instanceof IntNode ->
-                            intNode.setValue(((IntNode) finalToChange).getValue());
-                    case FloatNode floatNode when finalToChange instanceof FloatNode ->
-                            floatNode.setValue(((FloatNode) finalToChange).getValue());
-                    case StringNode stringNode when finalToChange instanceof StringNode ->
-                            stringNode.setValue(((StringNode) finalToChange).getValue());
-                    case BoolNode boolNode when finalToChange instanceof BoolNode ->
-                            boolNode.setValue(((BoolNode) finalToChange).getValue());
-                    case null, default -> throw new RuntimeException("Type mismatch");
-                }
+                replaceValue(nodeToChange, toChange);
+//                if (toChange instanceof BinaryOperatorNode) {
+//                    toChange = visit((BinaryOperatorNode) toChange);
+//                }
+//                if (toChange instanceof FunctionCallNode) {
+//                    toChange = visit((FunctionCallNode) toChange);
+//                }
+//                if (toChange instanceof IdentifierNode) {
+//                    toChange = getVariable((IdentifierNode) toChange);
+//                }
+//                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+//                    toChange = visit((RelationsAndLogicalOperatorNode) toChange);
+//                }
+//                AstNode finalToChange = toChange;
+//                switch (nodeToChange) {
+//                    case IntNode intNode when finalToChange instanceof IntNode ->
+//                            intNode.setValue(((IntNode) finalToChange).getValue());
+//                    case FloatNode floatNode when finalToChange instanceof FloatNode ->
+//                            floatNode.setValue(((FloatNode) finalToChange).getValue());
+//                    case StringNode stringNode when finalToChange instanceof StringNode ->
+//                            stringNode.setValue(((StringNode) finalToChange).getValue());
+//                    case BoolNode boolNode when finalToChange instanceof BoolNode ->
+//                            boolNode.setValue(((BoolNode) finalToChange).getValue());
+//                    case null, default -> throw new RuntimeException("Type mismatch");
+//                }
                 return;
             }
         }
@@ -132,19 +256,13 @@ public class Interpreter {
 
 
     public void visit(VariableDeclarationNode node) {
-        boolean found = false;
-        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            found = true;
-        }
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                found = true;
-            }
-        }
-        if (!found) {
+        if (!idExists(node.getIdentifier().toString())) {
 
             AstNode toChange = node.getValue();
+            if (toChange instanceof FunctionCallNode) {
+                toChange = visit((FunctionCallNode) toChange);
+            }
             if (node.getValue() instanceof BinaryOperatorNode) {
                 toChange = visit((BinaryOperatorNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
@@ -154,6 +272,14 @@ public class Interpreter {
                         scopes.getLast().put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
                     }
                 }
+
+            } else if (toChange instanceof PropertyAccessNode) {
+                toChange = visit((PropertyAccessNode) toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+
+            } else if (toChange instanceof ArrayAccessNode) {
+                toChange = visit((ArrayAccessNode) node.getValue());
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }
@@ -161,6 +287,65 @@ public class Interpreter {
         } else {
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists");
         }
+    }
+
+
+    //I hate Java for forcing me to make this function
+    //It is as stupid as its name makes it sound
+    private int[] integerListToIntArray(List<Integer> ints) {
+        return Arrays.stream(ints.toArray(new Integer[0])).mapToInt(i -> i).toArray();
+    }
+
+    public AstNode visit(ArrayAccessNode node) {
+        return ((ArrayNode) getVariable(node.getIdentifier())).get(integerListToIntArray(node.getIndices()));
+    }
+
+    public void visit(ArrayAssignmentNode node) {
+
+        int[] indices = integerListToIntArray(node.getIndices());
+
+        AstNode value;
+
+        if (node.getValue() instanceof BinaryOperatorNode) {
+            value = visit((BinaryOperatorNode) node.getValue());
+        } else if (node.getValue() instanceof IdentifierNode) {
+            value = visit((IdentifierNode) node.getValue());
+        } else if (node.getValue() instanceof FunctionCallNode) {
+            value = visit((FunctionCallNode) node.getValue());
+        } else if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
+            value = visit((RelationsAndLogicalOperatorNode) node.getValue());
+        } else {
+            //Those were all the checks made by visit(AssignmentNode)
+            //Surely there can't be any other checks that need to be made
+            value = node.getValue();
+        }
+
+        //These are the only checks made in
+
+        ((ArrayNode) getVariable(node.getIdentifier())).set(value, indices);
+    }
+
+    public void visit(ArrayDefinitionNode node) {
+        if (idExists(node.getIdentifier())) {
+            throw new RuntimeException("Variable '" + node.getIdentifier() + "' already exists.");
+        }
+
+        scopes.getLast().put(node.getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes())));
+    }
+
+    private boolean idExists(String id) {
+        boolean found = false;
+        if (scopes.getFirst().containsKey(id)) {
+            found = true;
+        }
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(id)) {
+                found = true;
+            }
+        }
+
+        return found;
     }
 
     public AstNode visit(TypeNode node) {
@@ -189,38 +374,38 @@ public class Interpreter {
     }
 
     public AstNode visit(FunctionCallNode node) {
-        HashMap<String, AstNode> localTable = new HashMap<>();
-        scopes.add(localTable);
-        activeScope.add(scopes.size() - 1);
-        if (fTable.containsKey(node.getFunctionName().toString())) {
-            FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
-            List<ParameterNode> arguments = function.getArguments().getParameters();
-            for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
-                visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
-            }
-            AstNode test = visit(function.getBlock());
-
-            if (test instanceof ReturnStatementNode) {
-                AstNode returnValue = ((ReturnStatementNode) test).getReturnValue();
-                if (returnValue instanceof IdentifierNode) {
-                    returnValue = getVariable((IdentifierNode) returnValue);
-                }
-                scopes.remove(localTable);
-                activeScope.removeLast();
-                if (function.getReturnType().getType().equals("void")) {
-                    if(returnValue != null){
-                        throw new RuntimeException("cannot return a value in void function call or have code after return statement");
-                    }
-                    return node;
-                }
-
-                return returnValue;
-            }
-        }
         if (node.getFunctionName().toString().equals("print")) {
-            scopes.remove(localTable);
-            activeScope.removeLast();
             InbuildClasses.print(node, scopes, activeScope);
+        } else {
+            HashMap<String, AstNode> localTable = new HashMap<>();
+            scopes.add(localTable);
+            activeScope.add(scopes.size() - 1);
+
+            if (fTable.containsKey(node.getFunctionName().toString())) {
+                FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
+                List<ParameterNode> arguments = function.getArguments().getParameters();
+                for (int i = 0; i < function.getArguments().getParameters().size(); i++) {
+                    visit(new VariableDeclarationNode(arguments.get(i).getIdentifier(), arguments.get(i).getType(), node.getArgument(i)));
+                }
+                AstNode test = visit(function.getBlock());
+
+                if (test instanceof ReturnStatementNode) {
+                    AstNode returnValue = ((ReturnStatementNode) test).getReturnValue();
+                    if (returnValue instanceof IdentifierNode) {
+                        returnValue = getVariable((IdentifierNode) returnValue);
+                    }
+                    scopes.remove(localTable);
+                    activeScope.removeLast();
+                    if (function.getReturnType().getType().equals("void")) {
+                        if (returnValue != null) {
+                            throw new RuntimeException("cannot return a value in void function call or have code after return statement");
+                        }
+                        return node;
+                    }
+
+                    return returnValue;
+                }
+            }
         }
         return node;
     }
@@ -252,6 +437,7 @@ public class Interpreter {
         if (!fTable.containsKey(node.getIdentifier().toString())) {
             fTable.put(node.getIdentifier().toString(), node);
         } else {
+            throw new RuntimeException("function " + node.getIdentifier() + " already exists");
         }
         return node;
     }
@@ -301,18 +487,18 @@ public class Interpreter {
         throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
     }
 
+
     public AstNode visit(WhileLoopNode node) {
-        HashMap<String, AstNode> localTable = new HashMap<>();
-        scopes.add(localTable);
         AstNode toCheck = (node.getExpression()).getNode();
         if (toCheck instanceof IdentifierNode) {
             toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
         } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
             toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
-
         }
         while ((toCheck instanceof BoolNode)) {
             if (((BoolNode) toCheck).getValue()) {
+                HashMap<String, AstNode> localTable = new HashMap<>();
+                scopes.add(localTable);
                 visit(node.getBlock());
                 toCheck = visit(node.getExpression().getNode());
                 if (toCheck instanceof IdentifierNode) {
@@ -320,8 +506,8 @@ public class Interpreter {
                 } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
                     toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
                 }
-            } else {
                 scopes.remove(localTable);
+            } else {
                 return node;
             }
 

@@ -12,6 +12,8 @@ c = 3 + (d + 5)
 
 while d <= 5{
     print(d)
+    var b2 : int = d
+    print(b2, "got it")
     d= d+1
 }
 fn test (haha : int, baba : bool) -> void{
@@ -48,3 +50,16 @@ else if b{
         print(holy)
     }
 }
+var Orc : enemy = {
+    var difficulty : int = 1
+    var health : int = 200
+    var symbol : string= "O"
+}
+var Goblin : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
+}
+var test : int = 5
+test = enemy.get(1).health
+print(test)

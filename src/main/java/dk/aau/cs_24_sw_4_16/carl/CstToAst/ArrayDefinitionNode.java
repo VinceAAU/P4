@@ -2,26 +2,20 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import lombok.Getter;
 
+import java.util.List;
+
 public class ArrayDefinitionNode extends AstNode {
-    private final TypeNode type;
+    @Getter private final TypeNode type;
 
     // we need this only if dynamic sizing is allowed
-    private final int size;
+    @Getter private final List<Integer> sizes;
 
-    private  IdentifierNode identifier;
+    private IdentifierNode identifier;
 
-    public ArrayDefinitionNode(TypeNode type, int size, IdentifierNode identifier) {
+    public ArrayDefinitionNode(TypeNode type, List<Integer> sizes, IdentifierNode identifier) {
         this.type = type;
-        this.size = size;
+        this.sizes = sizes;
         this.identifier = identifier;
-    }
-
-    public TypeNode getType() {
-        return type;
-    }
-
-    public int getSize() {
-        return size;
     }
 
     public String getIdentifier() {

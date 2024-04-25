@@ -13,33 +13,54 @@ statement
     | structureDefinition
     | importStatement
     | variableDeclaration
-    | arrayDefinition
+    | arrayDeclaration
     | coordinateDeclaration
     | methodCall
+    | propertyAssignment
     ;
 
 importStatement : 'import' STRING ;
 functionDefinition : 'fn' IDENTIFIER '(' parameterList? ')' '->' type block ;
-structureDefinition : 'struct' IDENTIFIER '{' variableDeclaration* '}' ;
-variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression | structInstantiation) ;
 
-primitiveTypeForArray
-    : 'int'
-    | 'float'
+
+structureDefinition : 'var' IDENTIFIER ':' structType '=' '{' variableDeclaration* '}' ;
+variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression) ;
+arrayDeclaration : 'var' IDENTIFIER ':' legalArrayType arrayOptionalIndex+;
+
+
+arrayOptionalIndex : '[' INT? ']' ;
+
+legalArrayType :
+    'bool'
+    | 'coord'
+    | 'int'
     | 'string'
+    | 'float'
+    | IDENTIFIER
     ;
 
-type
-    : primitiveTypeForArray
-    | 'bool'
+
+structType
+    : 'enemy'
+    | 'floor'
+    | 'wall'
+    ;
+
+
+type :
+    'bool'
+    | 'int'
+    | 'float'
     | 'coord'
     | 'void'
+    | 'string'
     | IDENTIFIER
-    | primitiveTypeForArray '[' ']'('[' ']')*
+    | legalArrayType '[' INT? ']' ('[' INT? ']')*
     ;
 assignment : (IDENTIFIER | arrayAccess) '=' expression ;
+propertyAssignment :  propertyAccess '=' expression ;
 functionCall : IDENTIFIER '(' argumentList? ')' ;
-methodCall : propertyAccess '(' argumentList? ')' ;
+methodCall : propertyAccess '(' argumentList? ')' ('.' IDENTIFIER)? ;
 argumentList : expression (',' expression)* ;
 parameterList : IDENTIFIER ':' type (',' IDENTIFIER ':' type)* ;
 
@@ -51,7 +72,7 @@ expression
     | expression op=('+' | '-') expression # AdditionSubtraction
     | expression op=('<' | '<=' | '>' | '>=' | '==' | '!=') expression # Relation
     | expression op=('AND' | 'OR') expression # Logical
-    | expression '..' primary # RandomBetween
+    | expression '..' expression # RandomBetween
     ;
 
 primary
@@ -63,13 +84,12 @@ primary
     | '(' expression ')' # Parentheses
     | functionCall # DummyFunctionCallExpr
     | methodCall # DummyMethodCall
-    | arrayAccess # DummyArrayAccessExpr
+    | arrayAccess # DummyArrayAccess
     | propertyAccess # DummyPropertyAccess
-    | structInstantiation # DummyStructInstantiationExpr
     ;
 
 
-structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER ':' expression)*)? '}' ;
+
 
 //operator
 //    : '!' # Not
@@ -94,10 +114,9 @@ structInstantiation : IDENTIFIER '{' (IDENTIFIER ':' expression (',' IDENTIFIER 
 ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' block )? ;
 whileLoop : 'while' expression block ;
 returnStatement : 'return' expression? ;
-block : '{' statement* '}' ;
-arrayDefinition : primitiveTypeForArray '[' INT? ']' ('[' INT ']')* IDENTIFIER ;
+block : '{' (statement  | expression)* '}' ;
 arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']')*;
-propertyAccess : IDENTIFIER '.' IDENTIFIER ;
+propertyAccess : structType '.' IDENTIFIER ('.' IDENTIFIER)? ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
 
 // Lexer rules
