@@ -280,6 +280,12 @@ public class Interpreter {
             } else if (toChange instanceof ArrayAccessNode) {
                 toChange = visit((ArrayAccessNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
+            } else if (toChange instanceof PropertyAccessNode) {
+                toChange = visit((PropertyAccessNode) toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+            } else if (toChange instanceof MethodCallNode) {
+                toChange = visit((MethodCallNode) toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             }
