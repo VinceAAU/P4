@@ -268,33 +268,11 @@ public class Visitor {
         AstNode left = node.getLeft(); // Får venstre x som i result=x+y i node form
         AstNode right = node.getRight();// Får højre y i node form
 
-        boolean valid_type_left = false;
-        boolean valid_type_right = false;
-
         Type left_type = Type.VOID;
-        Type right_Type= Type.VOID;
+        Type right_Type = Type.VOID;
 
-        if (left instanceof IdentifierNode) {
-            left_type = getVariable((IdentifierNode) left); // Vis x giv mig x value
-        } else if (left instanceof BinaryOperatorNode) {
-            left_type = binaryoperator_type_check((BinaryOperatorNode) left);
-        } else if (left instanceof IntNode) {
-            left_type = Type.INT;
-        } else if (left instanceof FloatNode) {
-            left_type = Type.FLOAT;
-        }
-
-        if (right instanceof IdentifierNode) {
-            right_Type = getVariable((IdentifierNode) right);// Vis y giv mig y value //! Jeg vil gerne have det
-                                                             // retunere type istedet for
-        } else if (right instanceof BinaryOperatorNode) {
-            right_Type = binaryoperator_type_check((BinaryOperatorNode) right); // ! Jeg vil gerne have det retunere                                                                       // type istedet for
-        }
-        else if (right instanceof IntNode) {
-            right_Type = Type.INT;
-        }else if (right instanceof FloatNode) {
-            right_Type = Type.FLOAT;
-        }
+        left_type = getType(left);
+        right_Type = getType(right);
 
         // Lav type check her.
 
@@ -303,83 +281,75 @@ public class Visitor {
         } else if (left_type == Type.FLOAT && right_Type == Type.FLOAT) {
             return Type.FLOAT;
         }
-        System.out.println("Wrong types for binnary operation:"+left_type+":"+left+" And:"+right+":"+right_Type);
+        System.out.println(
+                "Wrong types for binnary operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
         return Type.VOID;
     }
 
-    public Type relationOperator_Type_check(RelationsAndLogicalOperatorNode node){
+    public Type relationOperator_Type_check(RelationsAndLogicalOperatorNode node) {
 
         AstNode left = node.getLeft();
         AstNode right = node.getRight();
-        
-        if (left instanceof IdentifierNode) {
-            left = getVariable((IdentifierNode) left);
-        } else if (left instanceof RelationsAndLogicalOperatorNode) {
-            left = visit((RelationsAndLogicalOperatorNode) left);
+
+        Type left_type = Type.VOID;
+        Type right_Type = Type.VOID;
+
+        left_type = getType(left);
+        right_Type = getType(right);
+
+        if (left_type == Type.INT && right_Type == Type.INT) { // Her at udregning sker, som ikke burde ske.
+            return Type.BOOLEAN;
+        } else if (left_type == Type.FLOAT && right_Type == Type.FLOAT) {
+            return Type.BOOLEAN;
+        } else if (left_type == Type.BOOLEAN && right_Type == Type.BOOLEAN) {
+            return Type.BOOLEAN;
         }
-        if (right instanceof IdentifierNode) {
-            right = getVariable((IdentifierNode) right);
-        } else if (right instanceof RelationsAndLogicalOperatorNode) {
-            right = visit((RelationsAndLogicalOperatorNode) right);
-        }
-        if (left instanceof IntNode && right instanceof IntNode) {
-            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
-        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
-        } else if (left instanceof BoolNode && right instanceof BoolNode) {
-            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
-        }
-        throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
+
+        System.out.println(
+                "Wrong types for binnary operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
         return Type.VOID;
     }
 
-    public AstNode visit(RelationsAndLogicalOperatorNode node) {
-        AstNode left = node.getLeft();
-        AstNode right = node.getRight();
-        if (left instanceof IdentifierNode) {
-            left = getVariable((IdentifierNode) left);
-        } else if (left instanceof RelationsAndLogicalOperatorNode) {
-            left = visit((RelationsAndLogicalOperatorNode) left);
+    public Type getType(AstNode node) {
+        Type type = Type.VOID;
+        if (node instanceof IdentifierNode) {
+            type = getVariable((IdentifierNode) node); // Vis x giv mig x value
+        } else if (node instanceof BinaryOperatorNode) {
+            type = binaryoperator_type_check((BinaryOperatorNode) node);
+        } else if (node instanceof IntNode) {
+            type = Type.INT;
+        } else if (node instanceof FloatNode) {
+            type = Type.FLOAT;
+        } else if (node instanceof BoolNode) {
+            type = Type.BOOLEAN;
         }
-        if (right instanceof IdentifierNode) {
-            right = getVariable((IdentifierNode) right);
-        } else if (right instanceof RelationsAndLogicalOperatorNode) {
-            right = visit((RelationsAndLogicalOperatorNode) right);
-        }
-        if (left instanceof IntNode && right instanceof IntNode) {
-            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
-        } else if (left instanceof FloatNode && right instanceof FloatNode) {
-            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
-        } else if (left instanceof BoolNode && right instanceof BoolNode) {
-            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
-        }
-        throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
+
+        return type;
+
     }
 
-    public AstNode visit(WhileLoopNode node) {
+    public void visit(WhileLoopNode node) { // ! Type cheking her er at checke expression while(expresion) sikre at det
+                                            // er en bool type
         AstNode toCheck = (node.getExpression()).getNode();
-        if (toCheck instanceof IdentifierNode) {
-            toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
-        } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
-            toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
-        }
-        while ((toCheck instanceof BoolNode)) {
-            if (((BoolNode) toCheck).getValue()) {
-                HashMap<String, AstNode> localTable = new HashMap<>();
-                scopes.add(localTable);
-                visit(node.getBlock());
-                toCheck = visit(node.getExpression().getNode());
-                if (toCheck instanceof IdentifierNode) {
-                    toCheck = getVariable((IdentifierNode) node.getExpression().getNode());
-                } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
-                    toCheck = visit((RelationsAndLogicalOperatorNode) toCheck);
-                }
-                scopes.remove(localTable);
-            } else {
-                return node;
-            }
+        Type tocheck_type = Type.VOID;
 
+        if (toCheck instanceof IdentifierNode) {
+            tocheck_type = getVariable((IdentifierNode) node.getExpression().getNode()); // skal evaluere til bool
+        } else if (toCheck instanceof RelationsAndLogicalOperatorNode) {
+            tocheck_type = relationOperator_Type_check((RelationsAndLogicalOperatorNode) toCheck); // skal også til bool
         }
-        throw new RuntimeException("Did not get into while statement");
+        if (toCheck instanceof BoolNode) {
+            tocheck_type = Type.BOOLEAN;
+        }
+
+        if (tocheck_type != Type.BOOLEAN) {
+            System.out.println("While loop condition wrong type should be bool, but was:"+tocheck_type + "and got thi node"+toCheck);
+        }
+        HashMap<String, AstNode> localTable = new HashMap<>();
+        scopes.add(localTable);
+        visit(node.getBlock());
+        toCheck = visit(node.getExpression().getNode());
+        scopes.remove(localTable);
+
     }
 }
