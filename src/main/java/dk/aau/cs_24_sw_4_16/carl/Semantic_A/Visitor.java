@@ -6,8 +6,8 @@ import dk.aau.cs_24_sw_4_16.carl.Interpreter.InbuildClasses;;
 
 public class Visitor {
     HashMap<String, FunctionDefinitionNode> fTable; // function table, identifier(x) og node
-    HashMap<String, AstNode> vTable;// variable table, identifier(x) og node(int)
-    Stack<HashMap<String, AstNode>> scopes; // scope table, variable identifier(x) og node
+    HashMap<String, Type> ETable;// variable table, identifier(x) og node(int)
+    Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
     Deque<Integer> activeScope;// Hvilket scope vi er i nu
 
     boolean printyes = true;// ! SLET SENERE
@@ -18,11 +18,11 @@ public class Visitor {
                 System.out.println("Hej jeg kommer int i visitor");
             }
             fTable = new HashMap<>();
-            vTable = new HashMap<>();
+            ETable = new HashMap<>();
             scopes = new Stack<>();
             activeScope = new ArrayDeque<>();
             activeScope.push(0);
-            scopes.add(vTable);
+            scopes.add(ETable);
 
             return visit((ProgramNode) node);
         } else if (node instanceof StatementNode) {
@@ -33,7 +33,7 @@ public class Visitor {
         return node;
     }
 
-    public AstNode visit(StatementNode node) {
+    public void visit(StatementNode node) {
         if (node.getNode() instanceof AssignmentNode) {
             visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {
@@ -54,7 +54,7 @@ public class Visitor {
         } else if (node.getNode() instanceof ReturnStatementNode) {
             return visit((ReturnStatementNode) node.getNode());
         }
-        return null;
+
     }
 
     public AstNode visit(ReturnStatementNode node) {
@@ -62,7 +62,7 @@ public class Visitor {
     }
 
     public void visit(IfStatementNode node) {
-        HashMap<String, AstNode> localTable = new HashMap<>(); // ny lokalt value table
+        HashMap<String, Type> localTable = new HashMap<>(); // ny lokalt value table
         scopes.add(localTable); // Tilføjer det til stacken med scopes
         boolean visited = false;
         for (int i = 0; i < node.getExpressions().size(); i++) { // Hver expression er en if statement. Ligesom hver
@@ -102,7 +102,7 @@ public class Visitor {
 
     public void visit(AssignmentNode node) {
 
-        for (HashMap<String, AstNode> vTable : scopes) {
+        for (HashMap<String, Type> vTable : scopes) {
             if (vTable.containsKey(node.getIdentifier().toString())) { // tjek if variable x is scopes bool
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());// retunere node
                 AstNode toChange = node.getValue(); // Højre side af assignmen x= tochange vil retunere node
@@ -193,7 +193,7 @@ public class Visitor {
         return node;
     }
 
-    public AstNode visit(FunctionCallNode node) {
+    public void visit(FunctionCallNode node) {
         if (node.getFunctionName().toString().equals("print")) {
             InbuildClasses.print(node, scopes, activeScope);
         } else {
@@ -232,7 +232,7 @@ public class Visitor {
         return node;
     }
 
-    public AstNode visit(BlockNode node) {
+    public void visit(BlockNode node) {
         for (AstNode statement : node.getStatements()) {
 
             if (((StatementNode) statement).getNode() instanceof ReturnStatementNode) {
@@ -241,10 +241,9 @@ public class Visitor {
                 visit((StatementNode) statement);
             }
         }
-        return node;
     }
 
-    public AstNode visit(ExpressionNode node) {
+    public void visit(ExpressionNode node) {
         if (node.getNode() instanceof FunctionCallNode) {
             return visit((FunctionCallNode) node.getNode());
         } else if (node.getNode() instanceof RelationsAndLogicalOperatorNode) {
@@ -255,13 +254,12 @@ public class Visitor {
         return node;
     }
 
-    public AstNode visit(FunctionDefinitionNode node) {
+    public void visit(FunctionDefinitionNode node) {
         if (!fTable.containsKey(node.getIdentifier().toString())) {
             fTable.put(node.getIdentifier().toString(), node);
         } else {
             throw new RuntimeException("function " + node.getIdentifier() + " already exists");
         }
-        return node;
     }
 
     public Type binaryoperator_type_check(BinaryOperatorNode node) {
@@ -312,6 +310,7 @@ public class Visitor {
 
     public Type getType(AstNode node) {
         Type type = Type.VOID;
+
         if (node instanceof IdentifierNode) {
             type = getVariable((IdentifierNode) node); // Vis x giv mig x value
         } else if (node instanceof BinaryOperatorNode) {
@@ -322,10 +321,14 @@ public class Visitor {
             type = Type.FLOAT;
         } else if (node instanceof BoolNode) {
             type = Type.BOOLEAN;
+        } else if (node instanceof ExpressionNode){
+            if(((ExpressionNode) node).getNode() instanceof  BinaryOperatorNode){
+                type = binaryoperator_type_check((BinaryOperatorNode) node);
+            } else if (((ExpressionNode) node).getNode() instanceof RelationsAndLogicalOperatorNode){
+                type = relationOperator_Type_check((RelationsAndLogicalOperatorNode) node);
+            }
         }
-
         return type;
-
     }
 
     public void visit(WhileLoopNode node) { // ! Type cheking her er at checke expression while(expresion) sikre at det
