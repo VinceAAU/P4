@@ -7,11 +7,13 @@ public class SemanticAnalyzer {
 
     public void analyze(AstNode root) throws SemanticException {
         if (printTest) {
-            System.out.println("Hej jeg kommer her ind");
+         //   System.out.println("Hej jeg kommer her ind");
         }
-        System.out.println("Her starter visitor class");
-        Visitor visitor = new Visitor();
-        visitor.visit(root);
+       // System.out.println("Her starter visitor class");
+
+        TypeChecker typeChecker = new TypeChecker();
+        typeChecker.visitor(root);
+
         System.out.println("Her stopper visitor class");
 
         if (root != null) {
