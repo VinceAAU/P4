@@ -3,7 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.Semantic_A;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 public class SemanticAnalyzer {
 
-    public boolean printTest = false;
+    public boolean printTest = true;
 
     public void analyze(AstNode root) throws SemanticException {
         if (printTest) {
@@ -76,9 +76,10 @@ System.out.println("-----------------------------------------------");
         } else if (node instanceof VariableDeclarationNode) {
             visitVariableDeclaration((VariableDeclarationNode) node);
             if (printTest) {
-                System.out.println("Hej jeg kommer ind i variable");
+                System.out.println("Hej jeg kommer ind i variabledeclaration");
             }
         }
+
         // Add more as necessary
     }
 
