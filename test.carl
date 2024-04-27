@@ -6,8 +6,9 @@ var sej :int = nej
 
 var k:int = 20
 c=10
+var pp:int = 4+c
 
-
+pp= 5+nej
 c=k // p bliver gemt 
 
 k=nej

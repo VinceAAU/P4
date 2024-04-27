@@ -13,7 +13,7 @@ public class SemanticAnalyzer {
 
         TypeChecker typeChecker = new TypeChecker();
         typeChecker.visitor(root);
-
+System.out.println("-----------------------------------------------");
         System.out.println("Her stopper visitor class");
 
         if (root != null) {

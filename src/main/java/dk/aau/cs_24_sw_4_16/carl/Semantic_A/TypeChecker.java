@@ -45,6 +45,29 @@ public class TypeChecker {
         }
     }
 
+    public Type binaryoperator_type_check(BinaryOperatorNode node) {
+        AstNode left = node.getLeft(); // Får venstre x som i result=x+y i node form
+        AstNode right = node.getRight();// Får højre y i node form
+
+        Type left_type = Type.VOID;
+        Type right_Type = Type.VOID;
+
+        left_type = getType(left);
+        right_Type = getType(right);
+
+        if (left_type == Type.INT && right_Type == Type.INT) { // Her at udregning sker, som ikke burde ske.
+            return Type.INT;
+
+        } else if (left_type == Type.FLOAT && right_Type == Type.FLOAT) {
+            return Type.FLOAT;
+        }
+
+        System.out.println(
+                "Wrong types for binnary operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
+        return Type.VOID;
+
+    }
+
     private void visitVariableDeclaration(VariableDeclarationNode node) {
 
         try {
@@ -66,21 +89,8 @@ public class TypeChecker {
 
                 if (variableType == assignmentType) {
                     Type Type_we_save_in_E_table = variableType;
+                    scopes.getLast().put(node.getIdentifier().toString(), Type_we_save_in_E_table);
 
-                    if (node.getValue() instanceof BinaryOperatorNode) {
-                        // toChange = visit((BinaryOperatorNode) node.getValue());
-
-                        // scopes.getLast().put(node.getIdentifier().toString(), toChange);
-                    } else if (node.getValue() instanceof IdentifierNode) {
-                        for (HashMap<String, Type> ETable : scopes) {
-                            if (ETable.containsKey(Type_we_save_in_E_table.toString())) {
-                                scopes.getLast().put(node.getIdentifier().toString(),
-                                        ETable.get(Type_we_save_in_E_table.toString()));
-                            }
-                        }
-                    } else {
-                        scopes.getLast().put(node.getIdentifier().toString(), Type_we_save_in_E_table);
-                    }
                 } else {
                     System.out.println("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
                             + " that has the type:" + variableType
@@ -96,16 +106,15 @@ public class TypeChecker {
     }
 
     public Type getVariable(IdentifierNode node) {
-        for (HashMap<String, Type> ETable : scopes) {
-            if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-                System.out.println("Get Varible ident:"+node.getIdentifier());
-                System.out.println("Get Varible"+scopes.getFirst().get(node.getIdentifier().toString()));
-                return scopes.getFirst().get(node.getIdentifier().toString());
-            }
+        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
+            System.out.println("Get Varible ident:" + node.getIdentifier());
+            System.out.println("Get Varible" + scopes.getFirst().get(node.getIdentifier().toString()));
+            return scopes.getFirst().get(node.getIdentifier().toString());
         }
+
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                System.out.println("Get Varible2"+scopes.getFirst().get(node.getIdentifier().toString()));
+                System.out.println("Get Varible2" + scopes.getFirst().get(node.getIdentifier().toString()));
                 return scopes.get(i).get(node.getIdentifier().toString());
             }
         }
@@ -122,10 +131,8 @@ public class TypeChecker {
                 // hent gamle type og nye type.
                 Type oldType = getType(node.getIdentifier());
                 String identifier = node.getIdentifier().toString();
-                System.out.println(oldType);
 
                 Type rightType = getType(node.getValue());
-                System.out.println("we get in hereaowidjawiodjwaoidja");
                 // tjekke om det er lovligt.
                 if (oldType != rightType) {
                     System.out.println("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
@@ -145,7 +152,7 @@ public class TypeChecker {
         if (node instanceof IdentifierNode) {
             type = getVariable((IdentifierNode) node); // Vis x giv mig x value
         } else if (node instanceof BinaryOperatorNode) {
-            // type = binaryoperator_type_check((BinaryOperatorNode) node);
+            type = binaryoperator_type_check((BinaryOperatorNode) node);
         } else if (node instanceof IntNode) {
             IntNode intNode = (IntNode) node;
             Object value = intNode.getValue();
@@ -161,12 +168,9 @@ public class TypeChecker {
         } else if (node instanceof StringNode) {
             System.out.println("We get into string node");
             type = Type.STRING;
-        }
-
-        else if (node instanceof TypeNode) {
+        } else if (node instanceof TypeNode) {
             String type_fuck_me_why_did_we_save_types_as_String = ((TypeNode) node).getType();
             System.out.println(type_fuck_me_why_did_we_save_types_as_String + "get in gere");
-
             switch (type_fuck_me_why_did_we_save_types_as_String) {
                 case "int":
 
