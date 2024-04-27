@@ -3,7 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.Semantic_A;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 public class SemanticAnalyzer {
 
-    public boolean printTest = true;
+    public boolean printTest = false;
 
     public void analyze(AstNode root) throws SemanticException {
         if (printTest) {

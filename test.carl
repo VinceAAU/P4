@@ -1,58 +1,13 @@
 // Valid test cases
 var c : int = 5
-var y : int = c
-var d : int = 3
-var b : bool = true
-c = (4 + 4) + 4
-print(c,"myC")
-c = (d + d) + 5
-print(c,"My Second C")
-c = (5 + d) * 5
-c = 3 + (d + 5)
-print("Her starter Carls test")
-var poop : int =2
-var poop2 : int =2
-var p : int = poop+poop2
+var p: int = "Hej"
+var nej:string = "hej hej"
+var sej :int = nej
 
-print(p, "CARLS PRINT" )
+var k:int = 20
+c=10
 
-while d <= 5{
-    print(d)
-    var b2 : int = d
-    print(b2, "got it")
-    d= d+1
-}
-fn test (haha : int, baba : bool) -> void{
-    print(haha)
-    print(baba)
-    test2(69,false)
-}
-fn test2 (haha : int, baba : bool) -> void{
-    print(haha)
-    print(baba)
-}
-test(69420,true)
-if false{
-    print("false")
-}
-else if b{
-    print("else if")
-    b = false
-    var holy : bool = false
-    if true{
-        holy = false
-        print(holy)
-    }
-    if true{
-        holy = true
-        print(holy)
-    }
-    if true{
-        holy = false
-        print(holy)
-    }
-    if true{
-        holy = true
-        print(holy)
-    }
-}
+
+c=k // p bliver gemt 
+
+k=nej
