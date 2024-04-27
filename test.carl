@@ -10,5 +10,5 @@ var pp:int = 4+c
 
 pp= 5+nej
 c=k // p bliver gemt 
-
+var bool:boolean = true 
 k=nej

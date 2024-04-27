@@ -45,6 +45,32 @@ public class TypeChecker {
         }
     }
 
+
+    public Type relationOperator_Type_check(RelationsAndLogicalOperatorNode node) {
+
+       AstNode left = node.getLeft();
+        AstNode right = node.getRight();
+
+        Type left_type = Type.VOID;
+        Type right_Type = Type.VOID;
+
+        left_type = getType(left);
+       right_Type = getType(right);
+
+        if (left_type == Type.INT && right_Type == Type.INT) { // Her at udregning sker, som ikke burde ske.
+            return Type.BOOLEAN;
+        } else if (left_type == Type.FLOAT && right_Type == Type.FLOAT) {
+            return Type.BOOLEAN;
+        } else if (left_type == Type.BOOLEAN && right_Type == Type.BOOLEAN) {
+            return Type.BOOLEAN;
+        }
+
+        System.out.println(
+                "Wrong types for binnary operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
+        return Type.VOID;
+    }
+
+
     public Type binaryoperator_type_check(BinaryOperatorNode node) {
         AstNode left = node.getLeft(); // Får venstre x som i result=x+y i node form
         AstNode right = node.getRight();// Får højre y i node form
