@@ -178,8 +178,6 @@ public class TypeChecker {
 * */
 
     public void visitIfStatement(IfStatementNode node) {
-        HashMap<String, Type> localTable = new HashMap<>();
-        scopes.add(localTable);
         Type expression = Type.VOID;
         System.out.println("FYcj this code i hate the oop it sucsk ass");
         for (int i = 0; i < node.getExpressions().size(); i++) {
@@ -190,6 +188,8 @@ public class TypeChecker {
             }
         }
         for (int i = 0; i < node.getBlocks().size(); i++) {
+            HashMap<String, Type> localTable = new HashMap<>();
+            scopes.add(localTable);
             visitBlockNode(node.getBlocks().get(i));
 
             System.out.println(node.getBlocks().get(i));
