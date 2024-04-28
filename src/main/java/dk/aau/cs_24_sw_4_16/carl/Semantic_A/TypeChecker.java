@@ -43,6 +43,9 @@ public class TypeChecker {
         if(node.getNode() instanceof  IfStatementNode) {
             visitIfStatement((IfStatementNode) node.getNode());
         }
+        if (node.getNode() instanceof WhileLoopNode) {
+            visitWhileLoop((WhileLoopNode) node.getNode());
+        }
     }
 
 
@@ -65,7 +68,7 @@ public class TypeChecker {
             return Type.BOOLEAN;
         }
 
-        System.out.println(
+        System.err.println(
                 "Wrong types for relation operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
         return Type.VOID;
     }
@@ -88,7 +91,7 @@ public class TypeChecker {
             return Type.FLOAT;
         }
 
-        System.out.println(
+        System.err.println(
                 "Wrong types for binnary operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
         return Type.VOID;
 
@@ -118,7 +121,7 @@ public class TypeChecker {
                     scopes.getLast().put(node.getIdentifier().toString(), Type_we_save_in_E_table);
 
                 } else {
-                    System.out.println("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
+                    System.err.println("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
                             + " that has the type:" + variableType
                             + " And that is hella iligal");
                 }
@@ -126,7 +129,7 @@ public class TypeChecker {
                 throw new RuntimeException("variable " + node.getIdentifier() + " already exists");
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
 
     }
@@ -144,7 +147,7 @@ public class TypeChecker {
                 return scopes.get(i).get(node.getIdentifier().toString());
             }
         }
-        System.out.println("could not find the variable: " + node.getIdentifier());
+        System.err.println("could not find the variable: " + node.getIdentifier());
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
 
     }
@@ -161,7 +164,7 @@ public class TypeChecker {
                 Type rightType = getType(node.getValue());
                 // tjekke om det er lovligt.
                 if (oldType != rightType) {
-                    System.out.println("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
+                    System.err.println("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
                             + " that has the type:" + oldType
                             + " And that is hella iligal");
                 }
@@ -179,12 +182,10 @@ public class TypeChecker {
 
     public void visitIfStatement(IfStatementNode node) {
         Type expression = Type.VOID;
-        System.out.println("FYcj this code i hate the oop it sucsk ass");
         for (int i = 0; i < node.getExpressions().size(); i++) {
             expression = getType(node.getExpressions().get(i).getNode());
-            System.out.println("this is expression:"+i+":"+node.getExpressions().get(i).getNode().getClass());
             if (expression != Type.BOOLEAN) {
-                System.out.println("If statements expresion must resolve to bool expresion, and this resolve to Type:" + expression);
+                System.err.println("If statements expresion must resolve to bool expresion, and this resolve to Type:" + expression);
             }
         }
         for (int i = 0; i < node.getBlocks().size(); i++) {
@@ -193,10 +194,20 @@ public class TypeChecker {
             visitBlockNode(node.getBlocks().get(i));
 
             System.out.println(node.getBlocks().get(i));
-            //Måske forkert, men det virker
             scopes.remove(localTable);
         }
-//        scopes.remove(localTable);
+    }
+
+    public void visitWhileLoop(WhileLoopNode node) {
+        Type toCheck = getType((node.getExpression()).getNode());
+        if (toCheck != Type.BOOLEAN) {
+            System.err.println("Condition type is not boolean");
+        }
+        HashMap<String, Type> localTable = new HashMap<>();
+        scopes.add(localTable);
+        visitBlockNode(node.getBlock());
+        System.out.println(node.getBlock());
+        scopes.remove(localTable);
     }
 
     public void visitBlockNode(BlockNode node) {
@@ -263,7 +274,7 @@ public class TypeChecker {
             }
 
         } else {
-            System.out.println("The node we get failed to handle:" + node.getClass());
+            System.err.println("The node we get failed to handle:" + node.getClass());
         }
         return type;
     }
