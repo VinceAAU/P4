@@ -392,14 +392,16 @@ public class Interpreter {
             InbuildClasses.generateSpawns(node, scopes, tileInformationEnemy, rooms);
         } else if (node.getFunctionName().toString().equals("printMap")) {
             InbuildClasses.printMap(scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy);
-        } else if(node.getFunctionName().toString().equals("writeToFile")){
+        } else if (node.getFunctionName().toString().equals("writeToFile")) {
             try {
                 InbuildClasses.writeToFile(node, scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-        }else {
+        } else if (node.getFunctionName().toString().equals("setSeed")) {
+            InbuildClasses.setSeed(node);
+        } else {
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
             activeScope.add(scopes.size() - 1);

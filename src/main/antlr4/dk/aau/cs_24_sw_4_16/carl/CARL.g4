@@ -44,6 +44,7 @@ structType
     : 'enemy'
     | 'floor'
     | 'wall'
+    | 'room'
     ;
 
 

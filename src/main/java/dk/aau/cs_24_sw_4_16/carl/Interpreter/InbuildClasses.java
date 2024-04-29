@@ -146,14 +146,16 @@ public class InbuildClasses {
         map.set(new StringNode("p"), xPlayer, yPlayer);
     }
 
-    public static void printMap( Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) {
+    public static void printMap(Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) {
 
-        System.out.println(generatePrint(scopes,tileInformationFloor,tileInformationWall,tileInformationEnemy));
+        System.out.println(generatePrint(scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy));
     }
+
     public static void writeToFile(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) throws IOException {
-        Files.writeString(Path.of("map.json"), generatePrint(scopes,tileInformationFloor,tileInformationWall,tileInformationEnemy));
+        Files.writeString(Path.of("map.json"), generatePrint(scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy));
     }
-    private static String generatePrint(Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy){
+
+    private static String generatePrint(Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) {
         ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
         StringBuilder sb = new StringBuilder("""
                 {"map" : {
@@ -223,6 +225,7 @@ public class InbuildClasses {
         sb.append("]}}");
         return sb.toString();
     }
+
     private static void tileInformationStringBuilder(HashMap<String, HashMap<String, AstNode>> tileInformation, StringBuilder sb) {
         for (String name : tileInformation.keySet()) {
             for (HashMap<String, AstNode> innerHashMap : tileInformation.values()) {
@@ -267,5 +270,19 @@ public class InbuildClasses {
             }
         }
         return false;
+    }
+
+    public static void setSeed(FunctionCallNode node) {
+        if (node.getArguments().size() == 1) {
+            if (node.getArgument(0) instanceof IntNode) {
+                Interpreter.rand = new Random(((IntNode) node.getArgument(0)).getValue());
+            } else {
+                throw new RuntimeException("setSeed only supports int arguments");
+            }
+        } else if (node.getArguments().isEmpty()) {
+            Interpreter.rand = new Random();
+        } else {
+            throw new RuntimeException("setSeed called accepts only a singular int argument or none");
+        }
     }
 }

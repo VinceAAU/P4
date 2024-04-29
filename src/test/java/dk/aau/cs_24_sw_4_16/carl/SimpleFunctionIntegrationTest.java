@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleFunctionIntegrationTest {
@@ -34,8 +35,8 @@ public class SimpleFunctionIntegrationTest {
     @Test
     public void testingPrintSatement() throws Exception {
         String code = """
-                       print("test")
-                       """;
+                print("test")
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -54,10 +55,10 @@ public class SimpleFunctionIntegrationTest {
     @Test
     public void testingVariable() throws Exception {
         String code = """
-                       var x : int = 42
-                       var y : int = x
-                       print(y)
-                       """;
+                var x : int = 42
+                var y : int = x
+                print(y)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -99,9 +100,9 @@ public class SimpleFunctionIntegrationTest {
     @Test
     public void testingAddition() throws Exception {
         String code = """
-                       var x : int = (1 + 2) - 2
-                       print(x)
-                       """;
+                var x : int = (1 + 2) - 2
+                print(x)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -175,12 +176,13 @@ public class SimpleFunctionIntegrationTest {
         // Assertions can be extended based on the print output or internal state checks
         assertEquals("3".trim(), outContent.toString().trim(), "Expected the output to be 3 because x does not meet the other conditions and therefore, y should be set to 3.");
     }
+
     @Test
     public void testingMult() throws Exception {
         String code = """
-                       var x : int = (1 * 4) / 2
-                       print(x)
-                       """;
+                var x : int = (1 * 4) / 2
+                print(x)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -225,12 +227,12 @@ public class SimpleFunctionIntegrationTest {
     @Test
     public void testingFunction() throws Exception {
         String code = """
-                       fn calculate() -> int {
-                           return 42
-                       }
-                       var result: int = calculate()
-                       print(result)
-                       """;
+                fn calculate() -> int {
+                    return 42
+                }
+                var result: int = calculate()
+                print(result)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -421,6 +423,205 @@ public class SimpleFunctionIntegrationTest {
 //        assertEquals("true", outContent.toString().trim(), "Expected the output to be true because 3 < 4.");
 //    }
 
+    @Test
+    public void testingSeed() throws Exception {
+        String code = """
+                setSeed(42069)
+                var test : int = 1..20
+                print(test)
+                """;
 
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+
+        assertEquals("14".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testingSeed2() throws Exception {
+        String code = """
+                setSeed(555)
+                var test : int = 1..20
+                print(test)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+
+        assertEquals("6".trim(), outContent.toString().trim());
+    }
+
+
+    @Test
+    public void testingEntireProcedure() throws Exception {
+        String code = """
+                setSeed(42069)
+                generateMap(20,25)
+                generateRooms(3,5,7)
+                generateCorridors()
+                generateSpawns()
+                printMap()
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+// do not touch the indentation of the check it will break
+        assertEquals("""
+{"map" : {
+    "size":{
+    "height" : 10,
+    "width" : 10
+     },
+     "tiles": [
+
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","p","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","f","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","f","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","f","f","f","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]}],
+"level" : 1,
+"type" : "Room",
+"tileInformation":[
+{
+"symbol" : "w" ,
+"info" : {
+    "name" : "Wall"
+   }
+},
+{
+"symbol" : "f" ,
+"info" : {
+    "name" : "Floor"
+   }
+},
+{
+"symbol" : "p" ,
+"info" : {
+    "name" : "Player"
+   }
+}
+]}}
+                """.trim(), outContent.toString().trim());
+    }
+
+
+    //* +++++++++++++++++++++++    DONT YOU DARE TOUCH THIS TEST   +++++++++++++++++++++ *//
+    @Test
+    public void testingEntireProcedure2() throws Exception {
+        String code = """
+setSeed(242)
+generateMap(20,25)
+generateRooms(3,5,7)
+generateCorridors()
+generateSpawns()
+printMap()
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        Interpreter interpreter = new Interpreter();
+        interpreter.visit(astRoot);
+
+
+        assertEquals("""
+{"map" : {
+    "size":{
+    "height" : 10,
+    "width" : 10
+     },
+     "tiles": [
+
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","p","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]}],
+"level" : 1,
+"type" : "Room",
+"tileInformation":[
+{
+"symbol" : "w" ,
+"info" : {
+    "name" : "Wall"
+   }
+},
+{
+"symbol" : "f" ,
+"info" : {
+    "name" : "Floor"
+   }
+},
+{
+"symbol" : "p" ,
+"info" : {
+    "name" : "Player"
+   }
+}
+]}}
+""".trim(), outContent.toString().trim());
+    }
 
 }
