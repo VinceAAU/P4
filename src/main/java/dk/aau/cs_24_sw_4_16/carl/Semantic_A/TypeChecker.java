@@ -185,9 +185,6 @@ public class TypeChecker {
       if(returnType != activeFunction){
           error_handler("The return type " + returnType + " Does not match the return statement of the function " + activeFunction.getTypeName());
       }
-      if (Objects.equals(returnType.toString(), )) {
-          error_handler("Missing return statement");
-      }
     }
 
     public void visitAssignNode(AssignmentNode node) {
