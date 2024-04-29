@@ -123,7 +123,7 @@ coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expr
 INT : [-]?[0-9]+ ;
 FLOAT : [-]?[0-9]* '.' [0-9]+ ;
 STRING : '"' ~["]* '"' ;
-BOOL : '\b(true|false)\b' ;
+BOOL : ('true' | 'false') ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
 WS : [ \t\r\n]+ -> skip ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
