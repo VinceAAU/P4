@@ -11,7 +11,7 @@ public class TypeChecker {
     HashMap<String, Type> ETable;// variable table, identifier(x) og node(int)
     Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
     Deque<Integer> activeScope;// Hvilket scope vi er i nu
-
+    int error =1;
     public TypeChecker() {
         fTable = new HashMap<>();
         ETable = new HashMap<>();
@@ -66,7 +66,9 @@ public class TypeChecker {
         } else if (left_type == Type.BOOLEAN && right_Type == Type.BOOLEAN) {
             return Type.BOOLEAN;
         }
-
+        
+        System.out.println("Error:"+error);
+        error = error+1;
         System.err.println(
                 "Wrong types for relation operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
         return Type.VOID;
@@ -88,7 +90,8 @@ public class TypeChecker {
         } else if (left_type == Type.FLOAT && right_Type == Type.FLOAT) {
             return Type.FLOAT;
         }
-
+        System.out.println("Error:"+error);
+        error = error+1;
         System.err.println(
                 "Wrong types for binnary operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
         return Type.VOID;
@@ -120,6 +123,8 @@ public class TypeChecker {
                     scopes.getLast().put(node.getIdentifier().toString(), Type_we_save_in_E_table);
 
                 } else {
+                    System.out.println("Error:"+error);
+        error = error+1;
                     System.err.println("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
                             + " that has the type:" + variableType
                             + " And that is hella iligal");
@@ -135,8 +140,8 @@ public class TypeChecker {
 
     public Type getVariable(IdentifierNode node) {
         if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-            System.out.println("Get Varible ident:" + node.getIdentifier());
-            System.out.println("Get Varible" + scopes.getFirst().get(node.getIdentifier().toString()));
+            System.out.print("Get Varible identifier:" + node.getIdentifier());
+            System.out.println(":  Get Varible type:" + scopes.getFirst().get(node.getIdentifier().toString()));
             return scopes.getFirst().get(node.getIdentifier().toString());
         }
 
@@ -163,6 +168,8 @@ public class TypeChecker {
                 Type rightType = getType(node.getValue());
                 // tjekke om det er lovligt.
                 if (oldType != rightType) {
+                    System.out.println("Error:"+error);
+        error = error+1;
                     System.err.println("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
                             + " that has the type:" + oldType
                             + " And that is hella iligal");
