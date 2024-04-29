@@ -2,9 +2,10 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
-
+import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
@@ -33,7 +34,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             return new StatementNode(visitIfStatement(ctx.ifStatement()));
         } else if (ctx.returnStatement() != null) {
             return new StatementNode(visitReturnStatement(ctx.returnStatement()));
-
+        } else if (ctx.structureDefinition() != null) {
+            return new StatementNode(visitStructureDefinition(ctx.structureDefinition()));
+        } else if (ctx.propertyAssignment() != null) {
+            return new StatementNode(visitPropertyAssignment(ctx.propertyAssignment()));
+        } else if (ctx.arrayDeclaration() != null) {
+            return new StatementNode(visitArrayDeclaration(ctx.arrayDeclaration()));
         }
         throw new RuntimeException("Unknown statement type: " + ctx.getText());
     }
@@ -56,7 +62,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitStructureDefinition(CARLParser.StructureDefinitionContext ctx) {
-        return super.visitStructureDefinition(ctx);
+        String type = ctx.structType().getText();
+        List<VariableDeclarationNode> variableDeclarationNodes = new ArrayList<>();
+        for (var variableDeclaration : ctx.variableDeclaration()) {
+            variableDeclarationNodes.add((VariableDeclarationNode) visit(variableDeclaration));
+        }
+        return new StructureDefinitionNode(new IdentifierNode(ctx.IDENTIFIER().getText()), type, variableDeclarationNodes);
     }
 
     @Override
@@ -71,8 +82,30 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitPrimitiveTypeForArray(CARLParser.PrimitiveTypeForArrayContext ctx) {
-        return super.visitPrimitiveTypeForArray(ctx);
+    public AstNode visitArrayDeclaration(CARLParser.ArrayDeclarationContext ctx) {
+        String identifier = ctx.IDENTIFIER().getText();
+
+        IdentifierNode identifierNode = new IdentifierNode(identifier);
+
+        TypeNode type = (TypeNode) /*This is the part where we pray to God that it does indeed return a TypeNode */ visit(ctx.legalArrayType());
+
+        List<Integer> sizes = ctx.arrayOptionalIndex().stream()
+                .map(arrayOptionalIndexContext -> {
+                    if (arrayOptionalIndexContext.INT() == null)
+                        return -1;
+                    else
+                        return Integer.parseInt(arrayOptionalIndexContext.INT().getText()); //And on this line, we pray that the int is indeed an int...
+                })
+                .toList();
+
+        return new ArrayDefinitionNode(type, sizes, identifierNode);
+
+
+    }
+
+    @Override
+    public AstNode visitLegalArrayType(CARLParser.LegalArrayTypeContext ctx) {
+        return new TypeNode(ctx.getText());
     }
 
     @Override
@@ -84,7 +117,22 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitAssignment(CARLParser.AssignmentContext ctx) {
         AstNode value = visit(ctx.expression());
-        return new AssignmentNode(new IdentifierNode(ctx.IDENTIFIER().getText()), value);
+
+        if (ctx.IDENTIFIER() != null)
+            return new AssignmentNode(new IdentifierNode(ctx.IDENTIFIER().getText()), value);
+        else if (ctx.arrayAccess() != null)
+            return new ArrayAssignmentNode((ArrayAccessNode) visit(ctx.arrayAccess()), value);
+        else
+            throw new Error("Neither an array access nor an identifier");
+    }
+
+    @Override
+    public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
+        IdentifierNode id = new IdentifierNode(ctx.IDENTIFIER().getText());
+
+        List<Integer> indices = ctx.INT().stream().map(tn -> Integer.parseInt(tn.getText())).toList();
+
+        return new ArrayAccessNode(id, indices);
     }
 
     @Override
@@ -100,12 +148,22 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitMethodCall(CARLParser.MethodCallContext ctx) {
-        return super.visitMethodCall(ctx);
+        ctx.argumentList();
+        if (ctx.IDENTIFIER() != null) {
+            return new MethodCallNode((PropertyAccessNode) visitPropertyAccess(ctx.propertyAccess()), visitArgumentList(ctx.argumentList()), new IdentifierNode(ctx.IDENTIFIER().getText()));
+        }
+        return new MethodCallNode((PropertyAccessNode) visitPropertyAccess(ctx.propertyAccess()), visitArgumentList(ctx.argumentList()));
     }
 
     @Override
     public AstNode visitArgumentList(CARLParser.ArgumentListContext ctx) {
-        return super.visitArgumentList(ctx);
+        List<AstNode> list = new ArrayList<>();
+        if (ctx != null) {
+            for (CARLParser.ExpressionContext exp : ctx.expression()) {
+                list.add(visit(exp));
+            }
+        }
+        return new ArgumentListNode(list);
     }
 
     @Override
@@ -234,7 +292,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitNot(CARLParser.NotContext ctx) {
-        AstNode left = visit(ctx.expression());
+        AstNode left = visit(ctx.expression()); //Why do we need both a left and a right if they're the same? -Vincent
         AstNode right = visit(ctx.expression());
         if (left instanceof BoolNode) {
             AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
@@ -245,13 +303,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitRandomBetween(CARLParser.RandomBetweenContext ctx) {
-        return super.visitRandomBetween(ctx);
+        AstNode left = visit(ctx.expression(0));
+        AstNode right = visit(ctx.expression(1));
+        return new BinaryOperatorNode(left, right, "..");
     }
 
-    @Override
-    public AstNode visitStructInstantiation(CARLParser.StructInstantiationContext ctx) {
-        return super.visitStructInstantiation(ctx);
-    }
 
     @Override
     public AstNode visitIfStatement(CARLParser.IfStatementContext ctx) {
@@ -333,18 +389,19 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitArrayDefinition(CARLParser.ArrayDefinitionContext ctx) {
-        return super.visitArrayDefinition(ctx);
-    }
-
-    @Override
-    public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
-        return super.visitArrayAccess(ctx);
-    }
-
-    @Override
     public AstNode visitPropertyAccess(CARLParser.PropertyAccessContext ctx) {
-        return super.visitPropertyAccess(ctx);
+        List<IdentifierNode> identifiers = new ArrayList<>();
+        for (TerminalNode identifier : ctx.IDENTIFIER()) {
+            identifiers.add(new IdentifierNode(identifier.toString()));
+        }
+        return new PropertyAccessNode(ctx.structType().getText(), identifiers);
+    }
+
+    @Override
+    public AstNode visitPropertyAssignment(CARLParser.PropertyAssignmentContext ctx) {
+        AstNode property = visitPropertyAccess(ctx.propertyAccess());
+        AstNode value = visit(ctx.expression());
+        return new PropertyAssignmentNode((PropertyAccessNode) property, value);
     }
 
     @Override

@@ -1,9 +1,11 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
+import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
+
 public class BinaryOperatorNode extends AstNode {
-    private AstNode left;
-    private AstNode right;
-    private String operator;
+    private final AstNode left;
+    private final AstNode right;
+    private final String operator;
 
     public BinaryOperatorNode(AstNode left, AstNode right, String operator) {
         this.left = left;
@@ -24,6 +26,8 @@ public class BinaryOperatorNode extends AstNode {
         return null;
     }
 
+    //Why are these static? I feel like this goes against the idea of OOP
+    //-Vincent
     public static AstNode performOperation(int leftValue, int rightValue, String operator) {
         return switch (operator) {
             case "+" -> new IntNode(String.valueOf(leftValue + rightValue));
@@ -31,6 +35,7 @@ public class BinaryOperatorNode extends AstNode {
             case "*" -> new IntNode(String.valueOf(leftValue * rightValue));
             case "/" -> new IntNode(String.valueOf(leftValue / rightValue));
             case "%" -> new IntNode(String.valueOf(leftValue % rightValue));
+            case ".." -> new IntNode(String.valueOf(Interpreter.rand.nextInt(leftValue, rightValue)));
             default -> throw new IllegalArgumentException("Invalid operator: " + operator);
         };
     }
@@ -42,6 +47,7 @@ public class BinaryOperatorNode extends AstNode {
             case "*" -> new FloatNode(String.valueOf(leftValue * rightValue));
             case "/" -> new FloatNode(String.valueOf(leftValue / rightValue));
             case "%" -> new FloatNode(String.valueOf(leftValue % rightValue));
+            case ".." -> new IntNode(String.valueOf(Interpreter.rand.nextFloat(leftValue, rightValue)));
             default -> throw new IllegalArgumentException("Invalid operator: " + operator);
         };
     }

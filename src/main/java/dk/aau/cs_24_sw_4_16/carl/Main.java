@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import dk.aau.cs_24_sw_4_16.carl.Semantic_A.SemanticAnalyzer;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 
 public class Main {
     public static void main(String... args) {
@@ -51,10 +52,14 @@ public class Main {
             Interpreter inter = new Interpreter();
             
             inter.visit(astRoot);
-        } catch (Exception e) {
+        }
+         catch (IOException e) {
+            System.out.println(e.toString());
+        }
+         catch (Exception e) {
             // Catches any exception that occurs within the try block.
             // Prints the string representation of the exception to standard output.
-            System.out.println(e.toString());
+            System.out.println();
         }
     }
 }
