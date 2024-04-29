@@ -40,7 +40,7 @@ public class TypeChecker {
         if (node.getNode() instanceof AssignmentNode) {
             visitAssignNode((AssignmentNode) node.getNode());
         }
-        if(node.getNode() instanceof  IfStatementNode) {
+        if (node.getNode() instanceof IfStatementNode) {
             visitIfStatement((IfStatementNode) node.getNode());
         }
         if (node.getNode() instanceof WhileLoopNode) {
@@ -48,11 +48,10 @@ public class TypeChecker {
         }
     }
 
-
     public Type relationOperator_Type_check(RelationsAndLogicalOperatorNode node) {
 
-       AstNode left = node.getLeft();
-       AstNode right = node.getRight();
+        AstNode left = node.getLeft();
+        AstNode right = node.getRight();
 
         Type left_type = Type.VOID;
         Type right_Type = Type.VOID;
@@ -72,7 +71,6 @@ public class TypeChecker {
                 "Wrong types for relation operation:" + left_type + ":" + left + " And:" + right + ":" + right_Type);
         return Type.VOID;
     }
-
 
     public Type binaryoperator_type_check(BinaryOperatorNode node) {
         AstNode left = node.getLeft(); // Får venstre x som i result=x+y i node form
@@ -114,6 +112,7 @@ public class TypeChecker {
                 Type variableType = getType(node.getType()); // Left side type
 
                 AstNode ass = node.getValue(); // THis is right side should be a node
+                System.out.println("Right side on declaration:" + ass.getClass());
                 Type assignmentType = getType(ass); // This should give right side type
 
                 if (variableType == assignmentType) {
@@ -175,17 +174,19 @@ public class TypeChecker {
         throw new RuntimeException("Variable '" + node.getIdentifier() + "' has not been defined yet.");
     }
 
-/*
-* Vi her skal vi sikre af hver if(exp) exp = bool.  i if statements har vi if if else  flere exp som alle skal være type bool
-*
-* */
+    /*
+     * Vi her skal vi sikre af hver if(exp) exp = bool. i if statements har vi if if
+     * else flere exp som alle skal være type bool
+     *
+     */
 
     public void visitIfStatement(IfStatementNode node) {
         Type expression = Type.VOID;
         for (int i = 0; i < node.getExpressions().size(); i++) {
             expression = getType(node.getExpressions().get(i).getNode());
             if (expression != Type.BOOLEAN) {
-                System.err.println("If statements expresion must resolve to bool expresion, and this resolve to Type:" + expression);
+                System.err.println("If statements expresion must resolve to bool expresion, and this resolve to Type:"
+                        + expression);
             }
         }
         for (int i = 0; i < node.getBlocks().size(); i++) {
@@ -201,7 +202,8 @@ public class TypeChecker {
     public void visitWhileLoop(WhileLoopNode node) {
         Type toCheck = getType((node.getExpression()).getNode());
         if (toCheck != Type.BOOLEAN) {
-            System.err.println("Condition type is not boolean");
+            System.err.println(
+                    "While loop expresion must resolve to bool expresion, and this resolve to Type:" + toCheck);
         }
         HashMap<String, Type> localTable = new HashMap<>();
         scopes.add(localTable);
@@ -220,19 +222,19 @@ public class TypeChecker {
         Type type = Type.VOID;
 
         if (node instanceof IdentifierNode) {
-            type = getVariable((IdentifierNode) node); // Vis x giv mig x value
+            System.out.println(node.toString());
+            if ("true".equals(node.toString()) || "false".equals(node.toString())) {
+                type = Type.BOOLEAN;
+            } else {
+                type = getVariable((IdentifierNode) node); // Vis x giv mig x value
+            }
+
         } else if (node instanceof BinaryOperatorNode) {
             type = binaryoperator_type_check((BinaryOperatorNode) node);
-        } else if (node instanceof RelationsAndLogicalOperatorNode){
+        } else if (node instanceof RelationsAndLogicalOperatorNode) {
             type = relationOperator_Type_check((RelationsAndLogicalOperatorNode) node);
         }
-//        else if (node instanceof ExpressionNode) {
-//            if (((ExpressionNode) node).getNode() instanceof BinaryOperatorNode) {
-//                type = binaryoperator_type_check((BinaryOperatorNode) node);
-//            } else if (((ExpressionNode) node).getNode() instanceof RelationsAndLogicalOperatorNode) {
-//                type = relationOperator_Type_check((RelationsAndLogicalOperatorNode) node);
-//            }
-//        }
+
         else if (node instanceof IntNode) {
             IntNode intNode = (IntNode) node;
             Object value = intNode.getValue();
@@ -240,6 +242,7 @@ public class TypeChecker {
         } else if (node instanceof FloatNode) {
             type = Type.FLOAT;
         } else if (node instanceof BoolNode) {
+            System.out.println("Returns Bool type");
             type = Type.BOOLEAN;
         } else if (node instanceof ExpressionNode) {
 
@@ -248,7 +251,7 @@ public class TypeChecker {
             type = Type.STRING;
         } else if (node instanceof TypeNode) {
             String type_fuck_me_why_did_we_save_types_as_String = ((TypeNode) node).getType();
-            System.out.println(type_fuck_me_why_did_we_save_types_as_String + "get in gere");
+            System.out.println("A :" + type_fuck_me_why_did_we_save_types_as_String + " :got in Here");
             switch (type_fuck_me_why_did_we_save_types_as_String) {
                 case "int":
                     return Type.INT;

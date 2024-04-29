@@ -10,5 +10,11 @@ var pp:int = 4+c
 
 pp= 5+nej
 c=k // p bliver gemt 
-var bool:boolean = true 
 k=nej
+
+var b : bool = true
+
+var expression_true:bool =true
+if expression_true {
+    sej = nej
+}
