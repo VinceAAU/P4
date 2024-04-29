@@ -12,6 +12,7 @@ public class TypeChecker {
     Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
     Deque<Integer> activeScope;// Hvilket scope vi er i nu
     int error =1;
+    Boolean print_debugger = true;
     public TypeChecker() {
         fTable = new HashMap<>();
         ETable = new HashMap<>();
@@ -34,6 +35,11 @@ public class TypeChecker {
     }
 
     public void visitStatements(StatementNode node) {
+        if(print_debugger){
+            System.out.println("We get in the vist statement");
+            System.out.println(node.getClass());
+            System.out.println(node.getNode().getClass());
+        }
         if (node.getNode() instanceof VariableDeclarationNode) {
             visitVariableDeclaration((VariableDeclarationNode) node.getNode());
         }
@@ -157,8 +163,15 @@ public class TypeChecker {
     }
 
     public void visitAssignNode(AssignmentNode node) {
-
+        if(print_debugger){
+            System.out.println("Scopes:"+scopes);
+            System.out.println("Value"+node.getValue());
+        }
         for (HashMap<String, Type> ETable : scopes) {
+             if(print_debugger){
+                    System.out.println("Identifier"+node.getIdentifier().toString());
+                    System.out.println("Etable:"+ETable);
+                }
             if (ETable.containsKey(node.getIdentifier().toString())) {// hvis x er i scope
                 // tjekke om det er lovligt.
                 // hent gamle type og nye type.
@@ -166,6 +179,7 @@ public class TypeChecker {
                 String identifier = node.getIdentifier().toString();
 
                 Type rightType = getType(node.getValue());
+               
                 // tjekke om det er lovligt.
                 if (oldType != rightType) {
                     System.out.println("Error:"+error);
@@ -189,7 +203,16 @@ public class TypeChecker {
 
     public void visitIfStatement(IfStatementNode node) {
         Type expression = Type.VOID;
+        if(print_debugger){
+            System.out.println("We get in the If statement");
+        }
+        
         for (int i = 0; i < node.getExpressions().size(); i++) {
+
+            if(print_debugger){
+                System.out.println("We get in first for loop");
+               System.out.println("Number of expressions:"+node.getExpressions().size()); 
+            }
             expression = getType(node.getExpressions().get(i).getNode());
             if (expression != Type.BOOLEAN) {
                 System.err.println("If statements expresion must resolve to bool expresion, and this resolve to Type:"
@@ -197,6 +220,10 @@ public class TypeChecker {
             }
         }
         for (int i = 0; i < node.getBlocks().size(); i++) {
+            if(print_debugger){
+                System.out.println("We get in 2 for loop");
+                System.out.println("Number of blocks:"+node.getBlocks().size()); 
+            }
             HashMap<String, Type> localTable = new HashMap<>();
             scopes.add(localTable);
             visitBlockNode(node.getBlocks().get(i));
@@ -220,6 +247,10 @@ public class TypeChecker {
     }
 
     public void visitBlockNode(BlockNode node) {
+        if(true){
+            System.out.println("We get in vissitblock for loop");
+            System.out.println("Number of statements:"+node.getStatements().size()); 
+        }
         for (AstNode statement : node.getStatements()) {
             visitStatements((StatementNode) statement);
         }
