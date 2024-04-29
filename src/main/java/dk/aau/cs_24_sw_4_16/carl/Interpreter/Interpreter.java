@@ -44,13 +44,33 @@ public class Interpreter {
         }
         return node;
     }
-
+    public AstNode roomCall(MethodCallNode node)
+    {
+        if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
+            return new IntNode(rooms.size());
+        } else if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("get")) {
+            if (((ArgumentListNode) node.getValue()).getList().get(0) instanceof IntNode) {
+                int index = ((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue();
+                if (index < rooms.size()) {
+                    return rooms.get(((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue()).get(node.getIdentifierNode().toString());
+                } else {
+                    throw new RuntimeException("out of bounds");
+                }
+            } else {
+                throw new RuntimeException("parameter must be an int");
+            }
+        }
+        throw new RuntimeException("method call went wrong");
+    }
     public AstNode visit(MethodCallNode node) {
         HashMap<String, HashMap<String, AstNode>> list;
         switch (node.getPropertyAccessContext().getList()) {
             case "enemy" -> list = tileInformationEnemy;
             case "wall" -> list = tileInformationWall;
             case "floor" -> list = tileInformationFloor;
+            case "room" -> {
+                return roomCall(node);
+            }
             default -> throw new RuntimeException("list doesnt exist");
         }
         if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
@@ -115,6 +135,8 @@ public class Interpreter {
             tileInformationWall.put(node.getIdentifier().toString(), object);
         } else if (node.getType().equals("floor")) {
             tileInformationFloor.put(node.getIdentifier().toString(), object);
+        } else if (node.getType().equals("room")) {
+            rooms.add(object);
         }
     }
 
@@ -225,30 +247,6 @@ public class Interpreter {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
                 replaceValue(nodeToChange, toChange);
-//                if (toChange instanceof BinaryOperatorNode) {
-//                    toChange = visit((BinaryOperatorNode) toChange);
-//                }
-//                if (toChange instanceof FunctionCallNode) {
-//                    toChange = visit((FunctionCallNode) toChange);
-//                }
-//                if (toChange instanceof IdentifierNode) {
-//                    toChange = getVariable((IdentifierNode) toChange);
-//                }
-//                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
-//                    toChange = visit((RelationsAndLogicalOperatorNode) toChange);
-//                }
-//                AstNode finalToChange = toChange;
-//                switch (nodeToChange) {
-//                    case IntNode intNode when finalToChange instanceof IntNode ->
-//                            intNode.setValue(((IntNode) finalToChange).getValue());
-//                    case FloatNode floatNode when finalToChange instanceof FloatNode ->
-//                            floatNode.setValue(((FloatNode) finalToChange).getValue());
-//                    case StringNode stringNode when finalToChange instanceof StringNode ->
-//                            stringNode.setValue(((StringNode) finalToChange).getValue());
-//                    case BoolNode boolNode when finalToChange instanceof BoolNode ->
-//                            boolNode.setValue(((BoolNode) finalToChange).getValue());
-//                    case null, default -> throw new RuntimeException("Type mismatch");
-//                }
                 return;
             }
         }
