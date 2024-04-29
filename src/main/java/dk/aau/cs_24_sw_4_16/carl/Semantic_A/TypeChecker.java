@@ -296,7 +296,7 @@ public class TypeChecker {
             has_return_statement = false;
             visitBlockNode(node.getBlock());// Alle statement i fn. En af dem er returnStatement
             current_active_function = "";
-            if(!has_return_statement){
+            if(!has_return_statement && Type.VOID != getType(node.getReturnType())){
                 error_handler("Missing return statement in function declartion:"+node.getIdentifier().toString());
             }
             has_return_statement = false;

@@ -18,3 +18,14 @@ var expression_true:bool =true
 if expression_true {
     sej = nej
 }
+
+fn test2 (haha : int, baba : bool) -> void{
+    
+}
+
+fn test3 (haha : int, baba : bool) -> int{
+    
+}
+
+
+test2(69420,true)
