@@ -89,12 +89,21 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
         TypeNode type = (TypeNode) /*This is the part where we pray to God that it does indeed return a TypeNode */ visit(ctx.legalArrayType());
 
-        List<Integer> sizes = ctx.arrayOptionalIndex().stream()
+        /*List<Integer> sizes = ctx.arrayOptionalIndex().stream()
                 .map(arrayOptionalIndexContext -> {
                     if (arrayOptionalIndexContext.INT() == null)
                         return -1;
                     else
                         return Integer.parseInt(arrayOptionalIndexContext.INT().getText()); //And on this line, we pray that the int is indeed an int...
+                })
+                .toList();*/
+
+        List<AstNode> sizes = ctx.arrayOptionalIndex().stream()
+                .map(arrayOptionalIndexContext -> {
+                    if(arrayOptionalIndexContext.expression() == null)
+                        return new IntNode(-1);
+                    else
+                        return new ExpressionNode(visit(arrayOptionalIndexContext.expression()));
                 })
                 .toList();
 
@@ -130,7 +139,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
         IdentifierNode id = new IdentifierNode(ctx.IDENTIFIER().getText());
 
-        List<Integer> indices = ctx.INT().stream().map(tn -> Integer.parseInt(tn.getText())).toList();
+        //List<Integer> indices = ctx.INT().stream().map(tn -> Integer.parseInt(tn.getText())).toList();
+
+        List<AstNode> indices = ctx.expression().stream().map(e -> new ExpressionNode(visit(e)).getNode()).toList();
 
         return new ArrayAccessNode(id, indices);
     }
