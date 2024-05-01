@@ -365,6 +365,8 @@ public class Interpreter {
                 throw new RuntimeException("Type mismatch: " + ((RelationsAndLogicalOperatorNode) node).operator + " operator doesn't return an int");
         } else if (node instanceof IntNode) {
             return (IntNode) node;
+        } else if (node instanceof ExpressionNode){
+            return evaluate_int(((ExpressionNode) node).getNode());
         } else {
             throw new RuntimeException("Expected an integer, got " + node.getClass());
         }
