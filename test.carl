@@ -50,3 +50,25 @@ else if b{
         print(holy)
     }
 }
+var Orc : enemy = {
+    var difficulty : int = 1
+    var health : int = 200
+    var symbol : string= "O"
+}
+var Goblin : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
+}
+var Goblin2 : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
+}
+var Goblin3 : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
+}
+var test : int = 1..enemy.size()
+print(test)

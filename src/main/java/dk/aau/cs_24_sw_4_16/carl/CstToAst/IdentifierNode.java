@@ -16,6 +16,4 @@ public class IdentifierNode extends AstNode {
     public String toString() {
         return identifier;
     }
-
-
 }
