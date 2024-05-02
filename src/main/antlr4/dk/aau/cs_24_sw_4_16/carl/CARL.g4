@@ -76,8 +76,8 @@ expression
     ;
 
 primary
-    : INT # Int
-    | FLOAT # Float
+    : integer # Int
+    | fpNum # Float
     | STRING # String
     | IDENTIFIER # Identifier
     | BOOL # Bool
@@ -119,9 +119,12 @@ arrayAccess : IDENTIFIER '[' expression ']' ('[' expression ']')*;
 propertyAccess : structType '.' IDENTIFIER ('.' IDENTIFIER)? ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
 
+integer : '-'? INT;
+fpNum : '-'? FLOAT;
+
 // Lexer rules
-INT : [-]?[0-9]+ ;
-FLOAT : [-]?[0-9]* '.' [0-9]+ ;
+INT : [0-9]+ ;
+FLOAT : [0-9]* '.' [0-9]+ ;
 STRING : '"' ~["]* '"' ;
 BOOL : ('true' | 'false') ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;

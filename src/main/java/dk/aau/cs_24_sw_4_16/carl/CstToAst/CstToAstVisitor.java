@@ -203,6 +203,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
+    public AstNode visitInteger(CARLParser.IntegerContext ctx) {
+        return new IntNode(ctx.getText());
+    }
+
+    @Override
     public AstNode visitDummyFunctionCallExpr(CARLParser.DummyFunctionCallExprContext ctx) {
         return super.visitDummyFunctionCallExpr(ctx);
     }
@@ -298,6 +303,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitFloat(CARLParser.FloatContext ctx) {
+        return new FloatNode(ctx.getText());
+    }
+
+    @Override
+    public AstNode visitFpNum(CARLParser.FpNumContext ctx) {
         return new FloatNode(ctx.getText());
     }
 
