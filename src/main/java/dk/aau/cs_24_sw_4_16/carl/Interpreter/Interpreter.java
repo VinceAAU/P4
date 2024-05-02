@@ -3,6 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class Interpreter {
     HashMap<String, FunctionDefinitionNode> fTable;
@@ -296,19 +297,28 @@ public class Interpreter {
     }
 
 
-    //I hate Java for forcing me to make this function
-    //It is as stupid as its name makes it sound
-    private int[] integerListToIntArray(List<Integer> ints) {
-        return Arrays.stream(ints.toArray(new Integer[0])).mapToInt(i -> i).toArray();
+    private int[] astNodeListToIntArray(List<AstNode> ints) {
+        return Arrays.stream(ints.toArray(new AstNode[0])).mapToInt(i -> evaluate_int(i).getValue()).toArray();
     }
 
     public AstNode visit(ArrayAccessNode node) {
-        return ((ArrayNode) getVariable(node.getIdentifier())).get(integerListToIntArray(node.getIndices()));
+        //Explanation:
+        // 1. Get the ArrayNode behind the identifier.
+        // 2. Convert the List<AstNode> into int[] (through evaluate_int())
+        // 3. ???
+        // 4. Profit
+
+        return ((ArrayNode) getVariable(node.getIdentifier()))
+                .get(
+                    node.getIndices().stream().mapToInt(
+                        astNode -> evaluate_int(astNode).getValue()
+                    ).toArray()
+                );
     }
 
     public void visit(ArrayAssignmentNode node) {
 
-        int[] indices = integerListToIntArray(node.getIndices());
+        int[] indices = astNodeListToIntArray(node.getIndices());
 
         AstNode value;
 
@@ -331,12 +341,44 @@ public class Interpreter {
         ((ArrayNode) getVariable(node.getIdentifier())).set(value, indices);
     }
 
+    private IntNode evaluate_int(AstNode node){
+        if (node instanceof BinaryOperatorNode) {
+            return (IntNode) visit((BinaryOperatorNode) node);
+        } else if (node instanceof IdentifierNode) {
+
+            var value = getVariable((IdentifierNode) node);
+            if (value instanceof IntNode )
+                return (IntNode) value;
+            else
+                throw new RuntimeException("Type mismatch: Expected " + ((IdentifierNode) node).getIdentifier() + " to be an int, got " + value.getClass());
+        } else if (node instanceof FunctionCallNode){
+            var value = visit((FunctionCallNode) node);
+            if (value instanceof IntNode )
+                return (IntNode) value;
+            else
+                throw new RuntimeException("Type mismatch: Expected " + ((FunctionCallNode) node).getFunctionName().getIdentifier() + "() to return an int, got " + value.getClass());
+        } else if (node instanceof RelationsAndLogicalOperatorNode){
+            var value = visit((RelationsAndLogicalOperatorNode) node);
+            if (value instanceof IntNode )
+                return (IntNode) value;
+            else
+                throw new RuntimeException("Type mismatch: " + ((RelationsAndLogicalOperatorNode) node).operator + " operator doesn't return an int");
+        } else if (node instanceof IntNode) {
+            return (IntNode) node;
+        } else if (node instanceof ExpressionNode){
+            return evaluate_int(((ExpressionNode) node).getNode());
+        } else {
+            throw new RuntimeException("Expected an integer, got " + node.getClass());
+        }
+    }
+
     public void visit(ArrayDefinitionNode node) {
-        if (idExists(node.getIdentifier())) {
+        if (idExists(node.getIdentifier().getIdentifier())) {
             throw new RuntimeException("Variable '" + node.getIdentifier() + "' already exists.");
         }
 
-        scopes.getLast().put(node.getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes())));
+        scopes.getLast()
+                .put(node.getIdentifier().getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes().stream().mapToInt(n -> evaluate_int(n).getValue()).boxed().toList())));
     }
 
     private boolean idExists(String id) {

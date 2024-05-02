@@ -8,10 +8,10 @@ import java.util.List;
 public class ArrayAssignmentNode extends AstNode {
 
     final private IdentifierNode identifier;
-    final private List<Integer> indices;
+    final private List<AstNode> indices;
     final private AstNode value;
 
-    public ArrayAssignmentNode(IdentifierNode identifier, List<Integer> indices, ExpressionNode value){
+    public ArrayAssignmentNode(IdentifierNode identifier, List<AstNode> indices, ExpressionNode value){
         this.identifier = identifier;
         this.indices = indices;
         this.value = value;
