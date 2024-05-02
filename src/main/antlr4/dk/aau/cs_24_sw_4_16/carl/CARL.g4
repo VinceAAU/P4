@@ -14,7 +14,6 @@ statement
     | importStatement
     | variableDeclaration
     | arrayDeclaration
-    | coordinateDeclaration
     | methodCall
     | propertyAssignment
     ;
@@ -86,6 +85,7 @@ primary
     | methodCall # DummyMethodCall
     | arrayAccess # DummyArrayAccess
     | propertyAccess # DummyPropertyAccess
+    | '(' expression ',' expression ')' #Coord
     ;
 
 
@@ -117,7 +117,6 @@ returnStatement : 'return' expression? ;
 block : '{' (statement  | expression)* '}' ;
 arrayAccess : IDENTIFIER '[' expression ']' ('[' expression ']')*;
 propertyAccess : structType '.' IDENTIFIER ('.' IDENTIFIER)? ;
-coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
 
 integer : '-'? INT;
 fpNum : '-'? FLOAT;

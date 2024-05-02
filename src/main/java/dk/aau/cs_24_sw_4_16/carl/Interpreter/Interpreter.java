@@ -97,8 +97,6 @@ public class Interpreter {
             visit((ArrayDefinitionNode) node.getNode());
         } else if (node.getNode() instanceof ArrayAssignmentNode) {
             visit((ArrayAssignmentNode) node.getNode());
-        } else if (node.getNode() instanceof CoordinateDeclarationNode) {
-            visit((CoordinateDeclarationNode) node.getNode());
         } else {
             throw new RuntimeException("Unexpected statement node " + node.getNode().getClass());
         }
@@ -148,6 +146,7 @@ public class Interpreter {
     }
 
     public void replaceValue(AstNode node, AstNode node2) {
+        //I think it's a problem that we mutate primitives rather than just creating new ones
         AstNode toChange = node2;
         if (toChange instanceof BinaryOperatorNode) {
             toChange = visit((BinaryOperatorNode) toChange);
@@ -168,6 +167,7 @@ public class Interpreter {
             toChange = visit((MethodCallNode) toChange);
         }
         if (toChange instanceof ArrayAccessNode) toChange = visit((ArrayAccessNode) toChange);
+        if (toChange instanceof UnevaluatedCoordNode) toChange = visit((UnevaluatedCoordNode) toChange);
 
         AstNode finalToChange = toChange;
         switch (node) {
@@ -179,6 +179,8 @@ public class Interpreter {
                     stringNode.setValue(((StringNode) finalToChange).getValue());
             case BoolNode boolNode when finalToChange instanceof BoolNode ->
                     boolNode.setValue(((BoolNode) finalToChange).getValue());
+            case CoordNode coordNode when finalToChange instanceof CoordNode ->
+                    coordNode.mutate((CoordNode) finalToChange);
             case null, default -> throw new RuntimeException("Type mismatch");
         }
     }
@@ -258,6 +260,7 @@ public class Interpreter {
     }
 
 
+    //@mantarias maybe you want to use your replaceValue() here
     public void visit(VariableDeclarationNode node) {
 
         if (!idExists(node.getIdentifier().toString())) {
@@ -288,6 +291,9 @@ public class Interpreter {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else if (toChange instanceof MethodCallNode) {
                 toChange = visit((MethodCallNode) toChange);
+                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+            } else if (toChange instanceof UnevaluatedCoordNode){
+                toChange = visit((UnevaluatedCoordNode) toChange);
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else {
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
@@ -343,72 +349,39 @@ public class Interpreter {
         ((ArrayNode) getVariable(node.getIdentifier())).set(value, indices);
     }
 
-    private IntNode evaluate_int(AstNode node){
+    private IntNode evaluate_int(AstNode node) {
         if (node instanceof BinaryOperatorNode) {
             return (IntNode) visit((BinaryOperatorNode) node);
         } else if (node instanceof IdentifierNode) {
 
             var value = getVariable((IdentifierNode) node);
-            if (value instanceof IntNode )
+            if (value instanceof IntNode)
                 return (IntNode) value;
             else
                 throw new RuntimeException("Type mismatch: Expected " + ((IdentifierNode) node).getIdentifier() + " to be an int, got " + value.getClass());
-        } else if (node instanceof FunctionCallNode){
+        } else if (node instanceof FunctionCallNode) {
             var value = visit((FunctionCallNode) node);
-            if (value instanceof IntNode )
+            if (value instanceof IntNode)
                 return (IntNode) value;
             else
                 throw new RuntimeException("Type mismatch: Expected " + ((FunctionCallNode) node).getFunctionName().getIdentifier() + "() to return an int, got " + value.getClass());
-        } else if (node instanceof RelationsAndLogicalOperatorNode){
+        } else if (node instanceof RelationsAndLogicalOperatorNode) {
             var value = visit((RelationsAndLogicalOperatorNode) node);
-            if (value instanceof IntNode )
+            if (value instanceof IntNode)
                 return (IntNode) value;
             else
                 throw new RuntimeException("Type mismatch: " + ((RelationsAndLogicalOperatorNode) node).operator + " operator doesn't return an int");
         } else if (node instanceof IntNode) {
             return (IntNode) node;
-        } else if (node instanceof ExpressionNode){
+        } else if (node instanceof ExpressionNode) {
             return evaluate_int(((ExpressionNode) node).getNode());
         } else {
             throw new RuntimeException("Expected an integer, got " + node.getClass());
         }
     }
 
-    public void visit(CoordinateDeclarationNode node){
-        IntNode x = evaluate_int(node.getX());
-        IntNode y = evaluate_int(node.getY());
-
-        CoordNode value =  new CoordNode(x.getValue(), y.getValue());
-        scopes.getLast().put(node.getIdentifier().getIdentifier(), value);
-    }
-
-    private IntNode evaluate_int(AstNode node){
-        if (node instanceof BinaryOperatorNode) {
-            return (IntNode) visit((BinaryOperatorNode) node);
-        } else if (node instanceof IdentifierNode) {
-
-            var value = getVariable((IdentifierNode) node);
-            if (value instanceof IntNode )
-                return (IntNode) value;
-            else
-                throw new RuntimeException("Type mismatch: Expected " + ((IdentifierNode) node).getIdentifier() + " to be an int, got " + value.getClass());
-        } else if (node instanceof FunctionCallNode){
-            var value = visit((FunctionCallNode) node);
-            if (value instanceof IntNode )
-                return (IntNode) value;
-            else
-                throw new RuntimeException("Type mismatch: Expected " + ((FunctionCallNode) node).getFunctionName().getIdentifier() + "() to return an int, got " + value.getClass());
-        } else if (node instanceof RelationsAndLogicalOperatorNode){
-            var value = visit((RelationsAndLogicalOperatorNode) node);
-            if (value instanceof IntNode )
-                return (IntNode) value;
-            else
-                throw new RuntimeException("Type mismatch: " + ((RelationsAndLogicalOperatorNode) node).operator + " operator doesn't return an int");
-        } else if (node instanceof IntNode) {
-            return (IntNode) node;
-        } else {
-            throw new RuntimeException("Expected an integer, got " + node.getClass());
-        }
+    public CoordNode visit(UnevaluatedCoordNode node){
+        return evaluate_coord(node);
     }
 
     public void visit(ArrayDefinitionNode node) {
@@ -608,5 +581,12 @@ public class Interpreter {
 
         }
         throw new RuntimeException("Did not get into while statement");
+    }
+
+    private CoordNode evaluate_coord(UnevaluatedCoordNode node){
+        return new CoordNode(
+                evaluate_int(node.getX()).getValue(),
+                evaluate_int(node.getY()).getValue()
+        );
     }
 }
