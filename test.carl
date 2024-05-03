@@ -1,31 +1,23 @@
-// Valid test cases
-var c : int = 5
-var p: int = "Hej"
-var nej:string = "hej hej"
-var sej :int = nej
 
-var k:int = 20
-c=10
-var pp:int = 4+c
-
-pp= 5+nej
-c=k // p bliver gemt 
-k=nej
-
-var b : bool = true
-
-var expression_true:bool =true
-if expression_true {
-    sej = nej
+var Orc : enemy = {
+    var difficulty : int = 1
+    var health : int = 200
+    var symbol : string= "O"
 }
-
-fn test2 (haha : int, baba : bool) -> void{
-    
+var Goblin : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
 }
-
-fn test3 (haha : int, baba : bool) -> int{
-    
+var Goblin2 : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
 }
-
-
-test2(69420,true)
+var Goblin3 : enemy ={
+    var difficulty : int = 1
+    var health : int = 500
+    var symbol : string= "O"
+}
+var test : int = 1..enemy.size()
+print(test)

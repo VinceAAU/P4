@@ -86,4 +86,8 @@ public class ArrayNode extends AstNode {
 
 
     }
+
+    public ArrayList<Integer> getSizes() {
+        return sizes;
+    }
 }

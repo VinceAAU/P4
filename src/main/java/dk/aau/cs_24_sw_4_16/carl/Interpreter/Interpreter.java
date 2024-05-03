@@ -2,7 +2,9 @@ package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class Interpreter {
     HashMap<String, FunctionDefinitionNode> fTable;
@@ -12,7 +14,7 @@ public class Interpreter {
     HashMap<String, HashMap<String, AstNode>> tileInformationEnemy;
     HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
     HashMap<String, HashMap<String, AstNode>> tileInformationWall;
-
+    List<HashMap<String, AstNode>> rooms;
     //This will be the same instance for all instances of Interpreter
     //This might have unexpected consequences if we expand the program to use
     //more than one instance of Interpreter at a time, but it doesn't yet, so
@@ -30,6 +32,7 @@ public class Interpreter {
         activeScope = new ArrayDeque<>();
         activeScope.push(0);
         scopes.add(vTable);
+        rooms = new ArrayList<>();
     }
 
     public AstNode visit(AstNode node) {
@@ -42,13 +45,33 @@ public class Interpreter {
         }
         return node;
     }
-
+    public AstNode roomCall(MethodCallNode node)
+    {
+        if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
+            return new IntNode(rooms.size());
+        } else if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("get")) {
+            if (((ArgumentListNode) node.getValue()).getList().get(0) instanceof IntNode) {
+                int index = ((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue();
+                if (index < rooms.size()) {
+                    return rooms.get(((IntNode) ((ArgumentListNode) node.getValue()).getList().get(0)).getValue()).get(node.getIdentifierNode().toString());
+                } else {
+                    throw new RuntimeException("out of bounds");
+                }
+            } else {
+                throw new RuntimeException("parameter must be an int");
+            }
+        }
+        throw new RuntimeException("method call went wrong");
+    }
     public AstNode visit(MethodCallNode node) {
         HashMap<String, HashMap<String, AstNode>> list;
         switch (node.getPropertyAccessContext().getList()) {
             case "enemy" -> list = tileInformationEnemy;
             case "wall" -> list = tileInformationWall;
             case "floor" -> list = tileInformationFloor;
+            case "room" -> {
+                return roomCall(node);
+            }
             default -> throw new RuntimeException("list doesnt exist");
         }
         if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
@@ -113,6 +136,8 @@ public class Interpreter {
             tileInformationWall.put(node.getIdentifier().toString(), object);
         } else if (node.getType().equals("floor")) {
             tileInformationFloor.put(node.getIdentifier().toString(), object);
+        } else if (node.getType().equals("room")) {
+            rooms.add(object);
         }
     }
 
@@ -223,30 +248,6 @@ public class Interpreter {
                 AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
                 replaceValue(nodeToChange, toChange);
-//                if (toChange instanceof BinaryOperatorNode) {
-//                    toChange = visit((BinaryOperatorNode) toChange);
-//                }
-//                if (toChange instanceof FunctionCallNode) {
-//                    toChange = visit((FunctionCallNode) toChange);
-//                }
-//                if (toChange instanceof IdentifierNode) {
-//                    toChange = getVariable((IdentifierNode) toChange);
-//                }
-//                if (node.getValue() instanceof RelationsAndLogicalOperatorNode) {
-//                    toChange = visit((RelationsAndLogicalOperatorNode) toChange);
-//                }
-//                AstNode finalToChange = toChange;
-//                switch (nodeToChange) {
-//                    case IntNode intNode when finalToChange instanceof IntNode ->
-//                            intNode.setValue(((IntNode) finalToChange).getValue());
-//                    case FloatNode floatNode when finalToChange instanceof FloatNode ->
-//                            floatNode.setValue(((FloatNode) finalToChange).getValue());
-//                    case StringNode stringNode when finalToChange instanceof StringNode ->
-//                            stringNode.setValue(((StringNode) finalToChange).getValue());
-//                    case BoolNode boolNode when finalToChange instanceof BoolNode ->
-//                            boolNode.setValue(((BoolNode) finalToChange).getValue());
-//                    case null, default -> throw new RuntimeException("Type mismatch");
-//                }
                 return;
             }
         }
@@ -280,9 +281,6 @@ public class Interpreter {
             } else if (toChange instanceof ArrayAccessNode) {
                 toChange = visit((ArrayAccessNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof PropertyAccessNode) {
-                toChange = visit((PropertyAccessNode) toChange);
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else if (toChange instanceof MethodCallNode) {
                 toChange = visit((MethodCallNode) toChange);
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
@@ -296,19 +294,28 @@ public class Interpreter {
     }
 
 
-    //I hate Java for forcing me to make this function
-    //It is as stupid as its name makes it sound
-    private int[] integerListToIntArray(List<Integer> ints) {
-        return Arrays.stream(ints.toArray(new Integer[0])).mapToInt(i -> i).toArray();
+    private int[] astNodeListToIntArray(List<AstNode> ints) {
+        return Arrays.stream(ints.toArray(new AstNode[0])).mapToInt(i -> evaluate_int(i).getValue()).toArray();
     }
 
     public AstNode visit(ArrayAccessNode node) {
-        return ((ArrayNode) getVariable(node.getIdentifier())).get(integerListToIntArray(node.getIndices()));
+        //Explanation:
+        // 1. Get the ArrayNode behind the identifier.
+        // 2. Convert the List<AstNode> into int[] (through evaluate_int())
+        // 3. ???
+        // 4. Profit
+
+        return ((ArrayNode) getVariable(node.getIdentifier()))
+                .get(
+                    node.getIndices().stream().mapToInt(
+                        astNode -> evaluate_int(astNode).getValue()
+                    ).toArray()
+                );
     }
 
     public void visit(ArrayAssignmentNode node) {
 
-        int[] indices = integerListToIntArray(node.getIndices());
+        int[] indices = astNodeListToIntArray(node.getIndices());
 
         AstNode value;
 
@@ -331,12 +338,44 @@ public class Interpreter {
         ((ArrayNode) getVariable(node.getIdentifier())).set(value, indices);
     }
 
+    private IntNode evaluate_int(AstNode node){
+        if (node instanceof BinaryOperatorNode) {
+            return (IntNode) visit((BinaryOperatorNode) node);
+        } else if (node instanceof IdentifierNode) {
+
+            var value = getVariable((IdentifierNode) node);
+            if (value instanceof IntNode )
+                return (IntNode) value;
+            else
+                throw new RuntimeException("Type mismatch: Expected " + ((IdentifierNode) node).getIdentifier() + " to be an int, got " + value.getClass());
+        } else if (node instanceof FunctionCallNode){
+            var value = visit((FunctionCallNode) node);
+            if (value instanceof IntNode )
+                return (IntNode) value;
+            else
+                throw new RuntimeException("Type mismatch: Expected " + ((FunctionCallNode) node).getFunctionName().getIdentifier() + "() to return an int, got " + value.getClass());
+        } else if (node instanceof RelationsAndLogicalOperatorNode){
+            var value = visit((RelationsAndLogicalOperatorNode) node);
+            if (value instanceof IntNode )
+                return (IntNode) value;
+            else
+                throw new RuntimeException("Type mismatch: " + ((RelationsAndLogicalOperatorNode) node).operator + " operator doesn't return an int");
+        } else if (node instanceof IntNode) {
+            return (IntNode) node;
+        } else if (node instanceof ExpressionNode){
+            return evaluate_int(((ExpressionNode) node).getNode());
+        } else {
+            throw new RuntimeException("Expected an integer, got " + node.getClass());
+        }
+    }
+
     public void visit(ArrayDefinitionNode node) {
-        if (idExists(node.getIdentifier())) {
+        if (idExists(node.getIdentifier().getIdentifier())) {
             throw new RuntimeException("Variable '" + node.getIdentifier() + "' already exists.");
         }
 
-        scopes.getLast().put(node.getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes())));
+        scopes.getLast()
+                .put(node.getIdentifier().getIdentifier(), new ArrayNode(node.getType(), new ArrayList<>(node.getSizes().stream().mapToInt(n -> evaluate_int(n).getValue()).boxed().toList())));
     }
 
     private boolean idExists(String id) {
@@ -382,11 +421,30 @@ public class Interpreter {
     public AstNode visit(FunctionCallNode node) {
         if (node.getFunctionName().toString().equals("print")) {
             InbuildClasses.print(node, scopes, activeScope);
+        } else if (node.getFunctionName().toString().equals("generateMap")) {
+            InbuildClasses.generateGrid(node, scopes, tileInformationWall);
+
+        } else if (node.getFunctionName().toString().equals("generateRooms")) {
+            InbuildClasses.generateRooms(node, scopes, tileInformationFloor, rooms);
+        } else if (node.getFunctionName().toString().equals("generateCorridors")) {
+            InbuildClasses.generateCorridors(node, scopes, tileInformationFloor, rooms);
+        } else if (node.getFunctionName().toString().equals("generateSpawns")) {
+            InbuildClasses.generateSpawns(node, scopes, tileInformationEnemy, rooms);
+        } else if (node.getFunctionName().toString().equals("printMap")) {
+            InbuildClasses.printMap(scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy);
+        } else if (node.getFunctionName().toString().equals("writeToFile")) {
+            try {
+                InbuildClasses.writeToFile(node, scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        } else if (node.getFunctionName().toString().equals("setSeed")) {
+            InbuildClasses.setSeed(node);
         } else {
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
             activeScope.add(scopes.size() - 1);
-
             if (fTable.containsKey(node.getFunctionName().toString())) {
                 FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
                 List<ParameterNode> arguments = function.getArguments().getParameters();
@@ -408,7 +466,6 @@ public class Interpreter {
                         }
                         return node;
                     }
-
                     return returnValue;
                 }
             }
