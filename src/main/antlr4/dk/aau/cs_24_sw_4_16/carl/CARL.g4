@@ -28,7 +28,7 @@ variableDeclaration : 'var' IDENTIFIER ':' type '=' (expression) ;
 arrayDeclaration : 'var' IDENTIFIER ':' legalArrayType arrayOptionalIndex+;
 
 
-arrayOptionalIndex : '[' INT? ']' ;
+arrayOptionalIndex : '[' expression? ']' ;
 
 legalArrayType :
     'bool'
@@ -56,7 +56,7 @@ type :
     | 'void'
     | 'string'
     | IDENTIFIER
-    | legalArrayType '[' INT? ']' ('[' INT? ']')*
+    | legalArrayType '[' expression? ']' ('[' expression? ']')*
     ;
 assignment : (IDENTIFIER | arrayAccess) '=' expression ;
 propertyAssignment :  propertyAccess '=' expression ;
@@ -77,8 +77,8 @@ expression
     ;
 
 primary
-    : INT # Int
-    | FLOAT # Float
+    : integer # Int
+    | fpNum # Float
     | STRING # String
     | IDENTIFIER # Identifier
     | BOOL # Bool
@@ -116,13 +116,16 @@ ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' blo
 whileLoop : 'while' expression block ;
 returnStatement : 'return' expression? ;
 block : '{' (statement  | expression)* '}' ;
-arrayAccess : IDENTIFIER '[' INT ']' ('[' INT ']')*;
+arrayAccess : IDENTIFIER '[' expression ']' ('[' expression ']')*;
 propertyAccess : structType '.' IDENTIFIER ('.' IDENTIFIER)? ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?
 
+integer : '-'? INT;
+fpNum : '-'? FLOAT;
+
 // Lexer rules
-INT : [-]?[0-9]+ ;
-FLOAT : [-]?[0-9]* '.' [0-9]+ ;
+INT : [0-9]+ ;
+FLOAT : [0-9]* '.' [0-9]+ ;
 STRING : '"' ~["]* '"' ;
 BOOL : ('true' | 'false') ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;

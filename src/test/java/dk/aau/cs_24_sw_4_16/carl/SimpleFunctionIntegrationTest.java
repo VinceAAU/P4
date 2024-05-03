@@ -624,4 +624,147 @@ printMap()
 """.trim(), outContent.toString().trim());
     }
 
+  @Test
+  public void testingStruct1() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+            }
+                var test : int = 5
+            test = enemy.Goblin.health
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    Interpreter interpreter = new Interpreter();
+    interpreter.visit(astRoot);
+
+    assertEquals("5300".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct2() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : string = "ssssssss"
+            test = enemy.Goblin.gender
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    Interpreter interpreter = new Interpreter();
+    interpreter.visit(astRoot);
+
+    assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct3() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : string = "ssssssss"
+            test = enemy.Goblin.gender
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    Interpreter interpreter = new Interpreter();
+    interpreter.visit(astRoot);
+
+    assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct4() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : string = "ssssssss"
+            test = enemy.get(0).gender
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    Interpreter interpreter = new Interpreter();
+    interpreter.visit(astRoot);
+
+    assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct5() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : int =44
+            test = enemy.size()
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    Interpreter interpreter = new Interpreter();
+    interpreter.visit(astRoot);
+
+    assertEquals("1".trim(), outContent.toString().trim());
+  }
 }
