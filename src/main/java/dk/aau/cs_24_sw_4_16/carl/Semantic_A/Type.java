@@ -7,6 +7,12 @@ public enum Type {
     BOOLEAN("boolean"), // Boolean type
     VOID("void"), // Type for functions that don't return a value
     // ... add other types as needed
+    COORD("coord"),
+    ENEMY("enemy"),
+    WALL("wall"),
+    FLOOR("floor"),
+    ROOM("room"),
+
     UNKNOWN("unknown"); // Used for uninitialized or error states
 
     private final String typeName;

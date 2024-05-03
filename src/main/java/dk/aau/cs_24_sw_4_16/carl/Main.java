@@ -3,12 +3,10 @@ package dk.aau.cs_24_sw_4_16.carl;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
 import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
-import lombok.Getter;
-import lombok.Setter;
+import dk.aau.cs_24_sw_4_16.carl.Semantic_A.TypeChecker;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import dk.aau.cs_24_sw_4_16.carl.Semantic_A.SemanticAnalyzer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,21 +35,19 @@ public class Main {
             // It returns a parse tree representing the entire input file.
             ParseTree tree = parser.program();// Her stopper det som Antler har lavet.
 
-
             // CstToAstVisitor is a visitor class that converts the parse tree (CST) into an abstract syntax tree (AST).
             // This is typically used to simplify and optimize the tree structure for further processing.
             CstToAstVisitor visitor = new CstToAstVisitor();
             // The visit method walks the parse tree and constructs the AST
             AstNode astRoot = visitor.visit(tree);
-            //System.out.println(astRoot);
             System.out.println(astRoot);
-            
-            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
-            semanticAnalyzer.analyze(astRoot);
+
+            TypeChecker typeChecker = new TypeChecker();
+            typeChecker.visitor(astRoot);
 
             // Interpreter is a class that can traverse the AST and interpret or execute the program based on the AST.
             Interpreter inter = new Interpreter();
-            
+
             inter.visit(astRoot);
         }
          catch (IOException e) {
