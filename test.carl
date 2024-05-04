@@ -6,6 +6,7 @@ var Goblin : enemy ={
     var difficulty : int = 1
     var health : int = 500
     var symbol : string= "O"
+    var difficulty:int = 20
 }
 var Goblin : enemy ={
     var difficulty : int = 1
