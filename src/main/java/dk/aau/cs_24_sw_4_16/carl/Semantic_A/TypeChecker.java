@@ -108,7 +108,7 @@ public class TypeChecker {
 
         errorHandler("Wrong types for relation operation:" + leftType + ":" + left + " And:" + right + ":" + rightType);
 
-        return Type.VOID;
+        return Type.UNKNOWN;
     }
 
     public Type binaryOperatorTypeCheck(BinaryOperatorNode node) {
@@ -128,7 +128,7 @@ public class TypeChecker {
             return Type.FLOAT;
         }
         errorHandler("Wrong types for binary operation:" + leftType + ":" + left + " And:" + right + ":" + rightType);
-        return Type.VOID;
+        return Type.UNKNOWN;
 
     }
 
