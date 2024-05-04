@@ -1,15 +1,10 @@
 var number:int = 20
-
+var haha:string = "hej"
 var difficulty:int = 20
 
-var Goblin : enemy ={
-    var difficulty : int = 1
-    var health : int = 500
-    var symbol : string= "O"
-    var difficulty:int = 20
-}
-var Goblin : enemy ={
-    var difficulty : int = 1
-    var health : int = 500
-    var symbol : string= "O"
-}
+var array: int[3][3]
+
+
+array[1][2] = 71
+
+//var x: int = array[1][2]

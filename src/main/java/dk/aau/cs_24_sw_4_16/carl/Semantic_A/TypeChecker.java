@@ -12,7 +12,7 @@ public class TypeChecker {
             "generateCorridors", "generateSpawns", "printMap", "generatePrint", "writeToFile", "overlap",
             "tileInformationStringBuilder", "setSeed"));
     HashMap<String, HashMap<String, Type>> strucvariablesTable;
-    HashMap<String,Type> structTypes;
+    HashMap<String, Type> structTypes;
     // HashMap<String, FunctionDefinitionNode> fTable; // function table,
     // identifier(x) og node
 
@@ -24,6 +24,7 @@ public class TypeChecker {
     Boolean hasReturnStatement = false;
     String currentActiveFunction = "";
     public Boolean thereWasAnError = false;
+    String currentIdentifierCheck = "";
 
     public TypeChecker() {
 
@@ -40,6 +41,7 @@ public class TypeChecker {
     }
 
     public void visitor(AstNode node) {
+        System.out.println(node);
         if (node instanceof ProgramNode) {
             visitProgramNode((ProgramNode) node);
         }
@@ -83,6 +85,12 @@ public class TypeChecker {
         if (node.getNode() instanceof StructureDefinitionNode) {
             visitStruct((StructureDefinitionNode) node.getNode());
         }
+        if (node.getNode() instanceof ArrayDefinitionNode) {
+            visistarrayDekleration((ArrayDefinitionNode) node.getNode());
+        }
+        if (node.getNode() instanceof ArrayAssignmentNode) {
+            visistArrayAssignment((ArrayAssignmentNode) node.getNode());
+        }
     }
 
     public void errorHandler(String errorMessage) {
@@ -90,6 +98,90 @@ public class TypeChecker {
         System.err.println("Error " + errorNumber);
         errorNumber = errorNumber + 1;
         System.err.println(errorMessage);
+    }
+
+    /*
+     * VI skal hente værdi fra table
+     * Tjekke alle argumenter
+     * tjekke højre side
+     * tjekke for existens
+     */
+    public void visistArrayAssignment(ArrayAssignmentNode node) {
+        String identifier = node.getIdentifier().toString();
+        Boolean found =false;
+        if (!found) {
+            Type arrayType = scopes.getLast().get(identifier);
+            
+
+            Boolean validTypes = true;
+            Type sizeType = Type.UNKNOWN;
+            int arguementNumber = 0;
+            List<AstNode> sizes = node.getSizes();
+            for (int i = 0; i < sizes.size(); i++) {
+                AstNode astNode = sizes.get(i);
+                sizeType = getType(astNode);
+                if (sizeType != arrayType) {
+                    arguementNumber = i;
+                    validTypes = false;
+
+                    break;
+                }
+            }
+            if (validTypes) {
+                scopes.getLast().put(identifier, arrayType);
+            } else {
+                errorHandler("Tried to declare the array:" + identifier + " but argument: " + arguementNumber
+                        + " is of type:" + sizeType + " and should be:" + arrayType);
+            }
+
+        } else {
+            errorHandler("Identifier:" + identifier + " is alredy used, rename it");
+        }
+    }
+
+    /*
+     * Vi skal hente den dekleerede type
+     * VI skal tjekke om den eksistere
+     * vi skal tjekke om alle argumenterne er valide.
+     */
+    public void visistarrayDekleration(ArrayDefinitionNode node) {
+
+        String identifier = node.getIdentifier().toString();
+        boolean found = scopes.getFirst().containsKey(identifier);
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(identifier)) {
+                found = true;
+            }
+        }
+        if (!found) {
+            Type arrayType = getType(node.getType());
+
+            Boolean validTypes = true;
+            Type sizeType = Type.UNKNOWN;
+            int arguementNumber = 0;
+            List<AstNode> sizes = node.getSizes();
+            for (int i = 0; i < sizes.size(); i++) {
+                AstNode astNode = sizes.get(i);
+                sizeType = getType(astNode);
+                if (sizeType != arrayType) {
+                    arguementNumber = i;
+                    validTypes = false;
+
+                    break;
+                }
+            }
+            if (validTypes) {
+                scopes.getLast().put(identifier, arrayType);
+            } else {
+                errorHandler("Tried to declare the array:" + identifier + " but argument: " + arguementNumber
+                        + " is of type:" + sizeType + " and should be:" + arrayType);
+            }
+
+        } else {
+            errorHandler("Identifier:" + identifier + " is alredy used, rename it");
+        }
+
     }
 
     public Type relationOperatorTypeCheck(RelationsAndLogicalOperatorNode node) {
@@ -176,11 +268,14 @@ public class TypeChecker {
     }
 
     public Type getVariable(IdentifierNode node) {
+
         if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
+            currentIdentifierCheck = node.getIdentifier().toString();
             return scopes.getFirst().get(node.getIdentifier().toString());
         }
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
+                currentIdentifierCheck = node.getIdentifier().toString();
                 return scopes.get(i).get(node.getIdentifier().toString());
             }
         }
@@ -373,11 +468,10 @@ public class TypeChecker {
      */
     public void visitStruct(StructureDefinitionNode node) {
         String identifier = node.getIdentifier().toString();
-         System.out.println("structtypes"+structTypes);
+        System.out.println("structtypes" + structTypes);
         if (!strucvariablesTable.containsKey(identifier)) {
-            
-           
-            Type structType =getType(node.getType());
+
+            Type structType = getType(node.getType());
 
             HashMap<String, Type> localETable = new HashMap<>();
 
@@ -390,7 +484,7 @@ public class TypeChecker {
             structTypes.put(identifier, structType);
             strucvariablesTable.put(identifier, localETable);
             scopes.remove(localETable);
-            
+
         } else {
             errorHandler("Struct " + node.getIdentifier().toString() + " already exists");
         }
@@ -459,7 +553,7 @@ public class TypeChecker {
         } else if (node instanceof BoolNode) {
             type = Type.BOOLEAN;
         } else if (node instanceof ExpressionNode) {
-
+            type = getType(((ExpressionNode) node).getNode());
         } else if (node instanceof StringNode) {
             type = Type.STRING;
         } else if (node instanceof TypeNode) {
