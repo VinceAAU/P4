@@ -12,7 +12,8 @@ public class TypeChecker {
             "generateCorridors", "generateSpawns", "printMap", "generatePrint", "writeToFile", "overlap",
             "tileInformationStringBuilder", "setSeed"));
 
-    //    HashMap<String, FunctionDefinitionNode> fTable; // function table, identifier(x) og node
+    // HashMap<String, FunctionDefinitionNode> fTable; // function table,
+    // identifier(x) og node
 
     HashMap<String, Type> structTable;
     HashMap<String, Type> eTable;// variable table, identifier(x) og node(int)
@@ -22,9 +23,11 @@ public class TypeChecker {
     Boolean printDebugger = false;
     Boolean hasReturnStatement = false;
     String currentActiveFunction = "";
+     public Boolean thereWasAnError = false;
 
     public TypeChecker() {
-//        fTable = new HashMap<>();
+
+        // fTable = new HashMap<>();
         eTable = new HashMap<>();
         scopes = new Stack<>();
         activeScope = new ArrayDeque<>();
@@ -76,12 +79,13 @@ public class TypeChecker {
             System.out.println("we get in return statement" + hasReturnStatement);
             visitReturnNode((ReturnStatementNode) node.getNode());
         }
-        if(node.getNode() instanceof StructureDefinitionNode){
+        if (node.getNode() instanceof StructureDefinitionNode) {
             visitStruct((StructureDefinitionNode) node.getNode());
         }
     }
 
     public void errorHandler(String errorMessage) {
+        thereWasAnError = true;
         System.err.println("Error " + errorNumber);
         errorNumber = errorNumber + 1;
         System.err.println(errorMessage);
@@ -182,7 +186,7 @@ public class TypeChecker {
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
     }
 
-    // Check if return = type   er det samme som den function den står i.
+    // Check if return = type er det samme som den function den står i.
     public void visitReturnNode(ReturnStatementNode node) {
         Type returnType = getType(node.getReturnValue());
         Type activeFunction = typeOfReturnFunction.get(currentActiveFunction);
@@ -190,7 +194,8 @@ public class TypeChecker {
             errorHandler("You have made return statement outside a function THAT IS illigal");
         }
         if (returnType != activeFunction) {
-            errorHandler("The return type " + returnType + " Does not match the return statement of the function " + activeFunction.getTypeName());
+            errorHandler("The return type " + returnType + " Does not match the return statement of the function "
+                    + activeFunction.getTypeName());
         }
     }
 
@@ -283,21 +288,28 @@ public class TypeChecker {
     public void visitFunctionDefinition(FunctionDefinitionNode node) {
         // System.out.println(node + "We get in here");
         if (!listOfInbuiltFunctions.contains(node.getIdentifier().toString())) {
-            if (!typeOfReturnFunction.containsKey(node.toString()) && !functionParameters.containsKey(node.toString())) {
-                typeOfReturnFunction.put(node.getIdentifier().toString(), getType(node.getReturnType())); // Key identifier // Type
+            if (!typeOfReturnFunction.containsKey(node.toString())
+                    && !functionParameters.containsKey(node.toString())) {
+                typeOfReturnFunction.put(node.getIdentifier().toString(), getType(node.getReturnType())); // Key
+                                                                                                          // identifier
+                                                                                                          // // Type
                 functionParameters.put(node.getIdentifier().toString(), new ArrayList<>());
 
                 HashMap<String, Type> localTable = new HashMap<>();
                 scopes.add(localTable);
                 List<ParameterNode> parameters = node.getArguments().getParameters();
                 for (ParameterNode parameter : parameters) {
-                    String identifierParameter = String.valueOf((parameter.getIdentifier()));  // int carl
+                    String identifierParameter = String.valueOf((parameter.getIdentifier())); // int carl
                     Type arguementType = getType(parameter.getType());
                     if (localTable.containsKey(identifierParameter)) {
-                        errorHandler("The variable:" + identifierParameter + " Already exist in this function parameters.");
+                        errorHandler(
+                                "The variable:" + identifierParameter + " Already exist in this function parameters.");
                     } else {
                         scopes.getLast().put(identifierParameter, arguementType);
-                        functionParameters.get(node.getIdentifier().toString()).add(arguementType);// Den tilføjer typen til listen.  Fn x  tilføjet int x, int x, int x
+                        functionParameters.get(node.getIdentifier().toString()).add(arguementType);// Den tilføjer typen
+                                                                                                   // til listen. Fn x
+                                                                                                   // tilføjet int x,
+                                                                                                   // int x, int x
                     }
                 }
                 currentActiveFunction = node.getIdentifier().toString();
@@ -313,16 +325,17 @@ public class TypeChecker {
                 errorHandler("function " + node.getIdentifier() + " already exists");
             }
         } else {
-            errorHandler("You may not redeclare a inbuilt function. The function you tried to redeclare is:" + node.getIdentifier().toString());
+            errorHandler("You may not redeclare a inbuilt function. The function you tried to redeclare is:"
+                    + node.getIdentifier().toString());
         }
     }
 
     /*
      * Vi skal sammenligne argumenterne med paremetrene.
      * Vi skal tjekke at der lige mange.
-     * Der mangler fx argumenter der er ikke nok.  eller der for mange.
+     * Der mangler fx argumenter der er ikke nok. eller der for mange.
      * Vi skal sige hvis arguemtnet er en forkert type.
-     * */
+     */
     public void visitFunctionCall(FunctionCallNode node) {
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
             HashMap<String, Type> localETable = new HashMap<>();
@@ -333,20 +346,22 @@ public class TypeChecker {
                 int expectedArgumentsSize = expectedParameterTypes.size();
                 int actualArgumentsSize = node.getArguments().size();
                 if (expectedArgumentsSize != actualArgumentsSize) {
-                    errorHandler("Function Expected:" + expectedArgumentsSize + " Arguments but got :" + actualArgumentsSize + " Arguments");
+                    errorHandler("Function Expected:" + expectedArgumentsSize + " Arguments but got :"
+                            + actualArgumentsSize + " Arguments");
                 }
                 for (int i = 0; i < expectedArgumentsSize; i++) {
                     if (expectedParameterTypes.get(i) != getType(node.getArgument(i))) {
-                        errorHandler("Function Expected type: " + expectedParameterTypes.get(i) + ", as " + i + " Argument but got " + getType(node.getArgument(i)));
+                        errorHandler("Function Expected type: " + expectedParameterTypes.get(i) + ", as " + i
+                                + " Argument but got " + getType(node.getArgument(i)));
                     }
                 }
 
             } else {
-                errorHandler("The function :" + node.getFunctionName().toString() + " May not exist or be out of scope.");
+                errorHandler(
+                        "The function :" + node.getFunctionName().toString() + " May not exist or be out of scope.");
             }
         }
     }
-
 
     public void visitStruct(StructureDefinitionNode node) {
 
@@ -373,7 +388,7 @@ public class TypeChecker {
     public Type getType(Object node) {
         Type type = Type.VOID;
 
-        if (node instanceof IdentifierNode) { // true   bool node.    true identifier node
+        if (node instanceof IdentifierNode) { // true bool node. true identifier node
             if ("true".equals(node.toString()) || "false".equals(node.toString())) {
                 type = Type.BOOLEAN;
             } else {

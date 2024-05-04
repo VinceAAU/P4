@@ -35,25 +35,29 @@ public class Main {
             // It returns a parse tree representing the entire input file.
             ParseTree tree = parser.program();// Her stopper det som Antler har lavet.
 
-            // CstToAstVisitor is a visitor class that converts the parse tree (CST) into an abstract syntax tree (AST).
-            // This is typically used to simplify and optimize the tree structure for further processing.
+            // CstToAstVisitor is a visitor class that converts the parse tree (CST) into an
+            // abstract syntax tree (AST).
+            // This is typically used to simplify and optimize the tree structure for
+            // further processing.
             CstToAstVisitor visitor = new CstToAstVisitor();
             // The visit method walks the parse tree and constructs the AST
             AstNode astRoot = visitor.visit(tree);
-            System.out.println(astRoot);
+            //System.out.println(astRoot);
 
             TypeChecker typeChecker = new TypeChecker();
             typeChecker.visitor(astRoot);
 
-            // Interpreter is a class that can traverse the AST and interpret or execute the program based on the AST.
-            Interpreter inter = new Interpreter();
+            if (!typeChecker.thereWasAnError) {
+                Interpreter inter = new Interpreter();
+                
+                inter.visit(astRoot);
+            }
+            // Interpreter is a class that can traverse the AST and interpret or execute the
+            // program based on the AST.
 
-            inter.visit(astRoot);
-        }
-         catch (IOException e) {
+        } catch (IOException e) {
             System.out.println(e.toString());
-        }
-         catch (Exception e) {
+        } catch (Exception e) {
             // Catches any exception that occurs within the try block.
             // Prints the string representation of the exception to standard output.
             System.out.println();
