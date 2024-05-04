@@ -101,37 +101,43 @@ public class TypeChecker {
     }
 
     /*
-     * VI skal hente værdi fra table
+     * VI skal hente Type fra table
      * Tjekke alle argumenter
      * tjekke højre side
      * tjekke for existens
      */
     public void visistArrayAssignment(ArrayAssignmentNode node) {
         String identifier = node.getIdentifier().toString();
-        Boolean found =false;
+        Boolean found = false;
         if (!found) {
             Type arrayType = scopes.getLast().get(identifier);
-            
 
-            Boolean validTypes = true;
+            Boolean validTypesaccesTypes = true;
             Type sizeType = Type.UNKNOWN;
             int arguementNumber = 0;
-            List<AstNode> sizes = node.getSizes();
+            Type allowedAccesTypesForArrays = Type.INT;
+
+            List<AstNode> sizes = node.getIndices();
             for (int i = 0; i < sizes.size(); i++) {
                 AstNode astNode = sizes.get(i);
                 sizeType = getType(astNode);
-                if (sizeType != arrayType) {
+                if (sizeType != allowedAccesTypesForArrays) {
                     arguementNumber = i;
-                    validTypes = false;
+                    validTypesaccesTypes = false;
 
                     break;
                 }
             }
-            if (validTypes) {
-                scopes.getLast().put(identifier, arrayType);
-            } else {
-                errorHandler("Tried to declare the array:" + identifier + " but argument: " + arguementNumber
+            if (!validTypesaccesTypes) {
+                errorHandler("Tried to assign the array:" + identifier + " but acces value: " + arguementNumber
                         + " is of type:" + sizeType + " and should be:" + arrayType);
+            }
+
+            // Tjek venstre mod højre
+            Type assignType = getType(node.getValue());
+            if (arrayType != assignType) {
+                errorHandler("Tried to assign the type:" + assignType + " to the array:" + identifier
+                        + " that has the type:" + arrayType + ", and that is ilegal");
             }
 
         } else {

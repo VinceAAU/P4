@@ -5,6 +5,6 @@ var difficulty:int = 20
 var array: int[3][3]
 
 
-array[1][2] = 71
+array[1]["hej"] = "hej"
 
 //var x: int = array[1][2]
