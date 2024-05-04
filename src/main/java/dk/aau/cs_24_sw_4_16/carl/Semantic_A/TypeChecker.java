@@ -91,6 +91,7 @@ public class TypeChecker {
         if (node.getNode() instanceof ArrayAssignmentNode) {
             visistArrayAssignment((ArrayAssignmentNode) node.getNode());
         }
+
     }
 
     public void errorHandler(String errorMessage) {
@@ -98,6 +99,41 @@ public class TypeChecker {
         System.err.println("Error " + errorNumber);
         errorNumber = errorNumber + 1;
         System.err.println(errorMessage);
+    }
+
+    /*
+     * Vi skal tjekke om den er ordenligt skrevet og retunere en type?
+     */
+    public void visistArrayAccesNodeFn(ArrayAccessNode node) {
+        String identifier = node.getIdentifier().toString();
+        boolean found = scopes.getFirst().containsKey(identifier);
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(identifier)) {
+                found = true;
+            }
+        }
+        if (found) {
+            Type allowedAccesTypesForArrays = Type.INT;
+            Boolean validTypesaccesTypes = true;
+            Type sizeType = Type.UNKNOWN;
+            int arguementNumber = 0;
+
+            List<AstNode> sizes = node.getIndices();
+            for (int i = 0; i < sizes.size(); i++) {
+                AstNode astNode = sizes.get(i);
+                sizeType = getType(astNode);
+                if (sizeType != allowedAccesTypesForArrays) {
+                    arguementNumber = i;
+                    errorHandler("Tried to assign the array:" + identifier + " but acces value: " + arguementNumber
+                            + " is of type:" + sizeType + " and should be INT");
+                    validTypesaccesTypes = false;
+
+                    break;
+                }
+            }
+
+        }
     }
 
     /*
@@ -109,6 +145,13 @@ public class TypeChecker {
     public void visistArrayAssignment(ArrayAssignmentNode node) {
         String identifier = node.getIdentifier().toString();
         Boolean found = false;
+        found = scopes.getFirst().containsKey(identifier);
+
+        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+            if (scopes.get(i).containsKey(identifier)) {
+                found = true;
+            }
+        }
         if (!found) {
             Type arrayType = scopes.getLast().get(identifier);
 
@@ -545,6 +588,11 @@ public class TypeChecker {
                 type = getVariable((IdentifierNode) node); // Vis x giv mig x value
             }
 
+        } else if (node instanceof ArrayAccessNode) {
+
+            visistArrayAccesNodeFn(((ArrayAccessNode) node));
+
+            type = getType(((ArrayAccessNode) node).getIdentifier());
         } else if (node instanceof BinaryOperatorNode) {
             type = binaryOperatorTypeCheck((BinaryOperatorNode) node);
         } else if (node instanceof RelationsAndLogicalOperatorNode) {
