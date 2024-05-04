@@ -11,11 +11,11 @@ public class TypeChecker {
     List<String> listOfInbuiltFunctions = new ArrayList<>(Arrays.asList("print", "generateGrid", "generateRooms",
             "generateCorridors", "generateSpawns", "printMap", "generatePrint", "writeToFile", "overlap",
             "tileInformationStringBuilder", "setSeed"));
-
+    HashMap<String, HashMap<String, Type>> strucvariablesTable;
+    HashMap<String,Type> structTypes;
     // HashMap<String, FunctionDefinitionNode> fTable; // function table,
     // identifier(x) og node
 
-    HashMap<String, Type> structTable;
     HashMap<String, Type> eTable;// variable table, identifier(x) og node(int)
     Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
     Deque<Integer> activeScope;// Hvilket scope vi er i nu
@@ -23,7 +23,7 @@ public class TypeChecker {
     Boolean printDebugger = false;
     Boolean hasReturnStatement = false;
     String currentActiveFunction = "";
-     public Boolean thereWasAnError = false;
+    public Boolean thereWasAnError = false;
 
     public TypeChecker() {
 
@@ -35,7 +35,8 @@ public class TypeChecker {
         scopes.add(eTable);
         typeOfReturnFunction = new HashMap<>();
         functionParameters = new HashMap<>();
-        structTable = new HashMap<>();
+        strucvariablesTable = new HashMap<>();
+        structTypes = new HashMap<>();
     }
 
     public void visitor(AstNode node) {
@@ -363,20 +364,69 @@ public class TypeChecker {
         }
     }
 
+    /*
+     * Check om den eksistere
+     * Deklerere den til sidst. fordi kun vis alle variabler i den er okay
+     * check variabler
+     * hvis de ok gem dem i hashmap
+     * Skal også tjekke type af Struct i guess
+     */
     public void visitStruct(StructureDefinitionNode node) {
+        String identifier = node.getIdentifier().toString();
+         System.out.println("structtypes"+structTypes);
+        if (!strucvariablesTable.containsKey(identifier)) {
+            
+           
+            Type structType =getType(node.getType());
 
-        if (!structTable.containsKey(node.getIdentifier().toString())) {
-            structTable.put(node.getIdentifier().toString(), getType(node.getType()));
+            HashMap<String, Type> localETable = new HashMap<>();
+
+            scopes.add(localETable);
+
+            List<VariableDeclarationNode> declarations = node.getVariableDeclarations();
+            for (VariableDeclarationNode declaration : declarations) {
+                visitVariableDeclarationforStructs(declaration);
+            }
+            structTypes.put(identifier, structType);
+            strucvariablesTable.put(identifier, localETable);
+            scopes.remove(localETable);
+            
         } else {
-            errorHandler("function " + node.getIdentifier().toString() + " already exists");
+            errorHandler("Struct " + node.getIdentifier().toString() + " already exists");
         }
-        HashMap<String, Type> localETable = new HashMap<>();
-        scopes.add(localETable);
-        List<VariableDeclarationNode> declarations = node.getVariableDeclarations();
-        for (VariableDeclarationNode declaration : declarations) {
-            visitVariableDeclaration(declaration);
+        System.out.println(strucvariablesTable);
+    }
+
+    private void visitVariableDeclarationforStructs(VariableDeclarationNode node) {
+        try {
+            boolean found = scopes.getLast().containsKey(node.getIdentifier().toString());
+
+            if (!found) {// Vi skal tjekke variable type mod det den type vi assigner til variablen.
+
+                String identifier = node.getIdentifier().toString();
+
+                Type variableType = getType(node.getType()); // Left side type
+
+                AstNode ass = node.getValue(); // THis is right side should be a node
+                Type assignmentType = getType(ass); // This should give right side type
+
+                if (variableType == assignmentType) {
+                    Type typeWeSaveInETable = variableType;
+                    scopes.getLast().put(node.getIdentifier().toString(), typeWeSaveInETable);
+
+                } else {
+                    errorHandler("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
+                            + " that has the type:" + variableType
+                            + " And that is hella iligal");
+
+                }
+            } else {
+                throw new RuntimeException("variable " + node.getIdentifier() + " already exists in struct");
+            }
+        } catch (Exception e) {
+            errorHandler(e.getMessage());
         }
-        scopes.remove(localETable);
+
     }
 
     public void visitBlockNode(BlockNode node) {
@@ -386,7 +436,7 @@ public class TypeChecker {
     }
 
     public Type getType(Object node) {
-        Type type = Type.VOID;
+        Type type = Type.UNKNOWN;
 
         if (node instanceof IdentifierNode) { // true bool node. true identifier node
             if ("true".equals(node.toString()) || "false".equals(node.toString())) {
