@@ -13,9 +13,6 @@ public class TypeChecker {
             "tileInformationStringBuilder", "setSeed"));
     HashMap<String, HashMap<String, Type>> strucvariablesTable;
     HashMap<String, Type> structTypes;
-    // HashMap<String, FunctionDefinitionNode> fTable; // function table,
-    // identifier(x) og node
-
     HashMap<String, Type> eTable;// variable table, identifier(x) og node(int)
     Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
     Deque<Integer> activeScope;// Hvilket scope vi er i nu

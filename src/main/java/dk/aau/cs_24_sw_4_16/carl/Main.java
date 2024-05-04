@@ -46,10 +46,9 @@ public class Main {
 
             TypeChecker typeChecker = new TypeChecker();
             typeChecker.visitor(astRoot);
-            System.out.println("error");
+            
             if (!typeChecker.thereWasAnError) {
                 Interpreter inter = new Interpreter();
-                System.out.println("no error");
                 inter.visit(astRoot);
             }
             // Interpreter is a class that can traverse the AST and interpret or execute the
