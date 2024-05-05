@@ -88,7 +88,12 @@ public class TypeChecker {
         if (node.getNode() instanceof ArrayAssignmentNode) {
             visistArrayAssignment((ArrayAssignmentNode) node.getNode());
         }
-
+        if (node.getNode() instanceof PropertyAssignmentNode) {
+            visitPropertyAssignment((PropertyAssignmentNode) node.getNode());
+        }
+        if (node.getNode() instanceof MethodCallNode) {
+            visitMethodCall((MethodCallNode) node.getNode());
+        }
     }
 
     public void errorHandler(String errorMessage) {
@@ -228,6 +233,53 @@ public class TypeChecker {
             errorHandler("Identifier:" + identifier + " is alredy used, rename it");
         }
 
+    }
+
+    public void visitPropertyAssignment(PropertyAssignmentNode node) {
+        Type oldType = visitPropertyAccessNode(node.getPropertyAccessNode());
+        Type newType = getType(node.getValue());
+        errorHandler(oldType + "  " + newType);
+        if (oldType != newType) {
+            errorHandler("Type " + oldType + " does not match " + newType);
+        }
+    }
+
+    //Ved ikke om den virker endnu, kan være det er forkert
+    public Type visitPropertyAccessNode(PropertyAccessNode node) {
+        List<String> validPropertyAccess = new ArrayList<>(Arrays.asList("size", "get"));
+        //Viker ikke til det her behøves at tjekkes
+//        Type structType = getType(node.getList());
+//        System.out.println(structType);
+//
+//        if (!structTypes.containsValue(structType)) {
+//            errorHandler("could not find the struct type: " + structType);
+//            return Type.UNKNOWN;
+//        }
+
+        String firstIdentifier = node.getIdentifiers().get(0).toString();
+        if (!strucvariablesTable.containsKey(firstIdentifier)) {
+            errorHandler("could not find the struct variable: " + firstIdentifier);
+        }
+
+        HashMap<String, Type> listOfIdentifiers = strucvariablesTable.get(firstIdentifier);
+
+
+
+        if (!validPropertyAccess.contains(firstIdentifier) && node.getIdentifiers().size() <= 1 || !listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
+            errorHandler("you need 3 arguments");
+        }
+
+        if (strucvariablesTable.containsKey(firstIdentifier) && node.getIdentifiers().size() >= 2 && listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
+            Type identifierType = listOfIdentifiers.get(node.getIdentifiers().get(1).toString());
+            return getType(identifierType.getTypeName());
+        }
+        return Type.UNKNOWN;
+    }
+
+    public void visitMethodCall(MethodCallNode node) {
+        System.out.println("ekjrgnekrjgkewrjg");
+        Type type = visitPropertyAccessNode(node.getPropertyAccessContext());
+        System.out.println(type);
     }
 
     public Type relationOperatorTypeCheck(RelationsAndLogicalOperatorNode node) {
@@ -586,10 +638,11 @@ public class TypeChecker {
             }
 
         } else if (node instanceof ArrayAccessNode) {
-
             visistArrayAccesNodeFn(((ArrayAccessNode) node));
 
             type = getType(((ArrayAccessNode) node).getIdentifier());
+        } else if (node instanceof PropertyAccessNode) {
+            type = visitPropertyAccessNode((PropertyAccessNode) node);
         } else if (node instanceof BinaryOperatorNode) {
             type = binaryOperatorTypeCheck((BinaryOperatorNode) node);
         } else if (node instanceof RelationsAndLogicalOperatorNode) {
