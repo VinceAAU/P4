@@ -8,7 +8,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
+import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -18,14 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLLexer;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.BinaryOperatorNode;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.BoolNode;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.FloatNode;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.IntNode;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.RelationsAndLogicalOperatorNode;
-import dk.aau.cs_24_sw_4_16.carl.CstToAst.StringNode;
 
 public class TypeCheckerTest {
 
@@ -161,7 +156,43 @@ public class TypeCheckerTest {
 
     @Test
     void testVisitIfStatement() {
+        List<ExpressionNode> expressionNodeList = new ArrayList<>();
+        expressionNodeList.add(new ExpressionNode(new BoolNode("true")));
+        expressionNodeList.add(new ExpressionNode(new BoolNode("false")));
 
+        List<BlockNode> blockNodeList = new ArrayList<>();
+        blockNodeList.add(new BlockNode());
+        blockNodeList.add(new BlockNode());
+
+        IfStatementNode node1 = new IfStatementNode(blockNodeList, expressionNodeList);
+        typeChecker.visitIfStatement(node1);
+        Type correctType1 = typeChecker.getType(expressionNodeList.get(0));
+        Type correctType2 = typeChecker.getType(expressionNodeList.get(1));
+        assertEquals(Type.BOOLEAN, correctType1);
+        assertEquals(Type.BOOLEAN, correctType2);
+
+
+        expressionNodeList.add(new ExpressionNode(new IntNode("2")));
+        blockNodeList.add(new BlockNode());
+        IfStatementNode node2 = new IfStatementNode(blockNodeList, expressionNodeList);
+        typeChecker.visitIfStatement(node2);
+        Type errorType = typeChecker.getType(expressionNodeList.get(2));
+        assertEquals(Type.INT, errorType, "If statements expression must resolve to bool expression, and this resolve to Type:INT");
+    }
+
+    @Test
+    void testVisitWhileLoop() {
+        ExpressionNode expressionNode1 = new ExpressionNode(new BoolNode("true"));
+        BlockNode blockNode = new BlockNode();
+
+        typeChecker.visitWhileLoop(new WhileLoopNode(expressionNode1, blockNode));
+        Type correctType = typeChecker.getType(expressionNode1);
+        assertEquals(Type.BOOLEAN, correctType);
+
+        ExpressionNode expressionNode2 = new ExpressionNode(new StringNode("hello"));
+        Type errorType = typeChecker.getType(expressionNode2);
+        typeChecker.visitWhileLoop(new WhileLoopNode(expressionNode2, blockNode));
+        assertEquals(Type.STRING, errorType, "While loop expresion must resolve to bool expresion, and this resolve to Type:" + errorType);
     }
 
     @Test
@@ -181,11 +212,6 @@ public class TypeCheckerTest {
 
     @Test
     void testVisitStruct() {
-
-    }
-
-    @Test
-    void testVisitWhileLoop() {
 
     }
 
