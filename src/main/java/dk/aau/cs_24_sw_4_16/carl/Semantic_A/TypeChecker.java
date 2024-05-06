@@ -4,6 +4,8 @@ import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
 
 import java.util.*;
 
+import static java.lang.Integer.parseInt;
+
 public class TypeChecker {
 
     HashMap<String, Type> typeOfReturnFunction;
@@ -11,7 +13,7 @@ public class TypeChecker {
     List<String> listOfInbuiltFunctions = new ArrayList<>(Arrays.asList("print", "generateGrid", "generateRooms",
             "generateCorridors", "generateSpawns", "printMap", "generatePrint", "writeToFile", "overlap",
             "tileInformationStringBuilder", "setSeed"));
-    HashMap<String, HashMap<String, Type>> strucvariablesTable;
+    HashMap<String, HashMap<String, Type>> structVariablesTable;
     HashMap<String, Type> structTypes;
     HashMap<String, Type> eTable;// variable table, identifier(x) og node(int)
     Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
@@ -33,7 +35,7 @@ public class TypeChecker {
         scopes.add(eTable);
         typeOfReturnFunction = new HashMap<>();
         functionParameters = new HashMap<>();
-        strucvariablesTable = new HashMap<>();
+        structVariablesTable = new HashMap<>();
         structTypes = new HashMap<>();
     }
 
@@ -76,7 +78,6 @@ public class TypeChecker {
         }
         if (node.getNode() instanceof ReturnStatementNode) {
             hasReturnStatement = true;
-            System.out.println("we get in return statement" + hasReturnStatement);
             visitReturnNode((ReturnStatementNode) node.getNode());
         }
         if (node.getNode() instanceof StructureDefinitionNode) {
@@ -92,6 +93,7 @@ public class TypeChecker {
             visitPropertyAssignment((PropertyAssignmentNode) node.getNode());
         }
         if (node.getNode() instanceof MethodCallNode) {
+            errorHandler("ewjrngkewgjewkejnweklrglewrkngewkrgkwen");
             visitMethodCall((MethodCallNode) node.getNode());
         }
     }
@@ -257,11 +259,11 @@ public class TypeChecker {
 //        }
 
         String firstIdentifier = node.getIdentifiers().get(0).toString();
-        if (!strucvariablesTable.containsKey(firstIdentifier)) {
+        if (!structVariablesTable.containsKey(firstIdentifier) && !validPropertyAccess.contains(firstIdentifier)) {
             errorHandler("could not find the struct variable: " + firstIdentifier);
         }
 
-        HashMap<String, Type> listOfIdentifiers = strucvariablesTable.get(firstIdentifier);
+        HashMap<String, Type> listOfIdentifiers = structVariablesTable.get(firstIdentifier);
 
 
 
@@ -269,7 +271,7 @@ public class TypeChecker {
             errorHandler("you need 3 arguments");
         }
 
-        if (strucvariablesTable.containsKey(firstIdentifier) && node.getIdentifiers().size() >= 2 && listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
+        if (structVariablesTable.containsKey(firstIdentifier) && node.getIdentifiers().size() >= 2 && listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
             Type identifierType = listOfIdentifiers.get(node.getIdentifiers().get(1).toString());
             return getType(identifierType.getTypeName());
         }
@@ -277,9 +279,13 @@ public class TypeChecker {
     }
 
     public void visitMethodCall(MethodCallNode node) {
-        System.out.println("ekjrgnekrjgkewrjg");
-        Type type = visitPropertyAccessNode(node.getPropertyAccessContext());
-        System.out.println(type);
+        List<String> names = new ArrayList<>(structTypes.keySet());
+        try {
+            int i = Integer.parseInt(node.getValue().toString());
+            System.out.println("Parsed integer value: " + i);
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing integer: " + e.getMessage());
+        }
     }
 
     public Type relationOperatorTypeCheck(RelationsAndLogicalOperatorNode node) {
@@ -566,8 +572,7 @@ public class TypeChecker {
      */
     public void visitStruct(StructureDefinitionNode node) {
         String identifier = node.getIdentifier().toString();
-        System.out.println("structtypes" + structTypes);
-        if (!strucvariablesTable.containsKey(identifier)) {
+        if (!structVariablesTable.containsKey(identifier)) {
 
             Type structType = getType(node.getType());
 
@@ -580,13 +585,12 @@ public class TypeChecker {
                 visitVariableDeclarationforStructs(declaration);
             }
             structTypes.put(identifier, structType);
-            strucvariablesTable.put(identifier, localETable);
+            structVariablesTable.put(identifier, localETable);
             scopes.remove(localETable);
 
         } else {
             errorHandler("Struct " + node.getIdentifier().toString() + " already exists");
         }
-        System.out.println(strucvariablesTable);
     }
 
     private void visitVariableDeclarationforStructs(VariableDeclarationNode node) {
@@ -643,6 +647,8 @@ public class TypeChecker {
             type = getType(((ArrayAccessNode) node).getIdentifier());
         } else if (node instanceof PropertyAccessNode) {
             type = visitPropertyAccessNode((PropertyAccessNode) node);
+        } else if (node instanceof MethodCallNode) {
+            visitMethodCall((MethodCallNode) node);
         } else if (node instanceof BinaryOperatorNode) {
             type = binaryOperatorTypeCheck((BinaryOperatorNode) node);
         } else if (node instanceof RelationsAndLogicalOperatorNode) {
