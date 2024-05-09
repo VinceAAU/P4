@@ -1,6 +1,7 @@
 package dk.aau.cs_24_sw_4_16.carl.Semantic_A;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -171,13 +172,13 @@ public class TypeCheckerTest {
         assertEquals(Type.BOOLEAN, correctType1);
         assertEquals(Type.BOOLEAN, correctType2);
 
-
         expressionNodeList.add(new ExpressionNode(new IntNode("2")));
         blockNodeList.add(new BlockNode());
         IfStatementNode node2 = new IfStatementNode(blockNodeList, expressionNodeList);
         typeChecker.visitIfStatement(node2);
         Type errorType = typeChecker.getType(expressionNodeList.get(2));
-        assertEquals(Type.INT, errorType, "If statements expression must resolve to bool expression, and this resolve to Type:INT");
+        assertEquals(Type.INT, errorType,
+                "If statements expression must resolve to bool expression, and this resolve to Type:INT");
     }
 
     @Test
@@ -192,7 +193,8 @@ public class TypeCheckerTest {
         ExpressionNode expressionNode2 = new ExpressionNode(new StringNode("hello"));
         Type errorType = typeChecker.getType(expressionNode2);
         typeChecker.visitWhileLoop(new WhileLoopNode(expressionNode2, blockNode));
-        assertEquals(Type.STRING, errorType, "While loop expresion must resolve to bool expresion, and this resolve to Type:" + errorType);
+        assertEquals(Type.STRING, errorType,
+                "While loop expresion must resolve to bool expresion, and this resolve to Type:" + errorType);
     }
 
     @Test
@@ -218,5 +220,231 @@ public class TypeCheckerTest {
     @Test
     void testVisitor() {
 
+    }
+
+    @Test
+    void testTypeCheker1() {
+        /*
+         * Tried to assign the array:" + identifier + " but acces value: " +
+         * arguementNumber
+         * + " is of type:" + sizeType + " and should be INT
+         */
+    }
+
+    @Test
+    void testTypeCheker2() {
+        /*
+         * Tried to assign the array:" + identifier + " but acces value: " +
+         * arguementNumber
+         * + " is of type:" + sizeType + " and should be:" + arrayType
+         */
+    }
+
+    @Test
+    void testTypeCheker3() {
+        /*
+         * Tried to assign the type:" + assignType + " to the array:" + identifier
+         * + " that has the type:" + arrayType + ", and that is ilegal
+         */
+    }
+
+    @Test
+    void testTypeCheker4() {
+        /*
+         * Identifier:" + identifier + " is alredy used, rename it
+         */
+    }
+
+    @Test
+    void testTypeCheker5() {
+        /*
+         * Tried to declare the array:" + identifier + " but argument: " +
+         * arguementNumber
+         * + " is of type:" + sizeType + " and should be:" + arrayType
+         */
+    }
+
+    @Test
+    void testTypeCheker6() {
+        /*
+         * Identifier:" + identifier + " is alredy used, rename it
+         */
+    }
+
+    @Test
+    void testTypeCheker7() {
+        /*
+         * Type " + oldType + " does not match " + newType
+         * 
+         */
+    }
+
+    @Test
+    void testTypeCheker8() {
+        /*
+         * "Wrong types for binary operation:" + leftType + ":" + left + " And:" + right
+         * + ":" + rightType
+         */
+    }
+
+    @Test
+    void testTypeCheker9() {
+        /*
+         * "Wrong types for relation operation:" + leftType + ":" + left + " And:" +
+         * right + ":" + rightType
+         */
+    }
+
+    @Test
+    void testTypeCheker10() {
+        /*
+         * "Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
+         * + " that has the type:" + variableType
+         * + " And that is hella iligal"
+         */
+    }
+
+    public String normalizeOutput() {
+        String normalizedActualOutput = errContent.toString().trim().replace("\r\n", "\n").replace("\r", "\n");
+        return normalizedActualOutput;
+    }
+
+    @Test
+    void testTypeCheker11() {
+        /*
+         * Variable declaration rigtig type.
+         */
+        String code = """
+                var test_variable:int = 20
+                var test_variable2:string=test_variable
+                """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                Error 1
+                Tryied to asssign Type:INT to the variable:test_variable2 that has the type:STRING And that is hella iligal""";
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+
+    }
+
+    @Test
+    void testTypeCheker12() {
+        /*
+         * Må ikke deklere variable i samme scope.
+         */
+
+        String code = """
+                var test_variable:int = 20
+                var test_variable:int =40
+                """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                Error 1
+                variable test_variable already exists""";
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+    }
+
+    @Test
+    void testTypeCheker13() {
+        /*
+         * Try to use variable that does not exist
+         * Vi får flere fejl, men den først fejl burde være could not found variable
+         */
+
+        String code = """
+                var test_variable:int = 20
+                test_variable=y
+                """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                Error 1
+                could not find the variable y""";
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        // assertEquals(correct_error.trim(), terminal_Errors);
+        assertTrue(terminal_Errors.contains(correct_error));
+    }
+
+    @Test
+    void testTypeCheker14() {
+        /*
+         * Giver fejl vis return er ude for function
+         */
+        String code = """
+                var variable:int =20
+                return 10
+                """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                        Error 1
+                You have made return statement outside a function THAT IS illigal""";
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
+    }
+
+    @Test
+    void testTypeCheker15() {
+        /*
+         *  Giver ikke fejl vis return er inde i en funktion
+         */
+        String code = """
+            var variable:int =4
+            var y:int =3
+            var x:int =6
+            fn plus (y:int)-> int{
+                return y+x
+                }
+
+            """;
+    AstNode astTree = treemaker(code);
+
+    String correct_error = "";
+    typeChecker.visitor(astTree);
+    String terminal_Errors = normalizeOutput();
+    assertEquals(correct_error.trim(), terminal_Errors);
+    // assertTrue( terminal_Errors.contains(correct_error));
+    }
+
+    @Test
+    void testTypeCheker16() {
+        /*
+         * Tester at den smider fejl vis man prøver at retunere den forkerte type.
+         */
+        String code = """
+            var variable:int =4
+            var y:int =3
+            var x:int =6
+            fn plus (y:int)-> int{
+                var variable_string:string="hej"
+                return variable_string
+                }
+
+            """;
+    AstNode astTree = treemaker(code);
+
+    String correct_error = """
+        Error 1
+The return type STRING Does not match the return statement of the function int
+       """;
+    typeChecker.visitor(astTree);
+    String terminal_Errors = normalizeOutput();
+    assertEquals(correct_error.trim(), terminal_Errors);
+    // assertTrue( terminal_Errors.contains(correct_error));
+    }
+
+    @Test
+    void testTypeCheker17() {
+        /*
+         * 
+         */
     }
 }

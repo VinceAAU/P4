@@ -246,17 +246,17 @@ public class TypeChecker {
         }
     }
 
-    //Ved ikke om den virker endnu, kan være det er forkert
+    // Ved ikke om den virker endnu, kan være det er forkert
     public Type visitPropertyAccessNode(PropertyAccessNode node) {
         List<String> validPropertyAccess = new ArrayList<>(Arrays.asList("size", "get"));
-        //Viker ikke til det her behøves at tjekkes
-//        Type structType = getType(node.getList());
-//        System.out.println(structType);
-//
-//        if (!structTypes.containsValue(structType)) {
-//            errorHandler("could not find the struct type: " + structType);
-//            return Type.UNKNOWN;
-//        }
+        // Viker ikke til det her behøves at tjekkes
+        // Type structType = getType(node.getList());
+        // System.out.println(structType);
+        //
+        // if (!structTypes.containsValue(structType)) {
+        // errorHandler("could not find the struct type: " + structType);
+        // return Type.UNKNOWN;
+        // }
 
         String firstIdentifier = node.getIdentifiers().get(0).toString();
         if (!structVariablesTable.containsKey(firstIdentifier) && !validPropertyAccess.contains(firstIdentifier)) {
@@ -265,13 +265,13 @@ public class TypeChecker {
 
         HashMap<String, Type> listOfIdentifiers = structVariablesTable.get(firstIdentifier);
 
-
-
-        if (!validPropertyAccess.contains(firstIdentifier) && node.getIdentifiers().size() <= 1 || !listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
+        if (!validPropertyAccess.contains(firstIdentifier) && node.getIdentifiers().size() <= 1
+                || !listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
             errorHandler("you need 3 arguments");
         }
 
-        if (structVariablesTable.containsKey(firstIdentifier) && node.getIdentifiers().size() >= 2 && listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
+        if (structVariablesTable.containsKey(firstIdentifier) && node.getIdentifiers().size() >= 2
+                && listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
             Type identifierType = listOfIdentifiers.get(node.getIdentifiers().get(1).toString());
             return getType(identifierType.getTypeName());
         }
@@ -383,20 +383,28 @@ public class TypeChecker {
                 return scopes.get(i).get(node.getIdentifier().toString());
             }
         }
-        throw new RuntimeException("could not find the variable " + node.getIdentifier());
+        errorHandler("could not find the variable " + node.getIdentifier());
+        // throw new RuntimeException("could not find the variable " +
+        // node.getIdentifier());
+        return Type.UNKNOWN;
     }
 
     // Check if return = type er det samme som den function den står i.
     public void visitReturnNode(ReturnStatementNode node) {
         Type returnType = getType(node.getReturnValue());
-        Type activeFunction = typeOfReturnFunction.get(currentActiveFunction);
-        if (Objects.equals(currentActiveFunction, "")) {
+        if (currentActiveFunction == "") {
             errorHandler("You have made return statement outside a function THAT IS illigal");
+        } else {
+            Type activeFunction = typeOfReturnFunction.get(currentActiveFunction);
+            if (Objects.equals(currentActiveFunction, "")) {
+                errorHandler("You have made return statement outside a function THAT IS illigal");
+            }
+            if (returnType != activeFunction) {
+                errorHandler("The return type " + returnType + " Does not match the return statement of the function "
+                        + activeFunction.getTypeName());
+            }
         }
-        if (returnType != activeFunction) {
-            errorHandler("The return type " + returnType + " Does not match the return statement of the function "
-                    + activeFunction.getTypeName());
-        }
+
     }
 
     public void visitAssignNode(AssignmentNode node) {
