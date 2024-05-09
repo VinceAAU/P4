@@ -25,10 +25,9 @@
 
 
 ## Håndtering af strukturer
-- [ ] Valider fejlhåndtering ved adgang til uerklærede strukturfelter.
-- [ ] Kontroller for typefejlmatch i tildelinger af strukturfelter.
-- [ ] Sørg for at strukturer ikke tillader dobbelte feltnavne.
-- [ ] Bekræft at strukturdeklarationer håndterer scope korrekt.
+- [x] test at fejl bliver smidt når structs  redeklereres. 
+- [x] test for at fejl bliver smidt når strukturer ikke tillader dobbelte feltnavne.
+
 
 ## Generel typekontrol
 - [x] Sørg for typekompatibilitet i binære operationer.

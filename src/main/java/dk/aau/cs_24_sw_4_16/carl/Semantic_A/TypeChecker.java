@@ -24,6 +24,7 @@ public class TypeChecker {
     String currentActiveFunction = "";
     public Boolean thereWasAnError = false;
     String currentIdentifierCheck = "";
+    Boolean struct_variable_declarion_failed = false;
 
     public TypeChecker() {
 
@@ -149,10 +150,10 @@ public class TypeChecker {
     public void visistArrayAssignment(ArrayAssignmentNode node) {
         String identifier = node.getIdentifier().toString();
         Boolean found = false;
-       
+
         found = scopes.getLast().containsKey(identifier);
-       
-       // System.out.println(activeScope);
+
+        // System.out.println(activeScope);
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
@@ -209,36 +210,34 @@ public class TypeChecker {
                 found = true;
             }
         }
-        
-            Type arrayType = getType(node.getType());
 
-            Boolean validTypes = true;
-            Type sizeType = Type.UNKNOWN;
-            int arguementNumber = 0;
-            List<AstNode> sizes = node.getSizes();
-            for (int i = 0; i < sizes.size(); i++) {
-                AstNode astNode = sizes.get(i);
-                sizeType = getType(astNode);
-                if (sizeType != arrayType) {
-                    arguementNumber = i;
-                    validTypes = false;
+        Type arrayType = getType(node.getType());
 
-                    break;
-                }
+        Boolean validTypes = true;
+        Type sizeType = Type.UNKNOWN;
+        int arguementNumber = 0;
+        List<AstNode> sizes = node.getSizes();
+        for (int i = 0; i < sizes.size(); i++) {
+            AstNode astNode = sizes.get(i);
+            sizeType = getType(astNode);
+            if (sizeType != arrayType) {
+                arguementNumber = i;
+                validTypes = false;
+
+                break;
             }
-            if (validTypes) {
-                scopes.getLast().put(identifier, arrayType);
+        }
+        if (validTypes) {
+            scopes.getLast().put(identifier, arrayType);
 
-            } else {
-                errorHandler("Tried to declare the array:" + identifier + " but argument: " + arguementNumber
-                        + " is of type:" + sizeType + " and should be:" + arrayType);
-            }
+        } else {
+            errorHandler("Tried to declare the array:" + identifier + " but argument: " + arguementNumber
+                    + " is of type:" + sizeType + " and should be:" + arrayType);
+        }
 
-        if(found){
+        if (found) {
             errorHandler("Identifier:" + identifier + " is alredy used, rename it");
         }
-            
-        
 
     }
 
@@ -550,7 +549,7 @@ public class TypeChecker {
      * Vi skal sige hvis arguemtnet er en forkert type.
      */
     public void visitFunctionCall(FunctionCallNode node) {
-        System.out.println("we get in here how?"+node);
+        System.out.println("we get in here how?" + node);
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
 
             HashMap<String, Type> localETable = new HashMap<>();
@@ -576,7 +575,7 @@ public class TypeChecker {
                         "The function :" + node.getFunctionName().toString() + " May not exist or be out of scope.");
             }
         }
-        
+
     }
 
     /*
@@ -597,11 +596,16 @@ public class TypeChecker {
             scopes.add(localETable);
 
             List<VariableDeclarationNode> declarations = node.getVariableDeclarations();
+            struct_variable_declarion_failed = false;
             for (VariableDeclarationNode declaration : declarations) {
                 visitVariableDeclarationforStructs(declaration);
             }
-            structTypes.put(identifier, structType);
-            structVariablesTable.put(identifier, localETable);
+            if (!struct_variable_declarion_failed) {
+                structTypes.put(identifier, structType);
+                structVariablesTable.put(identifier, localETable);
+            }
+           
+            struct_variable_declarion_failed = false;
             scopes.remove(localETable);
 
         } else {
@@ -627,6 +631,7 @@ public class TypeChecker {
                     scopes.getLast().put(node.getIdentifier().toString(), typeWeSaveInETable);
 
                 } else {
+                    struct_variable_declarion_failed = true;
                     errorHandler("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
                             + " that has the type:" + variableType
                             + " And that is hella iligal");
@@ -636,6 +641,7 @@ public class TypeChecker {
                 throw new RuntimeException("variable " + node.getIdentifier() + " already exists in struct");
             }
         } catch (Exception e) {
+            struct_variable_declarion_failed = true;
             errorHandler(e.getMessage());
         }
 

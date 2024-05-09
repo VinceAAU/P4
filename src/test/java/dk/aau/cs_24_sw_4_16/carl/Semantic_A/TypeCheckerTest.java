@@ -323,18 +323,34 @@ public class TypeCheckerTest {
     @Test
     void testTypeCheker9() {
         String code = """
-          
-                fn print (y:int)-> int{
-                    return 5
-                    }
+                var Goblin : enemy ={
+                    var difficulty : int = 1
+                    var health : int = 500
+                    var symbol : string= "O"
+                    var difficulty:int = 20
+                }
+                var Goblin2 : enemy ={
+                    var difficulty : int = 1
+                    var health : int = 500
+                    var symbol : string= "O"
+                }
+                var Goblin2 : enemy ={
+                    var difficulty : int = 1
+                    var health : int = 500
+                    var symbol : string= "O"
+                }
 
-                """;
+
+                    """;
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-            Error 1
-            You may not redeclare a inbuilt function. The function you tried to redeclare is:print
-                """;;
+                            Error 1
+                variable difficulty already exists in struct
+                Error 2
+                Struct Goblin2 already exists
+                                """;
+        ;
         typeChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
@@ -344,7 +360,7 @@ public class TypeCheckerTest {
     @Test
     void testTypeCheker10() {
         String code = """
-          
+
                 fn print (y:int)-> int{
                     return 5
                     }
@@ -353,9 +369,10 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-            Error 1
-            You may not redeclare a inbuilt function. The function you tried to redeclare is:print
-                """;;
+                Error 1
+                You may not redeclare a inbuilt function. The function you tried to redeclare is:print
+                    """;
+        ;
         typeChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
