@@ -16,10 +16,13 @@
 - [ ] Bekræft at funktioner ikke tillader dobbelt deklarationer.
 
 ## Håndtering af arrays
-- [ ] Verificer fejlhåndtering ved adgang til indekser uden for grænser.
-- [ ] Sørg for typekompatibilitet i array-tildelinger.
-- [ ] Kontroller for fejl i array-deklaration med forkerte størrelsestyper.
-- [ ] Valider typekonsistens under tildeling af arrayelementer.
+
+- [x] test for fejl bliver smidt hvis at agumenterne i array [][] ikke er af typen int ved decleration
+- [x] test for fejl bliver smidt hvis at agumenterne i array [2][4] ikke er lovlige. i array[][]=2
+- [x] test at array:int   smider fejl hvis array[2][2] =string
+- [x] Test at ingen fejl bliver smidt hvis array er deklereret kooretk.
+- [x] Test for at ingen fejl bliver smidt vis array assignment er korrect
+
 
 ## Håndtering af strukturer
 - [ ] Valider fejlhåndtering ved adgang til uerklærede strukturfelter.
@@ -28,15 +31,12 @@
 - [ ] Bekræft at strukturdeklarationer håndterer scope korrekt.
 
 ## Generel typekontrol
-- [ ] Sørg for typekompatibilitet i binære operationer.
-- [ ] Valider boolean-udtryk i kontrolstrukturer (if, while).
-- [ ] Tjek for typefejl i relationelle og logiske operationer.
+- [x] Sørg for typekompatibilitet i binære operationer.
+- [x] Valider boolean-udtryk i kontrolstrukturer (if, while).
+- [x] Tjek for typefejl i relationelle og logiske operationer. RelationOperatorTypeCheck
 
-## Fejlhåndtering og beskeder
-- [ ] Gennemgå at alle fejlbeskeder er klare og informative.
-- [ ] Sørg for at fejltælleren inkrementerer korrekt.
 
-## Diverse
-- [ ] Test håndtering af re-deklaration af indbyggede funktioner.
-- [ ] Verificer typekontrol for adgang til egenskaber og metodekald.
+## Inbuild functioner
+- [x] Test håndtering at fejl bliver smidt for at  re-deklaration af indbyggede funktioner.
+
 

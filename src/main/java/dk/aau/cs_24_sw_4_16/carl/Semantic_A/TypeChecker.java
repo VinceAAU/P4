@@ -149,14 +149,16 @@ public class TypeChecker {
     public void visistArrayAssignment(ArrayAssignmentNode node) {
         String identifier = node.getIdentifier().toString();
         Boolean found = false;
-        found = scopes.getFirst().containsKey(identifier);
-
+       
+        found = scopes.getLast().containsKey(identifier);
+       
+       // System.out.println(activeScope);
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
             }
         }
-        if (!found) {
+        if (found) {
             Type arrayType = scopes.getLast().get(identifier);
 
             Boolean validTypesaccesTypes = true;
@@ -188,7 +190,7 @@ public class TypeChecker {
             }
 
         } else {
-            errorHandler("Identifier:" + identifier + " is alredy used, rename it");
+            errorHandler("Array:" + identifier + " Does not exist ");
         }
     }
 
@@ -207,7 +209,7 @@ public class TypeChecker {
                 found = true;
             }
         }
-        if (!found) {
+        
             Type arrayType = getType(node.getType());
 
             Boolean validTypes = true;
@@ -226,14 +228,17 @@ public class TypeChecker {
             }
             if (validTypes) {
                 scopes.getLast().put(identifier, arrayType);
+
             } else {
                 errorHandler("Tried to declare the array:" + identifier + " but argument: " + arguementNumber
                         + " is of type:" + sizeType + " and should be:" + arrayType);
             }
 
-        } else {
+        if(found){
             errorHandler("Identifier:" + identifier + " is alredy used, rename it");
         }
+            
+        
 
     }
 

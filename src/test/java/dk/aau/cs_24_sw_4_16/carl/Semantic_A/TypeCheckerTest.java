@@ -224,20 +224,53 @@ public class TypeCheckerTest {
 
     @Test
     void testTypeCheker1() {
-        /*
-         * Tried to assign the array:" + identifier + " but acces value: " +
-         * arguementNumber
-         * + " is of type:" + sizeType + " and should be INT
-         */
+
+        String code = """
+
+                var array: int[3][3]
+                var array: int[v][3]
+                                    """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                Error 1
+                could not find the variable v
+                Error 2
+                Tried to declare the array:array but argument: 0 is of type:UNKNOWN and should be:INT
+                Error 3
+                Identifier:array is alredy used, rename it
+                    """;
+        typeChecker.visitor(astTree);
+
+        String terminal_Errors = normalizeOutput();
+        System.out.println(terminal_Errors + "We get here");
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
     }
 
     @Test
     void testTypeCheker2() {
-        /*
-         * Tried to assign the array:" + identifier + " but acces value: " +
-         * arguementNumber
-         * + " is of type:" + sizeType + " and should be:" + arrayType
-         */
+        String code = """
+
+                var array: int[3][3]
+                array[1][1]=10
+                array[2][1]="string"
+                array["string"][2] = 2
+                                    """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                            Error 1
+                Tried to assign the type:STRING to the array:array that has the type:INT, and that is ilegal
+                Error 2
+                Tried to assign the array:array but acces value: 0 is of type:STRING and should be:INT
+                                """;
+        typeChecker.visitor(astTree);
+
+        String terminal_Errors = normalizeOutput();
+        System.out.println(terminal_Errors + "We get here");
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
     }
 
     @Test
@@ -289,19 +322,44 @@ public class TypeCheckerTest {
 
     @Test
     void testTypeCheker9() {
-        /*
-         * "Wrong types for relation operation:" + leftType + ":" + left + " And:" +
-         * right + ":" + rightType
-         */
+        String code = """
+          
+                fn print (y:int)-> int{
+                    return 5
+                    }
+
+                """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+            Error 1
+            You may not redeclare a inbuilt function. The function you tried to redeclare is:print
+                """;;
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
     }
 
     @Test
     void testTypeCheker10() {
-        /*
-         * "Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
-         * + " that has the type:" + variableType
-         * + " And that is hella iligal"
-         */
+        String code = """
+          
+                fn print (y:int)-> int{
+                    return 5
+                    }
+
+                """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+            Error 1
+            You may not redeclare a inbuilt function. The function you tried to redeclare is:print
+                """;;
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
     }
 
     public String normalizeOutput() {
@@ -445,19 +503,19 @@ public class TypeCheckerTest {
     void testTypeCheker17() {
         /*
          * Smid fejl vis :Valider at argumenterne i functions call stemmer overens med
-         * de forventede
+         * de forventede //! VIKRER IKKE ÅBENBART
          * typer i funktionsdeklaration.
          */
         String code = """
 
-        fn plus (y:int)-> int{
-             return y+2
-            }
-       //   var false_result:int =plus("string")
+                 fn plus (y:int)-> int{
+                      return y+2
+                     }
+                //   var false_result:int =plus("string")
 
-          var true_result:int=plus(5)
+                   var true_result:int=plus(5)
 
-                            """;
+                                     """;
         AstNode astTree = treemaker(code);
 
         String correct_error = """
@@ -471,4 +529,5 @@ public class TypeCheckerTest {
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));
     }
+
 }
