@@ -1,13 +1,11 @@
-var number:int = 20
 
-var difficulty:int = 20
 
-var Goblin : enemy ={
-    var difficulty : int = 1
-    var health : int = 500
-    var symbol : string= "O"
-   // var difficulty:int = 20
+fn plus (y:int)-> int{
+
+return y+2
 }
+var false_result:int =plus("string")
+                
+ var true_result:int=plus(5)
 
-//var number2:int = Goblin.size()
-//Goblin.health =20
+ 

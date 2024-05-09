@@ -444,29 +444,30 @@ public class TypeCheckerTest {
     @Test
     void testTypeCheker17() {
         /*
-         * Smid fejl vis :Valider at argumenterne i functions call stemmer overens med de forventede
+         * Smid fejl vis :Valider at argumenterne i functions call stemmer overens med
+         * de forventede
          * typer i funktionsdeklaration.
          */
         String code = """
-                var variable:int =4
-                fn plus (y:int)-> int{
-                    
-                    return y+2
-                    }
-                var false_result:int =plus("string")
-                
-                var true_result:int=plus(5)
 
+        fn plus (y:int)-> int{
+             return y+2
+            }
+       //   var false_result:int =plus("string")
 
-                """;
+          var true_result:int=plus(5)
+
+                            """;
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                        Error 1
-                        Function Expected type:   , as  Argument but got)
-                       """;
+                 Error 1
+                 Function Expected type:   , as  Argument but got
+                """;
         typeChecker.visitor(astTree);
+
         String terminal_Errors = normalizeOutput();
+        System.out.println(terminal_Errors + "We get here");
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));
     }

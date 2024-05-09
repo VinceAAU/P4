@@ -545,8 +545,9 @@ public class TypeChecker {
      * Vi skal sige hvis arguemtnet er en forkert type.
      */
     public void visitFunctionCall(FunctionCallNode node) {
-        System.out.println("we get in here");
+        System.out.println("we get in here how?"+node);
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
+
             HashMap<String, Type> localETable = new HashMap<>();
             scopes.add(localETable);
             if (typeOfReturnFunction.containsKey(node.getFunctionName().toString())) {
@@ -570,6 +571,7 @@ public class TypeChecker {
                         "The function :" + node.getFunctionName().toString() + " May not exist or be out of scope.");
             }
         }
+        
     }
 
     /*

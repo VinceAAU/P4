@@ -1,7 +1,7 @@
 # TODO-liste til test af typechecker
 
 ## Håndtering af variabler
-- [ ] Kast en fejl, hvis en variabel ikke er erklæret.
+- [x] Kast en fejl, hvis en variabel ikke er erklæret.
 - [x] Kast en fejl, hvis en forkert type er tildelt til en variabel.
 - [x] Sørg for at variabel-redeklaration i samme scope kaster en fejl.
 - [x] Tjek for brug af uerklærede variabler.
