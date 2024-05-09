@@ -105,15 +105,7 @@ public class TypeCheckerTest {
         assertEquals(expectedOutput.trim(), normalizedActualOutput);
     }
 
-    @Test
-    void testGetType() {
-
-    }
-
-    @Test
-    void testGetVariable() {
-
-    }
+   
 
     @Test
     void testRelationOperatorTypeCheck() {
@@ -135,25 +127,7 @@ public class TypeCheckerTest {
         assertEquals(Type.BOOLEAN, testfn3, "Should have Type bool");
     }
 
-    @Test
-    void testVisitAssignNode() {
-
-    }
-
-    @Test
-    void testVisitBlockNode() {
-
-    }
-
-    @Test
-    void testVisitFunctionCall() {
-
-    }
-
-    @Test
-    void testVisitFunctionDefinition() {
-
-    }
+    
 
     @Test
     void testVisitIfStatement() {
@@ -195,31 +169,6 @@ public class TypeCheckerTest {
         typeChecker.visitWhileLoop(new WhileLoopNode(expressionNode2, blockNode));
         assertEquals(Type.STRING, errorType,
                 "While loop expresion must resolve to bool expresion, and this resolve to Type:" + errorType);
-    }
-
-    @Test
-    void testVisitProgramNode() {
-
-    }
-
-    @Test
-    void testVisitReturnNode() {
-
-    }
-
-    @Test
-    void testVisitStatements() {
-
-    }
-
-    @Test
-    void testVisitStruct() {
-
-    }
-
-    @Test
-    void testVisitor() {
-
     }
 
     @Test
@@ -273,52 +222,6 @@ public class TypeCheckerTest {
         // assertTrue( terminal_Errors.contains(correct_error));
     }
 
-    @Test
-    void testTypeCheker3() {
-        /*
-         * Tried to assign the type:" + assignType + " to the array:" + identifier
-         * + " that has the type:" + arrayType + ", and that is ilegal
-         */
-    }
-
-    @Test
-    void testTypeCheker4() {
-        /*
-         * Identifier:" + identifier + " is alredy used, rename it
-         */
-    }
-
-    @Test
-    void testTypeCheker5() {
-        /*
-         * Tried to declare the array:" + identifier + " but argument: " +
-         * arguementNumber
-         * + " is of type:" + sizeType + " and should be:" + arrayType
-         */
-    }
-
-    @Test
-    void testTypeCheker6() {
-        /*
-         * Identifier:" + identifier + " is alredy used, rename it
-         */
-    }
-
-    @Test
-    void testTypeCheker7() {
-        /*
-         * Type " + oldType + " does not match " + newType
-         * 
-         */
-    }
-
-    @Test
-    void testTypeCheker8() {
-        /*
-         * "Wrong types for binary operation:" + leftType + ":" + left + " And:" + right
-         * + ":" + rightType
-         */
-    }
 
     @Test
     void testTypeCheker9() {
