@@ -545,6 +545,7 @@ public class TypeChecker {
      * Vi skal sige hvis arguemtnet er en forkert type.
      */
     public void visitFunctionCall(FunctionCallNode node) {
+        System.out.println("we get in here");
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
             HashMap<String, Type> localETable = new HashMap<>();
             scopes.add(localETable);

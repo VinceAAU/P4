@@ -394,24 +394,24 @@ public class TypeCheckerTest {
     @Test
     void testTypeCheker15() {
         /*
-         *  Giver ikke fejl vis return er inde i en funktion
+         * Giver ikke fejl vis return er inde i en funktion
          */
         String code = """
-            var variable:int =4
-            var y:int =3
-            var x:int =6
-            fn plus (y:int)-> int{
-                return y+x
-                }
+                var variable:int =4
+                var y:int =3
+                var x:int =6
+                fn plus (y:int)-> int{
+                    return y+x
+                    }
 
-            """;
-    AstNode astTree = treemaker(code);
+                """;
+        AstNode astTree = treemaker(code);
 
-    String correct_error = "";
-    typeChecker.visitor(astTree);
-    String terminal_Errors = normalizeOutput();
-    assertEquals(correct_error.trim(), terminal_Errors);
-    // assertTrue( terminal_Errors.contains(correct_error));
+        String correct_error = "";
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
     }
 
     @Test
@@ -420,31 +420,54 @@ public class TypeCheckerTest {
          * Tester at den smider fejl vis man prøver at retunere den forkerte type.
          */
         String code = """
-            var variable:int =4
-            var y:int =3
-            var x:int =6
-            fn plus (y:int)-> int{
-                var variable_string:string="hej"
-                return variable_string
-                }
+                var variable:int =4
+                var y:int =3
+                var x:int =6
+                fn plus (y:int)-> int{
+                    var variable_string:string="hej"
+                    return variable_string
+                    }
 
-            """;
-    AstNode astTree = treemaker(code);
+                """;
+        AstNode astTree = treemaker(code);
 
-    String correct_error = """
-        Error 1
-The return type STRING Does not match the return statement of the function int
-       """;
-    typeChecker.visitor(astTree);
-    String terminal_Errors = normalizeOutput();
-    assertEquals(correct_error.trim(), terminal_Errors);
-    // assertTrue( terminal_Errors.contains(correct_error));
+        String correct_error = """
+                        Error 1
+                The return type STRING Does not match the return statement of the function int
+                       """;
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
     }
 
     @Test
     void testTypeCheker17() {
         /*
-         * 
+         * Smid fejl vis :Valider at argumenterne i functions call stemmer overens med de forventede
+         * typer i funktionsdeklaration.
          */
+        String code = """
+                var variable:int =4
+                fn plus (y:int)-> int{
+                    
+                    return y+2
+                    }
+                var false_result:int =plus("string")
+                
+                var true_result:int=plus(5)
+
+
+                """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                        Error 1
+                        Function Expected type:   , as  Argument but got)
+                       """;
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
+        // assertTrue( terminal_Errors.contains(correct_error));
     }
 }
