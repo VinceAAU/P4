@@ -1,11 +1,18 @@
-
+var x:int =2
 
 fn plus (y:int)-> int{
-
-return y+2
+    var help : int = x + y
+    return help
 }
-var false_result:int =plus("string")
-                
- var true_result:int=plus(5)
 
- 
+var test : string = "test"
+print(test)
+
+if true {
+    var x:int = 5  //
+    var test : int = 5
+    test = 6
+    var result : int  = plus(2)
+    print(result)
+}
+print(test)

@@ -115,7 +115,7 @@ primary
 ifStatement : 'if' expression block ( 'else if' expression block )* ( 'else' block )? ;
 whileLoop : 'while' expression block ;
 returnStatement : 'return' expression? ;
-block : '{' (statement  | expression)* '}' ;
+block : '{' (statement)* '}' ;
 arrayAccess : IDENTIFIER '[' expression ']' ('[' expression ']')*;
 propertyAccess : structType '.' IDENTIFIER ('.' IDENTIFIER)? ;
 coordinateDeclaration : 'var' IDENTIFIER ':' 'coord' '=' '(' expression ',' expression ')' ;//Virker ikke nødvendigt, hvorfor ikke bare bruge arrayAcces?

@@ -30,7 +30,7 @@ public class Interpreter {
         tileInformationWall = new HashMap<>();
         scopes = new Stack<>();
         activeScope = new ArrayDeque<>();
-        activeScope.push(0);
+//        activeScope.push(0);
         scopes.add(vTable);
         rooms = new ArrayList<>();
     }
@@ -45,8 +45,8 @@ public class Interpreter {
         }
         return node;
     }
-    public AstNode roomCall(MethodCallNode node)
-    {
+
+    public AstNode roomCall(MethodCallNode node) {
         if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("size")) {
             return new IntNode(rooms.size());
         } else if (node.getPropertyAccessContext().getIdentifiers().get(0).toString().equals("get")) {
@@ -63,6 +63,7 @@ public class Interpreter {
         }
         throw new RuntimeException("method call went wrong");
     }
+
     public AstNode visit(MethodCallNode node) {
         HashMap<String, HashMap<String, AstNode>> list;
         switch (node.getPropertyAccessContext().getList()) {
@@ -230,27 +231,61 @@ public class Interpreter {
 
     public AstNode getVariable(IdentifierNode node) {
 //        for (HashMap<String, AstNode> vTable : scopes) {
-        if (scopes.getFirst().containsKey(node.getIdentifier())) {
-            return scopes.getFirst().get(node.getIdentifier());
-        }
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        int towards =!activeScope.isEmpty() ? activeScope.getLast() : 0;
+        for (int i = scopes.size() - 1; i >= towards; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier())) {
                 return scopes.get(i).get(node.getIdentifier());
             }
         }
+        int from = 0;
+        if (!activeScope.isEmpty()) {
+            from = activeScope.getFirst();
+        } else {
+            from = scopes.size() - 1;
+        }
+        for (int i = from; i >= 0; i--) {
+            if (scopes.get(i).containsKey(node.getIdentifier())) {
+                return scopes.get(i).get(node.getIdentifier());
+            }
+        }
+//        if (scopes.getFirst().containsKey(node.getIdentifier())) {
+//            return scopes.getFirst().get(node.getIdentifier());
+//        }
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
     }
 
     public void visit(AssignmentNode node) {
-        for (HashMap<String, AstNode> vTable : scopes) {
-            if (vTable.containsKey(node.getIdentifier().toString())) {
-                AstNode nodeToChange = vTable.get(node.getIdentifier().toString());
+        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
+        for (int i = scopes.size() - 1; i >= towards; i--) {
+            if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {
+//            if (vTable.containsKey(node.getIdentifier().toString())) {
+                AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
                 replaceValue(nodeToChange, toChange);
                 return;
             }
         }
+        int from = 0;
+        if (!activeScope.isEmpty()) {
+            from = activeScope.getFirst();
+        } else {
+            from = scopes.size() - 1;
+        }
+        for (int i = from; i >= 0; i--) {
+            if (scopes.get(i).containsKey(node.getIdentifier())) {
+                AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
+                AstNode toChange = node.getValue();
+                replaceValue(nodeToChange, toChange);
+                return;
+            }
+        }
+//        if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
+//            AstNode nodeToChange = scopes.getFirst().get(node.getIdentifier().toString());
+//            AstNode toChange = node.getValue();
+//            replaceValue(nodeToChange, toChange);
+//            return;
+//        }
 
         throw new RuntimeException("Variable '" + node.getIdentifier() + "' has not been defined yet.");
     }
@@ -258,7 +293,8 @@ public class Interpreter {
 
     public void visit(VariableDeclarationNode node) {
 
-        if (!idExists(node.getIdentifier().toString())) {
+        if (!scopes.getLast().containsKey(node.getIdentifier().getIdentifier())) {
+//        if (!idExists(node.getIdentifier().toString())) {
 
             AstNode toChange = node.getValue();
             if (toChange instanceof FunctionCallNode) {
@@ -289,7 +325,7 @@ public class Interpreter {
             }
 
         } else {
-            throw new RuntimeException("variable " + node.getIdentifier() + " already exists");
+            throw new RuntimeException("variable " + node.getIdentifier() + " already exists in the current scope");
         }
     }
 
@@ -307,9 +343,9 @@ public class Interpreter {
 
         return ((ArrayNode) getVariable(node.getIdentifier()))
                 .get(
-                    node.getIndices().stream().mapToInt(
-                        astNode -> evaluate_int(astNode).getValue()
-                    ).toArray()
+                        node.getIndices().stream().mapToInt(
+                                astNode -> evaluate_int(astNode).getValue()
+                        ).toArray()
                 );
     }
 
@@ -338,31 +374,31 @@ public class Interpreter {
         ((ArrayNode) getVariable(node.getIdentifier())).set(value, indices);
     }
 
-    private IntNode evaluate_int(AstNode node){
+    private IntNode evaluate_int(AstNode node) {
         if (node instanceof BinaryOperatorNode) {
             return (IntNode) visit((BinaryOperatorNode) node);
         } else if (node instanceof IdentifierNode) {
 
             var value = getVariable((IdentifierNode) node);
-            if (value instanceof IntNode )
+            if (value instanceof IntNode)
                 return (IntNode) value;
             else
                 throw new RuntimeException("Type mismatch: Expected " + ((IdentifierNode) node).getIdentifier() + " to be an int, got " + value.getClass());
-        } else if (node instanceof FunctionCallNode){
+        } else if (node instanceof FunctionCallNode) {
             var value = visit((FunctionCallNode) node);
-            if (value instanceof IntNode )
+            if (value instanceof IntNode)
                 return (IntNode) value;
             else
                 throw new RuntimeException("Type mismatch: Expected " + ((FunctionCallNode) node).getFunctionName().getIdentifier() + "() to return an int, got " + value.getClass());
-        } else if (node instanceof RelationsAndLogicalOperatorNode){
+        } else if (node instanceof RelationsAndLogicalOperatorNode) {
             var value = visit((RelationsAndLogicalOperatorNode) node);
-            if (value instanceof IntNode )
+            if (value instanceof IntNode)
                 return (IntNode) value;
             else
                 throw new RuntimeException("Type mismatch: " + ((RelationsAndLogicalOperatorNode) node).operator + " operator doesn't return an int");
         } else if (node instanceof IntNode) {
             return (IntNode) node;
-        } else if (node instanceof ExpressionNode){
+        } else if (node instanceof ExpressionNode) {
             return evaluate_int(((ExpressionNode) node).getNode());
         } else {
             throw new RuntimeException("Expected an integer, got " + node.getClass());
@@ -380,15 +416,36 @@ public class Interpreter {
 
     private boolean idExists(String id) {
         boolean found = false;
-        if (scopes.getFirst().containsKey(id)) {
-            found = true;
-        }
-
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
+        for (int i = scopes.size() - 1; i >= towards; i--) {
             if (scopes.get(i).containsKey(id)) {
                 found = true;
             }
         }
+        int from = 0;
+        if (!activeScope.isEmpty()) {
+            from = activeScope.getFirst();
+        } else {
+            from = scopes.size() - 1;
+        }
+        for (int i = from; i >= 0; i--) {
+            if (scopes.get(i).containsKey(id)) {
+                found = true;
+            }
+        }
+//        if (scopes.getFirst().containsKey(id)) {
+//            found = true;
+//        }
+
+//        if (scopes.getFirst().containsKey(id)) {
+//            found = true;
+//        }
+//
+//        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+//            if (scopes.get(i).containsKey(id)) {
+//                found = true;
+//            }
+//        }
 
         return found;
     }
