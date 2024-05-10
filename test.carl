@@ -1,22 +1,18 @@
-var Orc : enemy = {
-    var difficulty : int = 1
-    var health : int = 200
-    var symbol : string= "O"
+var x:int =2
+
+fn plus (y:int)-> int{
+    var help : int = x + y
+    return help
 }
-var Goblin : enemy ={
-    var difficulty : int = 1
-    var health : int = 500
-    var symbol : string= "O"
+
+var test : string = "test"
+print(test)
+
+if true {
+    var x:int = 5  //
+    var test : int = 5
+    test = 6
+    var result : int  = plus(2)
+    print(result)
 }
-var Goblin2 : enemy ={
-    var difficulty : int = 1
-    var health : int = 500
-    var symbol : string= "O"
-}
-var Goblin3 : enemy ={
-    var difficulty : int = 1
-    var health : int = 500
-    var symbol : string= "O"
-}
-var test : int = 1..enemy.size()
 print(test)

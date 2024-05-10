@@ -15,14 +15,29 @@ public class InbuildClasses {
             if (argument instanceof StatementNode) {
                 toPrint.append(((StatementNode) argument).getNode()).append(" ");
             } else if (argument instanceof IdentifierNode) {
-                if (scopes.getFirst().containsKey(argument.toString())) {
-                    toPrint.append(scopes.getFirst().get(argument.toString()).toString()).append(" ");
-                } else {
-                    for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+                int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
+                boolean found = false;
+                for (int i = scopes.size() - 1; i >= towards; i--) {
+                    if (scopes.get(i).containsKey(argument.toString())) {
+                        toPrint.append(scopes.get(i).get(argument.toString()).toString()).append(" ");
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    int from = 0;
+                    if (!activeScope.isEmpty()) {
+                        from = activeScope.getFirst();
+                    } else {
+                        from = scopes.size() - 1;
+                    }
+                    for (int i = from; i >= 0; i--) {
                         if (scopes.get(i).containsKey(argument.toString())) {
-                            toPrint.append(scopes.get(i).get(argument.toString()).toString()).append(" ");
+                            toPrint.append(scopes.getFirst().get(argument.toString()).toString()).append(" ");
                         }
                     }
+
                 }
 
             } else if (argument instanceof FloatNode) {
