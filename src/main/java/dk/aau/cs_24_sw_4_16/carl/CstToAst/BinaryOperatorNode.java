@@ -1,6 +1,6 @@
 package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
-import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
+import dk.aau.cs_24_sw_4_16.carl.Interpreter.EvaluatorExecutor;
 
 public class BinaryOperatorNode extends AstNode {
     private final AstNode left;
@@ -35,7 +35,7 @@ public class BinaryOperatorNode extends AstNode {
             case "*" -> new IntNode(String.valueOf(leftValue * rightValue));
             case "/" -> new IntNode(String.valueOf(leftValue / rightValue));
             case "%" -> new IntNode(String.valueOf(leftValue % rightValue));
-            case ".." -> new IntNode(String.valueOf(Interpreter.rand.nextInt(leftValue, rightValue)));
+            case ".." -> new IntNode(String.valueOf(EvaluatorExecutor.rand.nextInt(leftValue, rightValue)));
             default -> throw new IllegalArgumentException("Invalid operator: " + operator);
         };
     }
@@ -47,7 +47,7 @@ public class BinaryOperatorNode extends AstNode {
             case "*" -> new FloatNode(String.valueOf(leftValue * rightValue));
             case "/" -> new FloatNode(String.valueOf(leftValue / rightValue));
             case "%" -> new FloatNode(String.valueOf(leftValue % rightValue));
-            case ".." -> new IntNode(String.valueOf(Interpreter.rand.nextFloat(leftValue, rightValue)));
+            case ".." -> new IntNode(String.valueOf(EvaluatorExecutor.rand.nextFloat(leftValue, rightValue)));
             default -> throw new IllegalArgumentException("Invalid operator: " + operator);
         };
     }

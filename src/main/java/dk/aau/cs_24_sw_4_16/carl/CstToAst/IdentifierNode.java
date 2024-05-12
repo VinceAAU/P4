@@ -4,14 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class IdentifierNode extends AstNode {
-
-
     String identifier;
-
     public IdentifierNode(String identifier) {
         this.identifier = identifier;
     }
-
     @Override
     public String toString() {
         return identifier;

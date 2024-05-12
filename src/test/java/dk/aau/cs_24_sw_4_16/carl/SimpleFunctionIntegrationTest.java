@@ -2,7 +2,7 @@ package dk.aau.cs_24_sw_4_16.carl;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
-import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
+import dk.aau.cs_24_sw_4_16.carl.Interpreter.EvaluatorExecutor;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -46,7 +46,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("\"test\"".trim(), outContent.toString().trim(), "expected the output to be test");
@@ -68,7 +68,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -91,7 +91,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("2".trim(), outContent.toString().trim(), "Expected the output to be 2 because 'l' was incremented once.");
@@ -112,7 +112,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -140,7 +140,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -170,7 +170,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -192,7 +192,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -217,7 +217,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -242,7 +242,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -265,7 +265,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -287,7 +287,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -309,7 +309,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -332,7 +332,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("42".trim(), outContent.toString().trim());
@@ -353,7 +353,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("42.5".trim(), outContent.toString().trim());
@@ -374,7 +374,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("\"test\"".trim(), outContent.toString().trim());
@@ -395,7 +395,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("true".trim(), outContent.toString().trim());
@@ -439,7 +439,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
 
@@ -462,7 +462,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
 
@@ -489,7 +489,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
 // do not touch the indentation of the check it will break
@@ -567,7 +567,7 @@ printMap()
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
 
@@ -646,7 +646,7 @@ printMap()
     CstToAstVisitor visitor = new CstToAstVisitor();
     AstNode astRoot = visitor.visit(tree);
 
-    Interpreter interpreter = new Interpreter();
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
     interpreter.visit(astRoot);
 
     assertEquals("5300".trim(), outContent.toString().trim());
@@ -675,7 +675,7 @@ printMap()
     CstToAstVisitor visitor = new CstToAstVisitor();
     AstNode astRoot = visitor.visit(tree);
 
-    Interpreter interpreter = new Interpreter();
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
     interpreter.visit(astRoot);
 
     assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
@@ -704,7 +704,7 @@ printMap()
     CstToAstVisitor visitor = new CstToAstVisitor();
     AstNode astRoot = visitor.visit(tree);
 
-    Interpreter interpreter = new Interpreter();
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
     interpreter.visit(astRoot);
 
     assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
@@ -733,7 +733,7 @@ printMap()
     CstToAstVisitor visitor = new CstToAstVisitor();
     AstNode astRoot = visitor.visit(tree);
 
-    Interpreter interpreter = new Interpreter();
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
     interpreter.visit(astRoot);
 
     assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
@@ -762,7 +762,7 @@ printMap()
     CstToAstVisitor visitor = new CstToAstVisitor();
     AstNode astRoot = visitor.visit(tree);
 
-    Interpreter interpreter = new Interpreter();
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
     interpreter.visit(astRoot);
 
     assertEquals("1".trim(), outContent.toString().trim());

@@ -321,7 +321,7 @@ public class TypeCheckerTest {
 
         String correct_error = """
                 Error 1
-                variable test_variable already exists""";
+                variable: test_variable already exists in the scope""";
         typeChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class Interpreter {
+public class EvaluatorExecutor {
     HashMap<String, FunctionDefinitionNode> fTable;
     HashMap<String, AstNode> vTable;
     Stack<HashMap<String, AstNode>> scopes;
@@ -22,7 +22,7 @@ public class Interpreter {
     //the worst case we just get worse randomness.
     public static Random rand = new Random();
 
-    public Interpreter() {
+    public EvaluatorExecutor() {
         fTable = new HashMap<>();
         vTable = new HashMap<>();
         tileInformationEnemy = new HashMap<>();

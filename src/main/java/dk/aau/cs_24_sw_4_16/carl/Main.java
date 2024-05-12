@@ -2,7 +2,7 @@ package dk.aau.cs_24_sw_4_16.carl;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
-import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
+import dk.aau.cs_24_sw_4_16.carl.Interpreter.EvaluatorExecutor;
 import dk.aau.cs_24_sw_4_16.carl.Semantic_A.TypeChecker;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -48,7 +48,7 @@ public class Main {
             typeChecker.visitor(astRoot);
             
             if (!typeChecker.thereWasAnError) {
-                Interpreter inter = new Interpreter();
+                EvaluatorExecutor inter = new EvaluatorExecutor();
                 inter.visit(astRoot);
             }
             // Interpreter is a class that can traverse the AST and interpret or execute the

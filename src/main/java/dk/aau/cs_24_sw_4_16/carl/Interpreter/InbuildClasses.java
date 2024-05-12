@@ -88,10 +88,10 @@ public class InbuildClasses {
             ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
 
             while (roomCount > rooms.size()) {
-                int roomWidth = Interpreter.rand.nextInt(minRoomSize, maxRoomSize);
-                int roomHeight = Interpreter.rand.nextInt(minRoomSize, maxRoomSize);
-                int x = Interpreter.rand.nextInt(1, map.getSizes().get(1) - roomWidth);
-                int y = Interpreter.rand.nextInt(1, map.getSizes().get(0) - roomHeight);
+                int roomWidth = EvaluatorExecutor.rand.nextInt(minRoomSize, maxRoomSize);
+                int roomHeight = EvaluatorExecutor.rand.nextInt(minRoomSize, maxRoomSize);
+                int x = EvaluatorExecutor.rand.nextInt(1, map.getSizes().get(1) - roomWidth);
+                int y = EvaluatorExecutor.rand.nextInt(1, map.getSizes().get(0) - roomHeight);
                 HashMap<String, AstNode> room = new HashMap<>();
                 if (!overlap(x, y, roomWidth, roomHeight, map)) {
                     for (int i = y; i < y + roomHeight; i++) {
@@ -156,8 +156,8 @@ public class InbuildClasses {
 
     public static void generateSpawns(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy, List<HashMap<String, AstNode>> rooms) {
         ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
-        int yPlayer = Interpreter.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("width")).getValue()));
-        int xPlayer = Interpreter.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("height")).getValue()));
+        int yPlayer = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("width")).getValue()));
+        int xPlayer = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("height")).getValue()));
         map.set(new StringNode("p"), xPlayer, yPlayer);
     }
 
@@ -290,12 +290,12 @@ public class InbuildClasses {
     public static void setSeed(FunctionCallNode node) {
         if (node.getArguments().size() == 1) {
             if (node.getArgument(0) instanceof IntNode) {
-                Interpreter.rand = new Random(((IntNode) node.getArgument(0)).getValue());
+                EvaluatorExecutor.rand = new Random(((IntNode) node.getArgument(0)).getValue());
             } else {
                 throw new RuntimeException("setSeed only supports int arguments");
             }
         } else if (node.getArguments().isEmpty()) {
-            Interpreter.rand = new Random();
+            EvaluatorExecutor.rand = new Random();
         } else {
             throw new RuntimeException("setSeed called accepts only a singular int argument or none");
         }

@@ -12,6 +12,7 @@ if true {
     var x:int = 5  //
     var test : int = 5
     test = 6
+    var test :int = 20
     var result : int  = plus(2)
     print(result)
 }
