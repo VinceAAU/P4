@@ -331,7 +331,12 @@ public class TypeChecker {
 
         } else if (leftType == Type.FLOAT && rightType == Type.FLOAT) {
             return Type.FLOAT;
+        } else if (leftType == Type.INT && rightType == Type.FLOAT) {
+            return Type.FLOAT;
+        } else if (leftType == Type.FLOAT && rightType == Type.INT) {
+            return Type.FLOAT;
         }
+
         errorHandler("Wrong types for binary operation:" + leftType + ":" + left + " And:" + right + ":" + rightType);
         return Type.UNKNOWN;
 
@@ -342,11 +347,13 @@ public class TypeChecker {
         try {
             boolean found = scopes.getLast().containsKey(node.getIdentifier().toString());
 
-            /* for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-                if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                    found = true;
-                }
-            } */
+            /*
+             * for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+             * if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
+             * found = true;
+             * }
+             * }
+             */
             if (!found) {// Vi skal tjekke variable type mod det den type vi assigner til variablen.
 
                 String identifier = node.getIdentifier().toString();
@@ -378,12 +385,12 @@ public class TypeChecker {
     public Type getVariable(IdentifierNode node) {
 
         if (scopes.getLast().containsKey(node.getIdentifier().toString())) {
-         //   System.out.println("234324234"+scopes.getFirst());
+            // System.out.println("234324234"+scopes.getFirst());
             currentIdentifierCheck = node.getIdentifier().toString();
             return scopes.getLast().get(node.getIdentifier().toString());
         }
-      //  System.out.println("We get in here:"+node.getIdentifier().toString());
-      //  System.out.println("The scopes:"+scopes);
+        // System.out.println("We get in here:"+node.getIdentifier().toString());
+        // System.out.println("The scopes:"+scopes);
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 currentIdentifierCheck = node.getIdentifier().toString();
@@ -421,12 +428,12 @@ public class TypeChecker {
         boolean foundIdentifier = false;
 
         for (int i = scopes.size() - 1; 0 <= i; i--) {
-           // System.out.println("This many scopes:" + i + ":" + scopes.get(i));
-            HashMap<String, Type> ETable=scopes.get(i);
-           // System.out.println("Here it break2s"+ETable);
+            // System.out.println("This many scopes:" + i + ":" + scopes.get(i));
+            HashMap<String, Type> ETable = scopes.get(i);
+            // System.out.println("Here it break2s"+ETable);
             if (true) {
-               // System.out.println("Identifier" + node.getIdentifier().toString());
-               // System.out.println("Etable:" + ETable);
+                // System.out.println("Identifier" + node.getIdentifier().toString());
+                // System.out.println("Etable:" + ETable);
             }
             if (ETable.containsKey(node.getIdentifier().toString())) {// hvis x er i scope
                 foundIdentifier = true;
@@ -555,7 +562,7 @@ public class TypeChecker {
      * Vi skal sige hvis arguemtnet er en forkert type.
      */
     public void visitFunctionCall(FunctionCallNode node) {
-      //  System.out.println("we get in here how?" + node);
+        // System.out.println("we get in here how?" + node);
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
 
             HashMap<String, Type> localETable = new HashMap<>();
@@ -610,7 +617,7 @@ public class TypeChecker {
                 structTypes.put(identifier, structType);
                 structVariablesTable.put(identifier, localETable);
             }
-           
+
             struct_variable_declarion_failed = false;
             scopes.remove(localETable);
 

@@ -41,8 +41,10 @@ public class InbuildClasses {
                 }
 
             } else if (argument instanceof FloatNode) {
+                System.out.println("We get in Floatnode");
                 toPrint.append(((FloatNode) argument).getValue());
             } else if (argument instanceof IntNode) {
+                System.out.println("We get in Intnode");
                 toPrint.append(((IntNode) argument).getValue());
             } else if (argument instanceof StringNode) {
                 toPrint.append(((StringNode) argument).getValue());

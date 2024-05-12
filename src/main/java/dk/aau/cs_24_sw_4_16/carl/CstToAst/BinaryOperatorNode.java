@@ -22,7 +22,18 @@ public class BinaryOperatorNode extends AstNode {
             float leftValue = ((FloatNode) left).getValue();
             float rightValue = ((FloatNode) right).getValue();
             return performOperation(leftValue, rightValue, operator);
+        }else if (left instanceof FloatNode && right instanceof IntNode) {
+            float leftValue = ((FloatNode) left).getValue();
+            float rightValue = ((IntNode) right).getValue();
+            return performOperation(leftValue, rightValue, operator);
+        }else if (left instanceof IntNode && right instanceof FloatNode) {
+            float leftValue = ((IntNode) left).getValue();
+            float rightValue = ((FloatNode) right).getValue();
+            return performOperation(leftValue, rightValue, operator);
         }
+
+
+
         return null;
     }
 
@@ -51,6 +62,32 @@ public class BinaryOperatorNode extends AstNode {
             default -> throw new IllegalArgumentException("Invalid operator: " + operator);
         };
     }
+
+
+    public static AstNode performOperation(float leftValue, int rightValue, String operator) {
+        return switch (operator) {
+            case "+" -> new FloatNode(String.valueOf(leftValue + rightValue));
+            case "-" -> new FloatNode(String.valueOf(leftValue - rightValue));
+            case "*" -> new FloatNode(String.valueOf(leftValue * rightValue));
+            case "/" -> new FloatNode(String.valueOf(leftValue / rightValue));
+            case "%" -> new FloatNode(String.valueOf(leftValue % rightValue));
+            case ".." -> new IntNode(String.valueOf(EvaluatorExecutor.rand.nextFloat(leftValue, rightValue)));
+            default -> throw new IllegalArgumentException("Invalid operator: " + operator);
+        };
+    }
+
+    public static AstNode performOperation(int leftValue, float rightValue, String operator) {
+        return switch (operator) {
+            case "+" -> new FloatNode(String.valueOf(leftValue + rightValue));
+            case "-" -> new FloatNode(String.valueOf(leftValue - rightValue));
+            case "*" -> new FloatNode(String.valueOf(leftValue * rightValue));
+            case "/" -> new FloatNode(String.valueOf(leftValue / rightValue));
+            case "%" -> new FloatNode(String.valueOf(leftValue % rightValue));
+            case ".." -> new IntNode(String.valueOf(EvaluatorExecutor.rand.nextFloat(leftValue, rightValue)));
+            default -> throw new IllegalArgumentException("Invalid operator: " + operator);
+        };
+    }
+
 
     public AstNode getLeft() {
         return left;

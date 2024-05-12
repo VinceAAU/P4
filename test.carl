@@ -12,8 +12,18 @@ if true {
     var x:int = 5  //
     var test : int = 5
     test = 6
-    var test :int = 20
+   // var test :int = 20
     var result : int  = plus(2)
     print(result)
 }
 print(test)
+
+var intTest:int=5
+print(intTest)
+var floatTest:float=2.3
+print(floatTest)
+
+var carl:float =floatTest+intTest
+var carlFejler:int = intTest+floatTest
+print(carl)
+print(intTest)
