@@ -1,0 +1,110 @@
+var size : int = 20
+var map : string[size][size]
+var i : int = 0
+var j : int = 0
+while i < size{
+    j  = 0
+    while j < size {
+        map[i][j] = "w"
+        j = j+1
+    }
+    i = i+1
+}
+var roomSize : int = room.size()
+var test : bool = true
+while roomSize < 5 {
+    var roomWidth : int = 3..5
+    var roomHeight : int = 3..5
+    var x : int = 1..size - roomWidth
+    var y : int = 2..size - roomHeight
+    var xTo : int = x + roomWidth
+    if xTo < size - 1{
+        xTo = xTo + 1
+    }
+    var yTo : int = y + roomHeight
+    if yTo < size - 1{
+        yTo = yTo + 1
+    }
+    var xFrom : int = x
+    if xFrom > 0{
+        xFrom = xFrom - 1
+    }
+    var yFrom : int = y
+    if xFrom > 0{
+        xFrom = xFrom - 1
+    }
+    test = true
+    while xFrom < xTo  {
+         while yFrom < yTo  {
+            var check : string = map[xFrom][yFrom]
+            if(check == "f"){
+               test = false
+            }
+            yFrom = yFrom+1
+         }
+         xFrom = xFrom + 1
+    }
+    if test {
+        xFrom  = x
+        xTo = x + roomWidth
+        yTo = y + roomHeight
+        while xFrom < xTo  {
+        yFrom = y
+             while yFrom < yTo  {
+                map[xFrom][yFrom] = "f"
+                yFrom = yFrom+1
+             }
+             xFrom = xFrom+1
+        }
+        var newRoom : room = {
+            var x : int = x
+            var y : int = y
+            var roomWidth : int = roomWidth
+            var roomHeight : int = roomHeight
+        }
+    }
+    else{
+        print("did nothing")
+    }
+    roomSize =  room.size()
+
+}
+i = 0
+var toRooms : int  = roomSize - 1
+while i < toRooms{
+        var xFrom : int = room.get(i).x + room.get(i).roomWidth / 2
+        var yFrom : int = room.get(i).y + room.get(i).roomHeight / 2
+        var nextI : int = i+1
+        var xTo : int = room.get(nextI).x + room.get(nextI).roomWidth / 2
+        var yTo : int = room.get(nextI).y + room.get(nextI).roomHeight / 2
+        if xFrom < xTo{
+            while xFrom < xTo{
+                map[xFrom][yFrom] = "f"
+                xFrom = xFrom+1
+            }
+        }
+        else{
+            while xTo < xFrom{
+                map[xFrom][yFrom] = "f"
+                xFrom = xFrom-1
+            }
+        }
+        if yFrom < yTo{
+            while yFrom < yTo{
+                map[xFrom][yFrom] = "f"
+                yFrom = yFrom+1
+            }
+        }
+        else{
+            while yTo < yFrom{
+                map[xFrom][yFrom] = "f"
+                yFrom = yFrom-1
+            }
+        }
+    i = i + 1
+}
+
+var playerX : int = room.get(toRooms).x .. room.get(toRooms).x + room.get(toRooms).roomWidth
+var playerY : int = room.get(toRooms).y .. room.get(toRooms).y + room.get(toRooms).roomHeight
+map[playerX][playerY] = "p"
+writeToFile()

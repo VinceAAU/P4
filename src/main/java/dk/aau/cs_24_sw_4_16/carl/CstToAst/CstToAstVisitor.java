@@ -3,6 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +74,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitVariableDeclaration(CARLParser.VariableDeclarationContext ctx) {
         String identifier = ctx.IDENTIFIER().getText();
-
         IdentifierNode identifierNode = new IdentifierNode(identifier);
 
         TypeNode type = (TypeNode) visit(ctx.type());
@@ -100,7 +100,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
         List<AstNode> sizes = ctx.arrayOptionalIndex().stream()
                 .map(arrayOptionalIndexContext -> {
-                    if(arrayOptionalIndexContext.expression() == null)
+                    if (arrayOptionalIndexContext.expression() == null)
                         return new IntNode(-1);
                     else
                         return new ExpressionNode(visit(arrayOptionalIndexContext.expression()));
@@ -181,11 +181,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitParameterList(CARLParser.ParameterListContext ctx) {
         List<ParameterNode> parameters = new ArrayList<>();
         if (ctx != null) {
-            for (int i = 0; i < ctx.getChildCount() / 3; i++) {
-                IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
-                TypeNode type = (TypeNode) visit(ctx.type(i));
-                parameters.add(new ParameterNode(identifier, type));
-            }
+                for (int i = 0; i < Math.ceilDiv(ctx.getChildCount(), 4); i++) {
+                    System.out.println(ctx.IDENTIFIER().size());
+                    IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
+                    TypeNode type = (TypeNode) visit(ctx.type(i));
+                    parameters.add(new ParameterNode(identifier, type));
+                }
         }
 
         return new ParameterListNode(parameters);
@@ -353,7 +354,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
                 expressionNodes.add(new ExpressionNode(visit(exp)));
             }
         }
-
         List<BlockNode> blocks = new ArrayList<>();
         for (CARLParser.BlockContext block : ctx.block()) {
             blocks.add((BlockNode) visitBlock(block));
@@ -371,6 +371,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             } else {
                 left = visit(ctx.expression().getChild(0));
             }
+
             AstNode right;
             if (ctx.expression().getChild(2) instanceof CARLParser.IdentifierContext) {
                 right = new IdentifierNode(ctx.expression().getChild(2).getText());
