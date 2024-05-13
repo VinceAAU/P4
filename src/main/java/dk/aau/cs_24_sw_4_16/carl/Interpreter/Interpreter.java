@@ -254,7 +254,7 @@ public class Interpreter {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst();
+            from = activeScope.getFirst()-1;
         } else {
             from = scopes.size() - 1;
         }
@@ -282,12 +282,13 @@ public class Interpreter {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst();
+            from = activeScope.getFirst() -1 ;
         } else {
             from = scopes.size() - 1;
         }
+        System.out.println(from);
         for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(node.getIdentifier())) {
+            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
                 replaceValue(nodeToChange, toChange);
@@ -455,7 +456,7 @@ public class Interpreter {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst();
+            from = activeScope.getFirst() -1;
         } else {
             from = scopes.size() - 1;
         }
@@ -557,6 +558,8 @@ public class Interpreter {
                     return returnValue;
                 }
             }
+            scopes.remove(localTable);
+            activeScope.removeLast();
         }
         return node;
     }

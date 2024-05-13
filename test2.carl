@@ -63,9 +63,6 @@ while roomSize < 5 {
             var roomHeight : int = roomHeight
         }
     }
-    else{
-        print("did nothing")
-    }
     roomSize =  room.size()
 
 }
