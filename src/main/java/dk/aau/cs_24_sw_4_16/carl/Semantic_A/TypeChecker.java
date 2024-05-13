@@ -406,6 +406,7 @@ public class TypeChecker {
     // Check if return = type er det samme som den function den står i.
     public void visitReturnNode(ReturnStatementNode node) {
         Type returnType = getType(node.getReturnValue());
+        // System.out.println(returnType);
         if (currentActiveFunction == "") {
             errorHandler("You have made return statement outside a function THAT IS illigal");
         } else {
@@ -430,6 +431,7 @@ public class TypeChecker {
         for (int i = scopes.size() - 1; 0 <= i; i--) {
             // System.out.println("This many scopes:" + i + ":" + scopes.get(i));
             HashMap<String, Type> ETable = scopes.get(i);
+            // System.out.println("Scopes:"+scopes+"CurrentScopeWecheck:");
             // System.out.println("Here it break2s"+ETable);
             if (true) {
                 // System.out.println("Identifier" + node.getIdentifier().toString());
@@ -452,11 +454,13 @@ public class TypeChecker {
 
                 }
             } else {
-                errorHandler("Variable '" + node.getIdentifier() + "' has not been defined yet.");
             }
             if (foundIdentifier) {
                 break;
             }
+        }
+        if (!foundIdentifier) {
+            errorHandler("Variable '" + node.getIdentifier() + "' has not been defined yet.");
         }
     }
 
@@ -542,6 +546,8 @@ public class TypeChecker {
                 visitBlockNode(node.getBlock());// Alle statement i fn. En af dem er returnStatement
                 currentActiveFunction = "";
                 if (!hasReturnStatement && Type.VOID != getType(node.getReturnType())) {
+                   // System.out.println(getType(node.getReturnType()));
+                   // System.out.println(typeOfReturnFunction);
                     errorHandler("Missing return statement in function declartion:" + node.getIdentifier().toString());
                 }
                 hasReturnStatement = false;
@@ -712,6 +718,8 @@ public class TypeChecker {
                     return Type.BOOLEAN;
                 case "float":
                     return Type.FLOAT;
+                case "void":
+                    return Type.VOID;
                 default:
                     break;
             }

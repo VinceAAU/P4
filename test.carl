@@ -1,29 +1,21 @@
-var x:int =2
+var x: int = 0
+var y: int = 42
 
-fn plus (y:int)-> int{
-    var help : int = x + y
-    return help
+fn p() -> void {
+    x = x + 3
 }
 
-var test : string = "test"
-print(test)
-
-if true {
-    var x:int = 5  //
-    var test : int = 5
-    test = 6
-   // var test :int = 20
-    var result : int  = plus(2)
-    print(result)
+fn q() -> void {
+     p()
 }
-print(test)
+print(y)
+fn main() -> int {
+    var x : int = 9
+    p()
+    y = x
+    print(y)
+    return y
+}
 
-var intTest:int=5
-print(intTest)
-var floatTest:float=2.3
-print(floatTest)
-
-var carl:float =floatTest+intTest
-var carlFejler:int = intTest+floatTest
-print(carl)
-print(intTest)
+var v : int = main()
+print(v)
