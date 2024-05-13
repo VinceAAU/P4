@@ -95,6 +95,7 @@ public class EvaluatorExecutor {
     }
 
     public AstNode visit(StatementNode node) {
+        System.out.println(scopes);
         if (node.getNode() instanceof AssignmentNode) {
             visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {
@@ -258,8 +259,11 @@ public class EvaluatorExecutor {
     }
 
     public void visit(AssignmentNode node) {
+        //System.out.println("fycj me"+node);
         int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-        for (int i = scopes.size() - 1; i >= towards; i--) {
+        System.out.println(towards+":"+activeScope.getLast());
+        for (int i = scopes.size() - 1; i >= 0; i--) {
+           // System.out.println(scopes.get(i)+i);
             if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {
                 // if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
@@ -502,6 +506,7 @@ public class EvaluatorExecutor {
         } else if (node.getFunctionName().toString().equals("setSeed")) {
             InbuildClasses.setSeed(node);
         } else {
+           // Boolean returnVoidCase = false;
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
             activeScope.add(scopes.size() - 1);
@@ -515,6 +520,7 @@ public class EvaluatorExecutor {
                 AstNode test = visit(function.getBlock());
 
                 if (test instanceof ReturnStatementNode) {
+
                     AstNode returnValue = ((ReturnStatementNode) test).getReturnValue();
                     if (returnValue instanceof IdentifierNode) {
                         returnValue = getVariable((IdentifierNode) returnValue);
@@ -530,7 +536,10 @@ public class EvaluatorExecutor {
                     }
                     return returnValue;
                 }
+                scopes.remove(localTable);
             }
+            
+            
         }
         return node;
     }

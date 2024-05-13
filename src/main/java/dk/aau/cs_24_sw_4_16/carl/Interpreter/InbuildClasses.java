@@ -17,7 +17,7 @@ public class InbuildClasses {
             } else if (argument instanceof IdentifierNode) {
                 int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
                 boolean found = false;
-                for (int i = scopes.size() - 1; i >= towards; i--) {
+                for (int i = scopes.size() - 1; i >= 0; i--) {
                     if (scopes.get(i).containsKey(argument.toString())) {
                         toPrint.append(scopes.get(i).get(argument.toString()).toString()).append(" ");
                         found = true;

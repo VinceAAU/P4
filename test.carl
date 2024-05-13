@@ -2,20 +2,28 @@ var x: int = 0
 var y: int = 42
 
 fn p() -> void {
-    x = x + 3
+     x= x + 3
 }
 
 fn q() -> void {
      p()
 }
-print(y)
+
 fn main() -> int {
+    x=20
+    print(x)
     var x : int = 9
-    p()
+
+    q()
     y = x
-    print(y)
     return y
 }
 
+print("Før main")
 var v : int = main()
+
+print("efter Main")
+
+print(y)
+
 print(v)
