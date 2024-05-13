@@ -72,21 +72,50 @@ public class TypeCheckerTest {
 
         IntNode intNode = new IntNode(0);
         BoolNode boolNode = new BoolNode(null);
-        StringNode stringNode = new StringNode(null);
+        StringNode stringNode = new StringNode("String");
         FloatNode floatNode = new FloatNode("2.2");
 
-        BinaryOperatorNode testnode1 = new BinaryOperatorNode(intNode, intNode, null);
-        BinaryOperatorNode testnode2 = new BinaryOperatorNode(boolNode, stringNode, null);
-        BinaryOperatorNode testnode3 = new BinaryOperatorNode(floatNode, floatNode, null);
+        BinaryOperatorNode testnode1 = new BinaryOperatorNode(intNode, intNode, "+");
+        BinaryOperatorNode testnode2 = new BinaryOperatorNode(boolNode, stringNode, "+");
+        BinaryOperatorNode testnode3 = new BinaryOperatorNode(floatNode, floatNode, "+");
 
         Type testfn1 = typeChecker.binaryOperatorTypeCheck(testnode1);
         Type testfn2 = typeChecker.binaryOperatorTypeCheck(testnode2);
         Type testfn3 = typeChecker.binaryOperatorTypeCheck(testnode3);
 
         assertEquals(Type.INT, testfn1, "Should have returned int");
+        String correct_error = """
+                            Error 1
+                Wrong types for binary operation:BOOLEAN: false And:String:STRING
+                                                """;
+        ;
+
+        String terminal_Errors = normalizeOutput();
+        System.out.println(terminal_Errors);
+        assertEquals(correct_error.trim(), terminal_Errors);
         assertEquals(Type.UNKNOWN, testfn2, "Should have returned unknown");
         assertEquals(Type.FLOAT, testfn3, "Should have returned float");
 
+    }
+
+    @Test
+    void testTypeCheker47() {
+        String code = """
+                var integer:int =20
+                var test_string:string="string"
+                var result:int = integer+test_string
+                                    """;
+        AstNode astTree = treemaker(code);
+
+        String correct_error = """
+                Error 1
+                Wrong types for binary operation:INT:integer And:test_string:STRING
+                Error 2
+                Tryied to asssign Type:UNKNOWN to the variable:result that has the type:INT And that is hella iligal
+                                    """;
+        typeChecker.visitor(astTree);
+        String terminal_Errors = normalizeOutput();
+        assertEquals(correct_error.trim(), terminal_Errors);
     }
 
     @Test
@@ -104,8 +133,6 @@ public class TypeCheckerTest {
         String normalizedActualOutput = errContent.toString().trim().replace("\r\n", "\n").replace("\r", "\n");
         assertEquals(expectedOutput.trim(), normalizedActualOutput);
     }
-
-   
 
     @Test
     void testRelationOperatorTypeCheck() {
@@ -126,8 +153,6 @@ public class TypeCheckerTest {
         assertEquals(Type.BOOLEAN, testfn2, "Should have Type bool");
         assertEquals(Type.BOOLEAN, testfn3, "Should have Type bool");
     }
-
-    
 
     @Test
     void testVisitIfStatement() {
@@ -173,9 +198,7 @@ public class TypeCheckerTest {
 
     @Test
     void testTypeCheker1() {
-
         String code = """
-
                 var array: int[3][3]
                 var array: int[v][3]
                                     """;
@@ -194,13 +217,11 @@ public class TypeCheckerTest {
         String terminal_Errors = normalizeOutput();
         System.out.println(terminal_Errors + "We get here");
         assertEquals(correct_error.trim(), terminal_Errors);
-        // assertTrue( terminal_Errors.contains(correct_error));
     }
 
     @Test
     void testTypeCheker2() {
         String code = """
-
                 var array: int[3][3]
                 array[1][1]=10
                 array[2][1]="string"
@@ -221,7 +242,6 @@ public class TypeCheckerTest {
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));
     }
-
 
     @Test
     void testTypeCheker9() {
@@ -436,17 +456,19 @@ public class TypeCheckerTest {
                    var true_result:int=plus(5)
 
                                      """;
-       /*  AstNode astTree = treemaker(code);
-
-        String correct_error = """
-                 Error 1
-                 Function Expected type:   , as  Argument but got
-                """;
-        typeChecker.visitor(astTree);
-
-        String terminal_Errors = normalizeOutput();
-        System.out.println(terminal_Errors + "We get here");
-        assertEquals(correct_error.trim(), terminal_Errors); */
+        /*
+         * AstNode astTree = treemaker(code);
+         * 
+         * String correct_error = """
+         * Error 1
+         * Function Expected type: , as Argument but got
+         * """;
+         * typeChecker.visitor(astTree);
+         * 
+         * String terminal_Errors = normalizeOutput();
+         * System.out.println(terminal_Errors + "We get here");
+         * assertEquals(correct_error.trim(), terminal_Errors);
+         */
         // assertTrue( terminal_Errors.contains(correct_error));
     }
 
