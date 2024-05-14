@@ -6,6 +6,9 @@ public class BoolNode extends AstNode {
     public BoolNode(String value) {
         this.value = Boolean.parseBoolean(value);
     }
+    public BoolNode(Boolean value) {
+        this.value = value;
+    }
     public Boolean getValue() {
         return value;
     }

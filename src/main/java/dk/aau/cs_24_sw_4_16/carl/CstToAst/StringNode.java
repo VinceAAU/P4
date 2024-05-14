@@ -8,7 +8,7 @@ public class StringNode extends AstNode {
     }
 
     public String getValue() {
-        return value;
+        return value.replaceAll("\"","");
     }
 
     public void setValue(String value) {
@@ -17,6 +17,6 @@ public class StringNode extends AstNode {
 
     @Override
     public String toString() {
-        return value;
+        return value.replaceAll("\"","");
     }
 }
