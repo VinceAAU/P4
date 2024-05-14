@@ -57,7 +57,16 @@ public class Interpreter {
                 } else {
                     throw new RuntimeException("out of bounds");
                 }
-            } else {
+            } else if (((ArgumentListNode) node.getValue()).getList().get(0) instanceof IdentifierNode) {
+                IntNode in = ((IntNode) getVariable((IdentifierNode) ((ArgumentListNode) node.getValue()).getList().get(0)));
+                int index = in.getValue();
+                if (index < rooms.size()) {
+                    return rooms.get(in.getValue()).get(node.getIdentifierNode().toString());
+                } else {
+                    throw new RuntimeException("out of bounds");
+                }
+            }
+            {
                 throw new RuntimeException("parameter must be an int");
             }
         }
@@ -129,7 +138,12 @@ public class Interpreter {
     public void visit(StructureDefinitionNode node) {
         HashMap<String, AstNode> object = new HashMap<>();
         for (var variable : node.getVariableDeclarations()) {
-            object.put(variable.getIdentifier().toString(), variable.getValue());
+            if (variable.getValue() instanceof IdentifierNode) {
+                object.put(variable.getIdentifier().toString(), getVariable((new IdentifierNode(variable.getValue().toString()))));
+            } else {
+
+                object.put(variable.getIdentifier().toString(), variable.getValue());
+            }
         }
         if (node.getType().equals("enemy")) {
             tileInformationEnemy.put(node.getIdentifier().toString(), object);
@@ -232,7 +246,7 @@ public class Interpreter {
     public AstNode getVariable(IdentifierNode node) {
 //        for (HashMap<String, AstNode> vTable : scopes) {
 
-        int towards =!activeScope.isEmpty() ? activeScope.getLast() : 0;
+        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
         for (int i = scopes.size() - 1; i >= towards; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier())) {
                 return scopes.get(i).get(node.getIdentifier());
@@ -240,7 +254,7 @@ public class Interpreter {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst();
+            from = activeScope.getFirst()-1;
         } else {
             from = scopes.size() - 1;
         }
@@ -268,12 +282,13 @@ public class Interpreter {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst();
+            from = activeScope.getFirst() -1 ;
         } else {
             from = scopes.size() - 1;
         }
+        System.out.println(from);
         for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(node.getIdentifier())) {
+            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
                 replaceValue(nodeToChange, toChange);
@@ -306,9 +321,21 @@ public class Interpreter {
             } else if (toChange instanceof IdentifierNode) {
                 for (HashMap<String, AstNode> vTable : scopes) {
                     if (vTable.containsKey(toChange.toString())) {
-                        scopes.getLast().put(node.getIdentifier().toString(), vTable.get(toChange.toString()));
+                        AstNode variable = vTable.get(toChange.toString());
+                        if (variable instanceof IntNode) {
+                            scopes.getLast().put(node.getIdentifier().toString(), new IntNode(variable.toString()));
+                        } else if (variable instanceof FloatNode) {
+                            scopes.getLast().put(node.getIdentifier().toString(), new FloatNode(variable.toString()));
+                        } else if (variable instanceof StringNode) {
+                            scopes.getLast().put(node.getIdentifier().toString(), new StringNode(variable.toString()));
+                        } else if (variable instanceof BoolNode) {
+                            scopes.getLast().put(node.getIdentifier().toString(), new BoolNode(((BoolNode) variable).getValue()));
+                        } else {
+                            throw new RuntimeException("haa");
+                        }
                     }
                 }
+
 
             } else if (toChange instanceof PropertyAccessNode) {
                 toChange = visit((PropertyAccessNode) toChange);
@@ -320,10 +347,15 @@ public class Interpreter {
             } else if (toChange instanceof MethodCallNode) {
                 toChange = visit((MethodCallNode) toChange);
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else {
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
+            } else if (toChange instanceof IntNode) {
+                scopes.getLast().put(node.getIdentifier().toString(), new IntNode(toChange.toString()));
+            } else if (toChange instanceof FloatNode) {
+                scopes.getLast().put(node.getIdentifier().toString(), new FloatNode(toChange.toString()));
+            } else if (toChange instanceof StringNode) {
+                scopes.getLast().put(node.getIdentifier().toString(), new StringNode(toChange.toString()));
+            } else if (toChange instanceof BoolNode) {
+                scopes.getLast().put(node.getIdentifier().toString(), new BoolNode(((BoolNode) toChange).getValue()));
             }
-
         } else {
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists in the current scope");
         }
@@ -424,7 +456,7 @@ public class Interpreter {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst();
+            from = activeScope.getFirst() -1;
         } else {
             from = scopes.size() - 1;
         }
@@ -526,6 +558,8 @@ public class Interpreter {
                     return returnValue;
                 }
             }
+            scopes.remove(localTable);
+            activeScope.removeLast();
         }
         return node;
     }
@@ -565,23 +599,27 @@ public class Interpreter {
     public AstNode visit(BinaryOperatorNode node) {
         AstNode left = node.getLeft();
         AstNode right = node.getRight();
+        if (left instanceof MethodCallNode) {
+            left = visit((MethodCallNode) left);
+        } else if (left instanceof PropertyAccessNode) {
+            left = visit((PropertyAccessNode) left);
+        }
         if (left instanceof IdentifierNode) {
             left = getVariable((IdentifierNode) left);
         } else if (left instanceof BinaryOperatorNode) {
             left = visit((BinaryOperatorNode) left);
-        } else if (left instanceof MethodCallNode) {
-            left = visit((MethodCallNode) left);
-        } else if (left instanceof PropertyAccessNode) {
-            left = visit((PropertyAccessNode) left);
+        }
+        if (right instanceof PropertyAccessNode) {
+
+            right = visit((PropertyAccessNode) right);
+        }
+        if (right instanceof MethodCallNode) {
+            right = visit((MethodCallNode) right);
         }
         if (right instanceof IdentifierNode) {
             right = getVariable((IdentifierNode) right);
         } else if (right instanceof BinaryOperatorNode) {
             right = visit((BinaryOperatorNode) right);
-        } else if (right instanceof MethodCallNode) {
-            right = visit((MethodCallNode) right);
-        } else if (right instanceof PropertyAccessNode) {
-            right = visit((PropertyAccessNode) right);
         }
 
         if (left instanceof IntNode && right instanceof IntNode) {
@@ -589,7 +627,7 @@ public class Interpreter {
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         }
-        throw new RuntimeException("BinaryOperator not implemented clause");
+        throw new RuntimeException("BinaryOperator not implemented clause " + left.getClass() + " " + right.getClass());
     }
 
     public AstNode visit(RelationsAndLogicalOperatorNode node) {
@@ -599,11 +637,19 @@ public class Interpreter {
             left = getVariable((IdentifierNode) left);
         } else if (left instanceof RelationsAndLogicalOperatorNode) {
             left = visit((RelationsAndLogicalOperatorNode) left);
+        } else if (left instanceof PropertyAccessNode) {
+            left = visit((PropertyAccessNode) left);
+        } else if (left instanceof BinaryOperatorNode) {
+            left = visit((BinaryOperatorNode) left);
         }
         if (right instanceof IdentifierNode) {
             right = getVariable((IdentifierNode) right);
         } else if (right instanceof RelationsAndLogicalOperatorNode) {
             right = visit((RelationsAndLogicalOperatorNode) right);
+        } else if (right instanceof PropertyAccessNode) {
+            right = visit((PropertyAccessNode) right);
+        } else if (right instanceof BinaryOperatorNode) {
+            right = visit((BinaryOperatorNode) right);
         }
         if (left instanceof IntNode && right instanceof IntNode) {
             return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
@@ -611,8 +657,11 @@ public class Interpreter {
             return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof BoolNode && right instanceof BoolNode) {
             return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
+        } else if (left instanceof StringNode && right instanceof StringNode) {
+            return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
         }
-        throw new RuntimeException("RelationsAndLogicalOperator not implemented clause");
+
+        throw new RuntimeException("RelationsAndLogicalOperator not implemented clause " + left.getClass() + " " + right.getClass());
     }
 
 

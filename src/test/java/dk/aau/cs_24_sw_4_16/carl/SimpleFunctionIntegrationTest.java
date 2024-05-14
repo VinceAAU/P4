@@ -49,7 +49,7 @@ public class SimpleFunctionIntegrationTest {
         Interpreter interpreter = new Interpreter();
         interpreter.visit(astRoot);
 
-        assertEquals("\"test\"".trim(), outContent.toString().trim(), "expected the output to be test");
+        assertEquals("test".trim(), outContent.toString().trim(), "expected the output to be test");
     }
 
     @Test
@@ -377,7 +377,7 @@ public class SimpleFunctionIntegrationTest {
         Interpreter interpreter = new Interpreter();
         interpreter.visit(astRoot);
 
-        assertEquals("\"test\"".trim(), outContent.toString().trim());
+        assertEquals("test".trim(), outContent.toString().trim());
     }
 
     @Test
@@ -678,7 +678,7 @@ printMap()
     Interpreter interpreter = new Interpreter();
     interpreter.visit(astRoot);
 
-    assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
+    assertEquals("orcacnian".trim(), outContent.toString().trim());
   }
 
   @Test
@@ -707,7 +707,7 @@ printMap()
     Interpreter interpreter = new Interpreter();
     interpreter.visit(astRoot);
 
-    assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
+    assertEquals("orcacnian".trim(), outContent.toString().trim());
   }
 
   @Test
@@ -736,7 +736,7 @@ printMap()
     Interpreter interpreter = new Interpreter();
     interpreter.visit(astRoot);
 
-    assertEquals("\"orcacnian\"".trim(), outContent.toString().trim());
+    assertEquals("orcacnian".trim(), outContent.toString().trim());
   }
 
   @Test

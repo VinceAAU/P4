@@ -27,7 +27,9 @@ public class RelationsAndLogicalOperatorNode extends AstNode {
             return value;
         } else if (left instanceof IdentifierNode || right instanceof IdentifierNode) {
             return new RelationsAndLogicalOperatorNode(left, right, operator);
-
+        } else if (left instanceof StringNode && right instanceof StringNode) {
+            BoolNode bool = new BoolNode(((StringNode)left).getValue().equals( ((StringNode) right).getValue()));
+            return bool;
         }
         throw new RuntimeException("something went wrong in getAstNodeValue");
     }
