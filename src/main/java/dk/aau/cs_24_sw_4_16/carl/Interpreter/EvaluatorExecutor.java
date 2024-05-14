@@ -95,7 +95,7 @@ public class EvaluatorExecutor {
     }
 
     public AstNode visit(StatementNode node) {
-        System.out.println(scopes);
+      //  System.out.println(scopes);
         if (node.getNode() instanceof AssignmentNode) {
             visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {

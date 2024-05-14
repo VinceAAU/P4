@@ -4,11 +4,9 @@ var y: int = 42
 fn p() -> void {
      x= x + 3
 }
-
 fn q() -> void {
      p()
 }
-
 fn main() -> int {
     x=20
     print(x)
@@ -27,3 +25,4 @@ print("efter Main")
 print(y)
 
 print(v)
+
