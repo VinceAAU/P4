@@ -569,7 +569,7 @@ public class EvaluatorExecutor {
                     }
                     return returnValue;
                 }
-                scopes.remove(localTable);
+                
             }
             scopes.remove(localTable);
             activeScope.removeLast();
@@ -640,10 +640,7 @@ public class EvaluatorExecutor {
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof FloatNode && right instanceof IntNode) {
-            AstNode floatnode =BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
-            System.out.print("Left node:"+left+" And rigth node:"+ right+" Operator;"+node.getOperator());
-            System.out.println("We get in here YES+Result"+floatnode);
-            
+          //  AstNode floatnode =BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof IntNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());

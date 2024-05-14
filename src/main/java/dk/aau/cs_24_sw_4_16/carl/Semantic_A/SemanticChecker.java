@@ -54,11 +54,7 @@ public class SemanticChecker {
     }
 
     public void visitStatements(StatementNode node) {
-        if (printDebugger) {
-            System.out.println("We get in the vist statement");
-            System.out.println(node.getClass());
-            System.out.println(node.getNode().getClass());
-        }
+        
         if (node.getNode() instanceof VariableDeclarationNode) {
             visitVariableDeclaration((VariableDeclarationNode) node.getNode());
         }
@@ -286,9 +282,9 @@ public class SemanticChecker {
         List<String> names = new ArrayList<>(structTypes.keySet());
         try {
             int i = Integer.parseInt(node.getValue().toString());
-            System.out.println("Parsed integer value: " + i);
+           // System.out.println("Parsed integer value: " + i);
         } catch (NumberFormatException e) {
-            System.err.println("Error parsing integer: " + e.getMessage());
+           // System.err.println("Error parsing integer: " + e.getMessage());
         }
     }
 
@@ -423,9 +419,7 @@ public class SemanticChecker {
     }
 
     public void visitAssignNode(AssignmentNode node) {
-        if (printDebugger) {
-
-        }
+        
         boolean foundIdentifier = false;
 
         for (int i = scopes.size() - 1; 0 <= i; i--) {
@@ -472,16 +466,8 @@ public class SemanticChecker {
 
     public void visitIfStatement(IfStatementNode node) {
         Type expression = Type.VOID;
-        if (printDebugger) {
-            System.out.println("We get in the If statement");
-        }
 
         for (int i = 0; i < node.getExpressions().size(); i++) {
-
-            if (printDebugger) {
-                System.out.println("We get in first for loop");
-                System.out.println("Number of expressions:" + node.getExpressions().size());
-            }
             expression = getType(node.getExpressions().get(i).getNode());
             if (expression != Type.BOOLEAN) {
                 errorHandler("If statements expression must resolve to bool expression, and this resolve to Type:"
@@ -489,10 +475,6 @@ public class SemanticChecker {
             }
         }
         for (int i = 0; i < node.getBlocks().size(); i++) {
-            if (printDebugger) {
-                System.out.println("We get in 2 for loop");
-                System.out.println("Number of blocks:" + node.getBlocks().size());
-            }
             HashMap<String, Type> localETable = new HashMap<>();
             scopes.add(localETable);
             visitBlockNode(node.getBlocks().get(i));

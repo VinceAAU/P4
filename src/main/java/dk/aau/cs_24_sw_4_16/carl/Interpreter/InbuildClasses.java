@@ -16,7 +16,7 @@ public class InbuildClasses {
             if (argument instanceof StatementNode) {
                 toPrint.append(((StatementNode) argument).getNode()).append(" ");
             } else if (argument instanceof IdentifierNode) {
-                int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
+               
                 boolean found = false;
                 for (int i = scopes.size() - 1; i >= 0; i--) {
                     if (scopes.get(i).containsKey(argument.toString())) {
