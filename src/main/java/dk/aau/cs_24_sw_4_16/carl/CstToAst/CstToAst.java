@@ -3,7 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 
 import dk.aau.cs_24_sw_4_16.carl.CARLLexer;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
-import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
+import dk.aau.cs_24_sw_4_16.carl.Interpreter.EvaluatorExecutor;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -24,7 +24,7 @@ public class CstToAst {
             ParseTree tree = parser.program();
             CstToAstVisitor visitor = new CstToAstVisitor();
             AstNode astRoot = visitor.visit(tree);
-            Interpreter inter = new Interpreter();
+            EvaluatorExecutor inter = new EvaluatorExecutor();
             inter.visit(astRoot);
         }
         catch (Exception e){
