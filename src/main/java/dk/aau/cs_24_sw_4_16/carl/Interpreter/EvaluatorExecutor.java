@@ -104,7 +104,7 @@ public class EvaluatorExecutor {
     }
 
     public AstNode visit(StatementNode node) {
-      //  System.out.println(scopes);
+       // System.out.println(scopes);
         if (node.getNode() instanceof AssignmentNode) {
             visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {
@@ -273,9 +273,10 @@ public class EvaluatorExecutor {
     }
 
     public void visit(AssignmentNode node) {
+        
         //System.out.println("fycj me"+node);
         int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-        System.out.println(towards+":"+activeScope.getLast());
+      //  System.out.println(towards+":"+activeScope.getLast());
         for (int i = scopes.size() - 1; i >= 0; i--) {
            // System.out.println(scopes.get(i)+i);
             if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {

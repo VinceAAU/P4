@@ -6,7 +6,7 @@ import java.util.*;
 
 import static java.lang.Integer.parseInt;
 
-public class TypeChecker {
+public class SemanticChecker {
 
     HashMap<String, Type> typeOfReturnFunction;
     HashMap<String, List<Type>> functionParameters;
@@ -26,7 +26,7 @@ public class TypeChecker {
     String currentIdentifierCheck = "";
     Boolean struct_variable_declarion_failed = false;
 
-    public TypeChecker() {
+    public SemanticChecker() {
 
         // fTable = new HashMap<>();
         eTable = new HashMap<>();
@@ -41,7 +41,7 @@ public class TypeChecker {
     }
 
     public void visitor(AstNode node) {
-        System.out.println(node);
+       /// System.out.println(node);
         if (node instanceof ProgramNode) {
             visitProgramNode((ProgramNode) node);
         }

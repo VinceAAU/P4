@@ -25,7 +25,7 @@ import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 
 public class TypeCheckerTest {
 
-    TypeChecker typeChecker = new TypeChecker();
+    SemanticChecker SemanticChecker = new SemanticChecker();
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalErr = System.err;
@@ -71,7 +71,7 @@ public class TypeCheckerTest {
     void testBinaryOperatorTypeCheck() {
 
         IntNode intNode = new IntNode(0);
-        BoolNode boolNode = new BoolNode(null);
+        BoolNode boolNode = new BoolNode("yes");
         StringNode stringNode = new StringNode("String");
         FloatNode floatNode = new FloatNode("2.2");
 
@@ -79,9 +79,9 @@ public class TypeCheckerTest {
         BinaryOperatorNode testnode2 = new BinaryOperatorNode(boolNode, stringNode, "+");
         BinaryOperatorNode testnode3 = new BinaryOperatorNode(floatNode, floatNode, "+");
 
-        Type testfn1 = typeChecker.binaryOperatorTypeCheck(testnode1);
-        Type testfn2 = typeChecker.binaryOperatorTypeCheck(testnode2);
-        Type testfn3 = typeChecker.binaryOperatorTypeCheck(testnode3);
+        Type testfn1 = SemanticChecker.binaryOperatorTypeCheck(testnode1);
+        Type testfn2 = SemanticChecker.binaryOperatorTypeCheck(testnode2);
+        Type testfn3 = SemanticChecker.binaryOperatorTypeCheck(testnode3);
 
         assertEquals(Type.INT, testfn1, "Should have returned int");
         String correct_error = """
@@ -113,7 +113,7 @@ public class TypeCheckerTest {
                 Error 2
                 Tryied to asssign Type:UNKNOWN to the variable:result that has the type:INT And that is hella iligal
                                     """;
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
     }
@@ -122,8 +122,8 @@ public class TypeCheckerTest {
     void testErrorHandler() {
         String testString = "test1";
         String testString2 = "test2";
-        typeChecker.errorHandler(testString);
-        typeChecker.errorHandler(testString2);
+        SemanticChecker.errorHandler(testString);
+        SemanticChecker.errorHandler(testString2);
         String expectedOutput = "Error 1\n" +
                 "test1\n" +
                 "Error 2\n" +
@@ -138,16 +138,16 @@ public class TypeCheckerTest {
     void testRelationOperatorTypeCheck() {
 
         IntNode intNode = new IntNode(0);
-        BoolNode boolNode = new BoolNode(null);
-        StringNode stringNode = new StringNode(null);
+        BoolNode boolNode = new BoolNode("ee");
+        StringNode stringNode = new StringNode("ee");
         FloatNode floatNode = new FloatNode("2.2");
 
         RelationsAndLogicalOperatorNode testnode1 = new RelationsAndLogicalOperatorNode(stringNode, floatNode, null);
         RelationsAndLogicalOperatorNode testnode2 = new RelationsAndLogicalOperatorNode(boolNode, boolNode, null);
         RelationsAndLogicalOperatorNode testnode3 = new RelationsAndLogicalOperatorNode(intNode, intNode, null);
-        Type testfn1 = typeChecker.relationOperatorTypeCheck(testnode1);
-        Type testfn2 = typeChecker.relationOperatorTypeCheck(testnode2);
-        Type testfn3 = typeChecker.relationOperatorTypeCheck(testnode3);
+        Type testfn1 = SemanticChecker.relationOperatorTypeCheck(testnode1);
+        Type testfn2 = SemanticChecker.relationOperatorTypeCheck(testnode2);
+        Type testfn3 = SemanticChecker.relationOperatorTypeCheck(testnode3);
 
         assertEquals(Type.UNKNOWN, testfn1, "Should return Type unkown");
         assertEquals(Type.BOOLEAN, testfn2, "Should have Type bool");
@@ -165,17 +165,17 @@ public class TypeCheckerTest {
         blockNodeList.add(new BlockNode());
 
         IfStatementNode node1 = new IfStatementNode(blockNodeList, expressionNodeList);
-        typeChecker.visitIfStatement(node1);
-        Type correctType1 = typeChecker.getType(expressionNodeList.get(0));
-        Type correctType2 = typeChecker.getType(expressionNodeList.get(1));
+        SemanticChecker.visitIfStatement(node1);
+        Type correctType1 = SemanticChecker.getType(expressionNodeList.get(0));
+        Type correctType2 = SemanticChecker.getType(expressionNodeList.get(1));
         assertEquals(Type.BOOLEAN, correctType1);
         assertEquals(Type.BOOLEAN, correctType2);
 
         expressionNodeList.add(new ExpressionNode(new IntNode("2")));
         blockNodeList.add(new BlockNode());
         IfStatementNode node2 = new IfStatementNode(blockNodeList, expressionNodeList);
-        typeChecker.visitIfStatement(node2);
-        Type errorType = typeChecker.getType(expressionNodeList.get(2));
+        SemanticChecker.visitIfStatement(node2);
+        Type errorType = SemanticChecker.getType(expressionNodeList.get(2));
         assertEquals(Type.INT, errorType,
                 "If statements expression must resolve to bool expression, and this resolve to Type:INT");
     }
@@ -185,13 +185,13 @@ public class TypeCheckerTest {
         ExpressionNode expressionNode1 = new ExpressionNode(new BoolNode("true"));
         BlockNode blockNode = new BlockNode();
 
-        typeChecker.visitWhileLoop(new WhileLoopNode(expressionNode1, blockNode));
-        Type correctType = typeChecker.getType(expressionNode1);
+        SemanticChecker.visitWhileLoop(new WhileLoopNode(expressionNode1, blockNode));
+        Type correctType = SemanticChecker.getType(expressionNode1);
         assertEquals(Type.BOOLEAN, correctType);
 
         ExpressionNode expressionNode2 = new ExpressionNode(new StringNode("hello"));
-        Type errorType = typeChecker.getType(expressionNode2);
-        typeChecker.visitWhileLoop(new WhileLoopNode(expressionNode2, blockNode));
+        Type errorType = SemanticChecker.getType(expressionNode2);
+        SemanticChecker.visitWhileLoop(new WhileLoopNode(expressionNode2, blockNode));
         assertEquals(Type.STRING, errorType,
                 "While loop expresion must resolve to bool expresion, and this resolve to Type:" + errorType);
     }
@@ -212,7 +212,7 @@ public class TypeCheckerTest {
                 Error 3
                 Identifier:array is alredy used, rename it
                     """;
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
 
         String terminal_Errors = normalizeOutput();
         System.out.println(terminal_Errors + "We get here");
@@ -235,7 +235,7 @@ public class TypeCheckerTest {
                 Error 2
                 Tried to assign the array:array but acces value: 0 is of type:STRING and should be:INT
                                 """;
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
 
         String terminal_Errors = normalizeOutput();
         System.out.println(terminal_Errors + "We get here");
@@ -274,7 +274,7 @@ public class TypeCheckerTest {
                 Struct Goblin2 already exists
                                 """;
         ;
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));
@@ -296,7 +296,7 @@ public class TypeCheckerTest {
                 You may not redeclare a inbuilt function. The function you tried to redeclare is:print
                     """;
         ;
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));
@@ -321,7 +321,7 @@ public class TypeCheckerTest {
         String correct_error = """
                 Error 1
                 Tryied to asssign Type:INT to the variable:test_variable2 that has the type:STRING And that is hella iligal""";
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
 
@@ -342,7 +342,7 @@ public class TypeCheckerTest {
         String correct_error = """
                 Error 1
                 variable: test_variable already exists in the scope""";
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
     }
@@ -363,7 +363,7 @@ public class TypeCheckerTest {
         String correct_error = """
                 Error 1
                 could not find the variable y""";
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         // assertEquals(correct_error.trim(), terminal_Errors);
         assertTrue(terminal_Errors.contains(correct_error));
@@ -383,7 +383,7 @@ public class TypeCheckerTest {
         String correct_error = """
                         Error 1
                 You have made return statement outside a function THAT IS illigal""";
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));
@@ -406,7 +406,7 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = "";
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));
@@ -433,7 +433,7 @@ public class TypeCheckerTest {
                         Error 1
                 The return type STRING Does not match the return statement of the function int
                        """;
-        typeChecker.visitor(astTree);
+        SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
         // assertTrue( terminal_Errors.contains(correct_error));

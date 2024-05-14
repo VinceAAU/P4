@@ -90,7 +90,7 @@ public class SimpleFunctionIntegrationTest {
         ParseTree tree = parser.program();
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
-
+       // System.out.println(astRoot);
         EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 

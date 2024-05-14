@@ -10,6 +10,7 @@ import java.util.*;
 
 public class InbuildClasses {
     public static void print(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, Deque<Integer> activeScope) {
+      //  System.out.println("We get in here");
         StringBuilder toPrint = new StringBuilder();
         for (AstNode argument : node.getArguments()) {
             if (argument instanceof StatementNode) {

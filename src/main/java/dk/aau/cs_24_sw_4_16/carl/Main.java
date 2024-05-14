@@ -3,7 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
 import dk.aau.cs_24_sw_4_16.carl.Interpreter.EvaluatorExecutor;
-import dk.aau.cs_24_sw_4_16.carl.Semantic_A.TypeChecker;
+import dk.aau.cs_24_sw_4_16.carl.Semantic_A.SemanticChecker;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -44,7 +44,7 @@ public class Main {
             AstNode astRoot = visitor.visit(tree);
             //System.out.println(astRoot);
 
-            TypeChecker typeChecker = new TypeChecker();
+            SemanticChecker typeChecker = new SemanticChecker();
             typeChecker.visitor(astRoot);
             
             if (!typeChecker.thereWasAnError) {
