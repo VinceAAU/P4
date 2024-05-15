@@ -87,23 +87,26 @@ public class SemanticChecker {
 
     public void errorHandler(String errorMessage) {
         thereWasAnError = true;
-            System.err.println("Error " + errorNumber);
+            System.err.println("Error: " + errorNumber);
             errorNumber = errorNumber + 1;
             System.err.println(errorMessage);
     }
-
-    public void visistArrayAccesNodeFn(ArrayAccessNode node) {
-        String identifier = node.getIdentifier().toString();
-        boolean found = scopes.getFirst().containsKey(identifier);
+    private boolean checkIdentifierInScopes(String node) {
+        boolean found = scopes.getFirst().containsKey(node);
 
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(identifier)) {
+            if (scopes.get(i).containsKey(node)) {
                 found = true;
+                break;
             }
         }
+        return found;
+    }
+
+        public void visistArrayAccesNodeFn(ArrayAccessNode node) {
+        boolean found = checkIdentifierInScopes(node.getIdentifier().toString());
         if (found) {
             Type allowedAccesTypesForArrays = Type.INT;
-            Boolean validTypesaccesTypes = true;
             Type sizeType = Type.UNKNOWN;
             int arguementNumber = 0;
 
@@ -113,10 +116,8 @@ public class SemanticChecker {
                 sizeType = getType(astNode);
                 if (sizeType != allowedAccesTypesForArrays) {
                     arguementNumber = i;
-                    errorHandler("Tried to assign the array:" + identifier + " but acces value: " + arguementNumber
-                            + " is of type:" + sizeType + " and should be INT");
-                    validTypesaccesTypes = false;
-
+                    errorHandler("Tried to assign the array: " + node.getIdentifier().toString() + " but access value: " + arguementNumber
+                            + " is of type: " + sizeType + " and should be INT");
                     break;
                 }
             }
@@ -126,7 +127,7 @@ public class SemanticChecker {
 
     public void visistArrayAssignment(ArrayAssignmentNode node) {
         String identifier = node.getIdentifier().toString();
-        Boolean found = false;
+        boolean found = false;
         Type arrayType = Type.UNKNOWN;
         found = scopes.getLast().containsKey(identifier);
 
@@ -139,8 +140,7 @@ public class SemanticChecker {
             }
         }
         if (found) {
-
-            Boolean validTypesaccesTypes = true;
+            boolean validTypesaccesTypes = true;
             Type sizeType = Type.UNKNOWN;
             int arguementNumber = 0;
             Type allowedAccesTypesForArrays = Type.INT;
@@ -157,36 +157,28 @@ public class SemanticChecker {
                 }
             }
             if (!validTypesaccesTypes) {
-                errorHandler("Tried to assign the array:" + identifier + " but acces value: " + arguementNumber
-                        + " is of type:" + sizeType + " and should be:" + arrayType);
+                errorHandler("Tried to assign the array: " + identifier + " but access value: " + arguementNumber
+                        + " is of type: " + sizeType + " and should be: " + arrayType);
             }
 
             // Tjek venstre mod højre
             Type assignType = getType(node.getValue());
             if (arrayType != assignType) {
-                errorHandler("Tried to assign the type:" + assignType + " to the array:" + identifier
-                        + " that has the type:" + arrayType + ", and that is ilegal");
+                errorHandler("Tried to assign the type: " + assignType + " to the array: " + identifier
+                        + " that has the type: " + arrayType);
             }
 
         } else {
-            errorHandler("Array:" + identifier + " Does not exist ");
+            errorHandler("Array: " + identifier + " Does not exist ");
         }
     }
 
     public void visistarrayDekleration(ArrayDefinitionNode node) {
-
-        String identifier = node.getIdentifier().toString();
-        boolean found = scopes.getFirst().containsKey(identifier);
-
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-            if (scopes.get(i).containsKey(identifier)) {
-                found = true;
-            }
-        }
+        boolean found = checkIdentifierInScopes(node.getIdentifier().toString());
 
         Type arrayType = getType(node.getType());
 
-        Boolean validTypes = true;
+        boolean validTypes = true;
         Type sizeType = Type.UNKNOWN;
         int arguementNumber = 0;
         List<AstNode> sizes = node.getSizes();
@@ -201,15 +193,15 @@ public class SemanticChecker {
             }
         }
         if (validTypes) {
-            scopes.getLast().put(identifier, arrayType);
+            scopes.getLast().put(node.getIdentifier().toString(), arrayType);
 
         } else {
-            errorHandler("Tried to declare the array:" + identifier + " but argument: " + arguementNumber
-                    + " is of type:" + sizeType + " and should be:" + arrayType);
+            errorHandler("Tried to declare the array: " + node.getIdentifier().toString() + " but argument: " + arguementNumber
+                    + " is of type: " + sizeType + " and should be: " + arrayType);
         }
 
         if (found) {
-            errorHandler("Identifier:" + identifier + " is alredy used, rename it");
+            errorHandler("Identifier: " + node.getIdentifier().toString() + " is already used");
         }
 
     }
@@ -217,7 +209,6 @@ public class SemanticChecker {
     public void visitPropertyAssignment(PropertyAssignmentNode node) {
         Type oldType = visitPropertyAccessNode(node.getPropertyAccessNode());
         Type newType = getType(node.getValue());
-        errorHandler(oldType + "  " + newType);
         if (oldType != newType) {
             errorHandler("Type " + oldType + " does not match " + newType);
         }
@@ -229,14 +220,14 @@ public class SemanticChecker {
       
         String firstIdentifier = node.getIdentifiers().get(0).toString();
         if (!structVariablesTable.containsKey(firstIdentifier) && !validPropertyAccess.contains(firstIdentifier)) {
-            errorHandler("could not find the struct variable: " + firstIdentifier);
+            errorHandler("Could not find the struct variable: " + firstIdentifier);
         }
 
         HashMap<String, Type> listOfIdentifiers = structVariablesTable.get(firstIdentifier);
 
         if (!validPropertyAccess.contains(firstIdentifier) && node.getIdentifiers().size() <= 1
                 || !listOfIdentifiers.containsKey(node.getIdentifiers().get(1).toString())) {
-            errorHandler("you need 3 arguments");
+            errorHandler("You need 3 arguments");
         }
 
         if (structVariablesTable.containsKey(firstIdentifier) && node.getIdentifiers().size() >= 2
@@ -272,7 +263,7 @@ public class SemanticChecker {
         }
         
 
-        errorHandler("Wrong types for relation operation:" + leftType + ":" + left + " And:" + right + ":" + rightType);
+        errorHandler("Wrong types for relation operation: " + leftType + ": " + left + " And: " + right + ": " + rightType);
 
         return Type.UNKNOWN;
     }
@@ -298,7 +289,7 @@ public class SemanticChecker {
             return Type.FLOAT;
         }
 
-        errorHandler("Wrong types for binary operation:" + leftType + ":" + left + " And:" + right + ":" + rightType);
+        errorHandler("Wrong types for binary operation: " + leftType + ": " + left + " And: " + right + ": " + rightType);
         return Type.UNKNOWN;
 
     }
@@ -325,17 +316,15 @@ public class SemanticChecker {
                 Type assignmentType = getType(ass); // This should give right side type
 
                 if (variableType == assignmentType) {
-                    Type typeWeSaveInETable = variableType;
-                    scopes.getLast().put(node.getIdentifier().toString(), typeWeSaveInETable);
+                    scopes.getLast().put(node.getIdentifier().toString(), variableType);
 
                 } else {
-                    errorHandler("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
-                            + " that has the type:" + variableType
-                            + " And that is hella iligal");
+                    errorHandler("Tried to assign Type: " + assignmentType + " to the variable: " + identifier
+                            + " that has the type: " + variableType);
 
                 }
             } else {
-                throw new RuntimeException("variable: " + node.getIdentifier() + " already exists in the scope");
+                throw new RuntimeException("Variable: " + node.getIdentifier() + " already exists in the scope");
             }
         } catch (Exception e) {
             errorHandler(e.getMessage());
@@ -357,22 +346,22 @@ public class SemanticChecker {
                 return scopes.get(i).get(node.getIdentifier());
             }
         }
-        errorHandler("could not find the variable " + node.getIdentifier());
+        errorHandler("Could not find the variable " + node.getIdentifier());
         return Type.UNKNOWN;
     }
 
     public void visitReturnNode(ReturnStatementNode node) {
         Type returnType = getType(node.getReturnValue());
        
-        if (currentActiveFunction == "") {
-            errorHandler("You have made return statement outside a function THAT IS illigal");
+        if (Objects.equals(currentActiveFunction, "")) {
+            errorHandler("Return statement should be in a function");
         } else {
             Type activeFunction = typeOfReturnFunction.get(currentActiveFunction);
             if (Objects.equals(currentActiveFunction, "")) {
-                errorHandler("You have made return statement outside a function THAT IS illigal");
+                errorHandler("Return statement should be in a function");
             }
             if (returnType != activeFunction) {
-                errorHandler("The return type " + returnType + " Does not match the return statement of the function "
+                errorHandler("The return type " + returnType + " Does not match the return statement of the function"
                         + activeFunction.getTypeName());
             }
         }
@@ -396,9 +385,8 @@ public class SemanticChecker {
                 Type rightType = getType(node.getValue());
 
                 if (oldType != rightType) {
-                    errorHandler("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
-                            + " that has the type:" + oldType
-                            + " And that is hella iligal");
+                    errorHandler("Tried to assign Type: " + rightType + " to the variable: " + identifier
+                            + " that has the type: " + oldType);
 
                 }
             }
@@ -407,7 +395,7 @@ public class SemanticChecker {
             }
         }
         if (!foundIdentifier) {
-            errorHandler("Variable '" + node.getIdentifier() + "' has not been defined yet.");
+            errorHandler("Variable " + node.getIdentifier() + " has not been defined yet.");
         }
     }
 
@@ -417,7 +405,7 @@ public class SemanticChecker {
         for (int i = 0; i < node.getExpressions().size(); i++) {
             expression = getType(node.getExpressions().get(i).getNode());
             if (expression != Type.BOOLEAN) {
-                errorHandler("If statements expression must resolve to bool expression, and this resolve to Type:"
+                errorHandler("If statements expression must resolve to bool expression, and cannot be of type: "
                         + expression);
             }
         }
@@ -433,7 +421,7 @@ public class SemanticChecker {
     public void visitWhileLoop(WhileLoopNode node) {
         Type toCheck = getType((node.getExpression()).getNode());
         if (toCheck != Type.BOOLEAN) {
-            errorHandler("While loop expresion must resolve to bool expresion, and this resolve to Type:" + toCheck);
+            errorHandler("While loop expression must resolve to bool expression, and can not be of type: " + toCheck);
 
         }
         HashMap<String, Type> localTable = new HashMap<>();
@@ -460,7 +448,7 @@ public class SemanticChecker {
                     Type arguementType = getType(parameter.getType());
                     if (localTable.containsKey(identifierParameter)) {
                         errorHandler(
-                                "The variable:" + identifierParameter + " Already exist in this function parameters.");
+                                "The variable: " + identifierParameter + " Already exist in this function parameters.");
                     } else {
                         scopes.getLast().put(identifierParameter, arguementType);
                         functionParameters.get(node.getIdentifier().toString()).add(arguementType);// Den tilføjer typen
@@ -475,7 +463,7 @@ public class SemanticChecker {
                 currentActiveFunction = "";
                 if (!hasReturnStatement && Type.VOID != getType(node.getReturnType())) {
                     
-                    errorHandler("Missing return statement in function declartion:" + node.getIdentifier().toString());
+                    errorHandler("Missing return statement in function declaration: " + node.getIdentifier().toString());
                 }
                 hasReturnStatement = false;
                 scopes.remove(localTable);
@@ -483,7 +471,7 @@ public class SemanticChecker {
                 errorHandler("function " + node.getIdentifier() + " already exists");
             }
         } else {
-            errorHandler("You may not redeclare a inbuilt function. The function you tried to redeclare is:"
+            errorHandler("You may not redeclare a inbuilt function. The function you tried to redeclare is: "
                     + node.getIdentifier().toString());
         }
     }
@@ -500,7 +488,7 @@ public class SemanticChecker {
                 int expectedArgumentsSize = expectedParameterTypes.size();
                 int actualArgumentsSize = node.getArguments().size();
                 if (expectedArgumentsSize != actualArgumentsSize) {
-                    errorHandler("Function Expected:" + expectedArgumentsSize + " Arguments but got :"
+                    errorHandler("Function Expected: " + expectedArgumentsSize + " Arguments but got: "
                             + actualArgumentsSize + " Arguments");
                 }
                 for (int i = 0; i < expectedArgumentsSize; i++) {
@@ -564,13 +552,12 @@ public class SemanticChecker {
 
                 } else {
                     struct_variable_declarion_failed = true;
-                    errorHandler("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
-                            + " that has the type:" + variableType
-                            + " And that is hella iligal");
+                    errorHandler("Tried to assign Type: " + assignmentType + " to the variable: " + identifier
+                            + " that has the type: " + variableType);
 
                 }
             } else {
-                throw new RuntimeException("variable " + node.getIdentifier() + " already exists in struct");
+                throw new RuntimeException("Variable " + node.getIdentifier() + " already exists in struct");
             }
         } catch (Exception e) {
             struct_variable_declarion_failed = true;
@@ -586,7 +573,15 @@ public class SemanticChecker {
     }
 
     public Type resolveMethodCallType(MethodCallNode node) {
-        return Type.INT;
+        List<String> properties = Collections.singletonList(node.getPropertyAccessContext().getIdentifiers().toString());
+        System.out.println(properties);
+        if(properties.contains("[size]")) {
+            return Type.INT;
+        } else if (properties.contains("[get]")) {
+            System.out.println("HELELEKGNKGJNKJG");
+            return Type.UNKNOWN;
+        }
+        return Type.UNKNOWN;
     }
 
     public Type getType(Object node) {
@@ -605,11 +600,8 @@ public class SemanticChecker {
             type = getType(((ArrayAccessNode) node).getIdentifier());
         } else if (node instanceof PropertyAccessNode) {
             type = visitPropertyAccessNode((PropertyAccessNode) node);
-        } else if (node instanceof MethodCallNode) {
-            MethodCallNode methodCallNode = (MethodCallNode) node;
+        } else if (node instanceof MethodCallNode methodCallNode) {
             type = resolveMethodCallType(methodCallNode);
-           
-           
         } else if (node instanceof BinaryOperatorNode) {
             type = binaryOperatorTypeCheck((BinaryOperatorNode) node);
         } else if (node instanceof RelationsAndLogicalOperatorNode) {
@@ -676,7 +668,7 @@ public class SemanticChecker {
                 default:
                     break;
             }
-        } 
+        }
         else {
             errorHandler("The node we get failed to handle:" + node.getClass());
         }
