@@ -120,7 +120,6 @@ public class SemanticChecker {
     private boolean checkIdentifierInScopes(String node) {
         boolean found = false;
         for (int i = scopes.size() - 1; i >= 0; i--) {
-            System.out.println(i);
             if (scopes.get(i).containsKey(node)) {
                 found = true;
                 break;
@@ -130,7 +129,28 @@ public class SemanticChecker {
     }
 
     /**
-     * Method for accessing array indices.
+     * Private helper method for accessing array indices.
+     * Loops through all indices, and checks if the type matches INT type.
+     * @param identifier is the array name.
+     * @param indicesInNode is the indices of the array.
+     * Throws error if wrong type is assigned. This error here is only thrown for visistArrayAccesNodeFn method.
+     */
+    private void checkArrayIndexTypes(String identifier, List<AstNode> indicesInNode) {
+        Type allowedAccesTypesForArrays = Type.INT;
+        Type sizeType = Type.UNKNOWN;
+
+        for (int i = 0; i < indicesInNode.size(); i++) {
+            AstNode astNode = indicesInNode.get(i);
+            sizeType = getType(astNode);
+            if (sizeType != allowedAccesTypesForArrays) {
+                errorHandler("Tried to assign the array: " + identifier + " but access value: " + i
+                        + " is of type: " + sizeType + " and should be INT");
+            }
+        }
+    }
+
+    /**
+     * Method for checking type when accessing array indices.
      * Looks for array in scope.
      * Checks if correct type is being assigned to array indices.
      * Throws error if wrong type is assigned.
@@ -138,58 +158,30 @@ public class SemanticChecker {
     public void visistArrayAccesNodeFn(ArrayAccessNode node) {
         boolean found = checkIdentifierInScopes(node.getIdentifier().toString());
         if (found) {
-            Type allowedAccesTypesForArrays = Type.INT;
-            Type sizeType = Type.UNKNOWN;
-            int arguementNumber = 0;
-
-            List<AstNode> sizes = node.getIndices();
-            for (int i = 0; i < sizes.size(); i++) {
-                AstNode astNode = sizes.get(i);
-                sizeType = getType(astNode);
-                if (sizeType != allowedAccesTypesForArrays) {
-                    arguementNumber = i;
-                    errorHandler("Tried to assign the array: " + node.getIdentifier().toString() + " but access value: " + arguementNumber
-                            + " is of type: " + sizeType + " and should be INT");
-                    break;
-                }
-            }
-
+            checkArrayIndexTypes(node.getIdentifier().toString(), node.getIndices());
         }
     }
 
     /**
-     * Method for assigning value to array indices.
+     * Method for checking type when assigning value to array indices.
      * Looks for array in scope.
-     * Checks if correct type is being assigned to array indices.
+     * Checks if correct type is being assigned to array.
      * Throws error if wrong type is assigned.
      */
     public void visistArrayAssignment(ArrayAssignmentNode node) {
-        System.out.println(node.getIdentifier().toString());
         String identifier = node.getIdentifier().toString();
-        boolean found = checkIdentifierInScopes(node.getIdentifier().toString());
+        boolean found = false;
         Type arrayType = Type.UNKNOWN;
 
+        for (int i = scopes.size() - 1; 0 <= i; i--) {
+            if (scopes.get(i).containsKey(identifier)) {
+                found = true;
+                arrayType = scopes.get(i).get(identifier);
+            }
+        }
+
         if (found) {
-            boolean validTypesaccesTypes = true;
-            Type sizeType = Type.UNKNOWN;
-            int arguementNumber = 0;
-            Type allowedAccesTypesForArrays = Type.INT;
-
-            List<AstNode> sizes = node.getIndices();
-            for (int i = 0; i < sizes.size(); i++) {
-                AstNode astNode = sizes.get(i);
-                sizeType = getType(astNode);
-                if (sizeType != allowedAccesTypesForArrays) {
-                    arguementNumber = i;
-                    validTypesaccesTypes = false;
-
-                    break;
-                }
-            }
-            if (!validTypesaccesTypes) {
-                errorHandler("Tried to assign the array: " + identifier + " but access value: " + arguementNumber
-                        + " is of type: " + sizeType + " and should be: " + arrayType);
-            }
+            checkArrayIndexTypes(identifier, node.getIndices());
 
             // Tjek venstre mod højre
             Type assignType = getType(node.getValue());
@@ -203,11 +195,16 @@ public class SemanticChecker {
         }
     }
 
+    /**
+     * Method for checking type when declaring array.
+     * Looks for array in scope.
+     * Checks if correct type is being assigned to array.
+     * Throws error if wrong type is assigned.
+     */
     public void visistarrayDekleration(ArrayDefinitionNode node) {
         boolean found = checkIdentifierInScopes(node.getIdentifier().toString());
 
         Type arrayType = getType(node.getType());
-
         boolean validTypes = true;
         Type sizeType = Type.UNKNOWN;
         int arguementNumber = 0;
@@ -218,7 +215,6 @@ public class SemanticChecker {
             if (sizeType != Type.INT) {
                 arguementNumber = i;
                 validTypes = false;
-
                 break;
             }
         }
@@ -236,6 +232,11 @@ public class SemanticChecker {
 
     }
 
+    /**
+     * Method for checking type when assigning value to properties.
+     * Checks if assigned type is not the same as current type.
+     * Throws error if wrong type is assigned.
+     */
     public void visitPropertyAssignment(PropertyAssignmentNode node) {
         Type oldType = visitPropertyAccessNode(node.getPropertyAccessNode());
         Type newType = getType(node.getValue());
@@ -244,7 +245,13 @@ public class SemanticChecker {
         }
     }
 
-
+    /**
+     * Method for checking type when accessing properties.
+     * Checks if struct for property access does not exist or if property type is not get or size.
+     * Checks if struct property access is less than 3 arguments or if property type is not get or size.
+     * Throws error if any of these are true and returns an unknown type.
+     * Else returns the the type of the property.
+     */
     public Type visitPropertyAccessNode(PropertyAccessNode node) {
         List<String> validPropertyAccess = new ArrayList<>(Arrays.asList("size", "get"));
 
@@ -268,7 +275,12 @@ public class SemanticChecker {
         return Type.UNKNOWN;
     }
 
-
+    /**
+     * Method for checking types of operands in relation and logical operations.
+     * Checks type of left and right operands.
+     * Returns BOOLEAN if both operands are of compatible types.
+     * Throws an error if the operand types are incompatible and returns unknown.
+     */
     public Type relationOperatorTypeCheck(RelationsAndLogicalOperatorNode node) {
 
         AstNode left = node.getLeft();
@@ -296,6 +308,12 @@ public class SemanticChecker {
         return Type.UNKNOWN;
     }
 
+    /**
+     * Method for checking types of operands in binary operations.
+     * Checks type of left and right operands.
+     * Returns operand type if both operands are of compatible types.
+     * Throws an error if the operand types are incompatible and returns unknown.
+     */
     public Type binaryOperatorTypeCheck(BinaryOperatorNode node) {
         AstNode left = node.getLeft(); // Får venstre x som i result=x+y i node form
         AstNode right = node.getRight();// Får højre y i node form
@@ -322,18 +340,18 @@ public class SemanticChecker {
 
     }
 
+    /**
+     * Method for checking types in variable declarations.
+     * Checks if the variable identifier already exists in the scope.
+     * If not, it compares the variable type with the assigned value type.
+     * If types match, adds the variable to the current scope.
+     * Throws an error if types do not match or if the variable already exists.
+     */
     private void visitVariableDeclaration(VariableDeclarationNode node) {
 
         try {
             boolean found = scopes.getLast().containsKey(node.getIdentifier().toString());
 
-            /*
-             * for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-             * if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-             * found = true;
-             * }
-             * }
-             */
             if (!found) {// Vi skal tjekke variable type mod det den type vi assigner til variablen.
 
                 String identifier = node.getIdentifier().toString();
@@ -360,15 +378,20 @@ public class SemanticChecker {
 
     }
 
+    /**
+     * Method for getting the type of identifier.
+     * Checks if the identifier exists in scope in the last index, and returns type if found.
+     * Otherwise, loops through the whole scope, and returns type if found.
+     * Throws an error if the variable is not found in any scope, and returns unknown.
+     */
     public Type getVariable(IdentifierNode node) {
 
         if (scopes.getLast().containsKey(node.getIdentifier())) {
-
             currentIdentifierCheck = node.getIdentifier();
             return scopes.getLast().get(node.getIdentifier());
         }
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier())) {
                 currentIdentifierCheck = node.getIdentifier();
                 return scopes.get(i).get(node.getIdentifier());
@@ -378,6 +401,12 @@ public class SemanticChecker {
         return Type.UNKNOWN;
     }
 
+    /**
+     * Method for checking return statements.
+     * Gets the type from the return value.
+     * Checks if the return statement is within a function.
+     * Compares the return type with the return type of the current function, and throws an error if not the same.
+     */
     public void visitReturnNode(ReturnStatementNode node) {
         Type returnType = getType(node.getReturnValue());
 
@@ -385,9 +414,6 @@ public class SemanticChecker {
             errorHandler("Return statement should be in a function");
         } else {
             Type activeFunction = typeOfReturnFunction.get(currentActiveFunction);
-            if (Objects.equals(currentActiveFunction, "")) {
-                errorHandler("Return statement should be in a function");
-            }
             if (returnType != activeFunction) {
                 errorHandler("The return type " + returnType + " Does not match the return statement of the function "
                         + activeFunction.getTypeName());
@@ -396,6 +422,12 @@ public class SemanticChecker {
 
     }
 
+    /**
+     * Method for checking assignment types.
+     * Searches for the identifier in the scopes.
+     * Compares the type of the variable with the type of the assigned value.
+     * Throws an error if the types do not match or if the variable has not been defined.
+     */
     public void visitAssignNode(AssignmentNode node) {
 
         boolean foundIdentifier = false;
@@ -427,6 +459,14 @@ public class SemanticChecker {
         }
     }
 
+    /**
+     * Method for checking if statements.
+     * Checks all the expressions type in the if statement, and are of boolean type.
+     * Throws an error if any expression does not resolve to a boolean type.
+     * Creates a local symbol table the blocks in the if statement.
+     * Visits each block node within the if statement, and checks the type within the blocks.
+     * Removes the local symbol table after visiting each block node.
+     */
     public void visitIfStatement(IfStatementNode node) {
         Type expression = Type.VOID;
 
@@ -446,6 +486,14 @@ public class SemanticChecker {
         }
     }
 
+    /**
+     * Method for checking while statements.
+     * Checks that the expression type in the while statement are of boolean type.
+     * Throws an error if expression does not resolve to a boolean type.
+     * Creates a local symbol table for the block in the while statement.
+     * Visits block node within the while statement, and checks the type within the block.
+     * Removes the local symbol table after visiting the block node.
+     */
     public void visitWhileLoop(WhileLoopNode node) {
         Type toCheck = getType((node.getExpression()).getNode());
         if (toCheck != Type.BOOLEAN) {
@@ -459,13 +507,24 @@ public class SemanticChecker {
         scopes.remove(localTable);
     }
 
+    /**
+     * Method for checking type in function definitions.
+     * Checks if the function is not an inbuilt function.
+     * Checks if the function has not been previously defined.
+     * Adds the function return type and parameters its own environment.
+     * Creates a local symbol table for the function.
+     * Adds function parameters to the local symbol table.
+     * Sets the current active function used for when checking for return type.
+     * Checks the types in the block node within the function.
+     * Checks if the function has a return statement if its return type is not VOID.
+     * Removes the local symbol table after checking block node.
+     */
     public void visitFunctionDefinition(FunctionDefinitionNode node) {
         if (!listOfInbuiltFunctions.contains(node.getIdentifier().toString())) {
             if (!typeOfReturnFunction.containsKey(node.toString())
                     && !functionParameters.containsKey(node.toString())) {
-                typeOfReturnFunction.put(node.getIdentifier().toString(), getType(node.getReturnType())); // Key
-                // identifier
-                // // Type
+                typeOfReturnFunction.put(node.getIdentifier().toString(), getType(node.getReturnType()));
+
                 functionParameters.put(node.getIdentifier().toString(), new ArrayList<>());
 
                 HashMap<String, Type> localTable = new HashMap<>();
@@ -504,12 +563,20 @@ public class SemanticChecker {
         }
     }
 
+    /**
+     * Method for checking type in function calls.
+     * Checks if the called function is not an inbuilt function.
+     * Checks if the called function has been previously defined.
+     * Compares the expected parameter types with the actual arguments provided.
+     * Throws an error if the number of arguments does not match the expected number.
+     * Throws an error if the type of any argument does not match the expected type.
+     */
     public void visitFunctionCall(FunctionCallNode node) {
 
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
-
-            HashMap<String, Type> localETable = new HashMap<>();
-            scopes.add(localETable);
+//No need to have local symbol tabel if we do not use it for anything
+//            HashMap<String, Type> localETable = new HashMap<>();
+//            scopes.add(localETable);
             if (typeOfReturnFunction.containsKey(node.getFunctionName().toString())) {
                 List<Type> expectedParameterTypes = functionParameters.get(node.getFunctionName().toString());
 
@@ -534,6 +601,14 @@ public class SemanticChecker {
 
     }
 
+    /**
+     * Method for checking types in struct definitions.
+     * Checks if the struct identifier already exists in the structVariablesTable.
+     * If not, add the struct to the structVariablesTable.
+     * Creates a local symbol table for struct.
+     * Checks type of each variable declaration in the struct, and adds it if correctly defined.
+     * Removes the local symbol table after visiting variable declarations.
+     */
     public void visitStruct(StructureDefinitionNode node) {
         String identifier = node.getIdentifier().toString();
         if (!structVariablesTable.containsKey(identifier)) {
@@ -549,10 +624,9 @@ public class SemanticChecker {
             for (VariableDeclarationNode declaration : declarations) {
                 visitVariableDeclarationforStructs(declaration);
             }
-            if (!struct_variable_declarion_failed) {
+
                 structTypes.put(identifier, structType);
                 structVariablesTable.put(identifier, localETable);
-            }
 
             struct_variable_declarion_failed = false;
             scopes.remove(localETable);
@@ -562,6 +636,14 @@ public class SemanticChecker {
         }
     }
 
+    /**
+     * Method for checking types variable declarations within structures.
+     * Checks if the variable identifier already exists in the current scope.
+     * If not found, compares the variable type with the assigned value type.
+     * Adds the variable to the current scope if types match.
+     * Sets struct_variable_declarion_failed flag to true and throws an error if types do not match.
+     * Throws an error if the variable already exists in the current scope.
+     */
     private void visitVariableDeclarationforStructs(VariableDeclarationNode node) {
         try {
             boolean found = scopes.getLast().containsKey(node.getIdentifier().toString());
@@ -594,27 +676,44 @@ public class SemanticChecker {
 
     }
 
+    /**
+     * Method for checking the block type to visit.
+     * Loops through the block node, and visits its respective statement.
+     */
     public void visitBlockNode(BlockNode node) {
         for (AstNode statement : node.getStatements()) {
             visitStatements((StatementNode) statement);
         }
     }
 
+    /**
+     * Method for checking method call type.
+     * Checks if the property contains size, and returns an int type if true.
+     * Checks if the property contains get, and returns an unknown type if true
+     */
     public Type resolveMethodCallType(MethodCallNode node) {
-        List<String> properties = Collections.singletonList(node.getPropertyAccessContext().getIdentifiers().toString());
-        System.out.println(properties);
-        if (properties.contains("[size]")) {
-            return Type.INT;
-        } else if (properties.contains("[get]")) {
-            System.out.println("HELELEKGNKGJNKJG");
-            return Type.UNKNOWN;
-        }
-        return Type.UNKNOWN;
+//        System.out.println(node.getValue());
+//        List<String> structNames = new ArrayList<>();
+//        for (String structName : structTypes.keySet()) {
+//            structNames.add(structName);
+//            System.out.println(structNames);
+//        }
+//        int value = (Integer.parseInt(node.getValue().toString().replace("[", "").replace("]", "")));
+//        String name = structNames.get(value);
+//        if (structTypes.containsKey(name)) {
+//
+//        }
+        return Type.INT;
     }
 
+    /**
+     * Method to determine the type of a given node.
+     * Returns the type of the node.
+     */
     public Type getType(Object node) {
         Type type = Type.UNKNOWN;
 
+        // Check the type of the node and assign appropriate type
         if (node instanceof IdentifierNode) { // true bool node. true identifier node
             if ("true".equals(node.toString()) || "false".equals(node.toString())) {
                 type = Type.BOOLEAN;
@@ -648,6 +747,7 @@ public class SemanticChecker {
         } else if (node instanceof StringNode) {
             type = Type.STRING;
         } else if (node instanceof TypeNode) {
+            // If the node is a type node, retrieve its type from the node
             String typeAsString = ((TypeNode) node).getType();
             switch (typeAsString) {
                 case "int":
@@ -663,7 +763,6 @@ public class SemanticChecker {
                 default:
                     break;
             }
-
             if (node instanceof String) { // Directly handling raw Strings
                 return Type.STRING;
             } else if (node instanceof Integer) { // Directly handling raw Integers

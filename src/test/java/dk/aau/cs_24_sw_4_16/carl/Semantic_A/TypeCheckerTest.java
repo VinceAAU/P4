@@ -232,7 +232,7 @@ public class TypeCheckerTest {
                 Error: 1
                 Tried to assign the type: STRING to the array: array that has the type: INT
                 Error: 2
-                Tried to assign the array: array but access value: 0 is of type: STRING and should be: INT
+                Tried to assign the array: array but access value: 0 is of type: STRING and should be INT
                                 """;
         SemanticChecker.visitor(astTree);
 
@@ -344,6 +344,8 @@ public class TypeCheckerTest {
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
     }
+
+
 
     @Test
     void testTypeCheker13() {
