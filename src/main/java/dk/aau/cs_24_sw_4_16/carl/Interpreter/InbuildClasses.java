@@ -25,7 +25,7 @@ public class InbuildClasses {
                         break;
                     }
                 }
-
+                // Kode bliver aldrig kørt?
                 if (!found) {
                     int from = 0;
                     if (!activeScope.isEmpty()) {
@@ -40,6 +40,7 @@ public class InbuildClasses {
                     }
 
                 }
+                // Slet possible?
 
             } else if (argument instanceof FloatNode) {
                 System.out.println("We get in Floatnode");
