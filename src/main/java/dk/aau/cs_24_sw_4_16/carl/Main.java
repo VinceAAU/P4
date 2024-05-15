@@ -43,7 +43,7 @@ public class Main {
             // The visit method walks the parse tree and constructs the AST
             AstNode astRoot = visitor.visit(tree);
             //System.out.println(astRoot);
-
+            
             SemanticChecker typeChecker = new SemanticChecker();
             typeChecker.visitor(astRoot);
             
