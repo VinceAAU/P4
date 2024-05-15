@@ -59,7 +59,8 @@ public class EvaluatorExecutor {
                     throw new RuntimeException("out of bounds");
                 }
             } else if (((ArgumentListNode) node.getValue()).getList().get(0) instanceof IdentifierNode) {
-                IntNode in = ((IntNode) getVariable((IdentifierNode) ((ArgumentListNode) node.getValue()).getList().get(0)));
+                IntNode in = ((IntNode) getVariable(
+                        (IdentifierNode) ((ArgumentListNode) node.getValue()).getList().get(0)));
                 int index = in.getValue();
                 if (index < rooms.size()) {
                     return rooms.get(in.getValue()).get(node.getIdentifierNode().toString());
@@ -104,7 +105,7 @@ public class EvaluatorExecutor {
     }
 
     public AstNode visit(StatementNode node) {
-       // System.out.println(scopes);
+
         if (node.getNode() instanceof AssignmentNode) {
             visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {
@@ -141,7 +142,8 @@ public class EvaluatorExecutor {
         HashMap<String, AstNode> object = new HashMap<>();
         for (var variable : node.getVariableDeclarations()) {
             if (variable.getValue() instanceof IdentifierNode) {
-                object.put(variable.getIdentifier().toString(), getVariable((new IdentifierNode(variable.getValue().toString()))));
+                object.put(variable.getIdentifier().toString(),
+                        getVariable((new IdentifierNode(variable.getValue().toString()))));
             } else {
 
                 object.put(variable.getIdentifier().toString(), variable.getValue());
@@ -247,17 +249,19 @@ public class EvaluatorExecutor {
     }
 
     public AstNode getVariable(IdentifierNode node) {
-        // for (HashMap<String, AstNode> vTable : scopes) {
 
-        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-        for (int i = scopes.size() - 1; i >= towards; i--) {
+        // Ændring så den kikker igennem alle scopes, fra det mest nestede scope mod det
+        // øverste scope
+        for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier())) {
                 return scopes.get(i).get(node.getIdentifier());
             }
         }
+
+        // Det her kode gør ikke noget, bliver aldrig reached?
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst()-1;
+            from = activeScope.getFirst() - 1;
         } else {
             from = scopes.size() - 1;
         }
@@ -266,30 +270,25 @@ public class EvaluatorExecutor {
                 return scopes.get(i).get(node.getIdentifier());
             }
         }
-        // if (scopes.getFirst().containsKey(node.getIdentifier())) {
-        // return scopes.getFirst().get(node.getIdentifier());
-        // }
+        // Har tjekket at Mantas test2 program virker, uden, det gør det.
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
     }
 
     public void visit(AssignmentNode node) {
-        
-        //System.out.println("fycj me"+node);
-        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-      //  System.out.println(towards+":"+activeScope.getLast());
+        // Ændring så den kikker igennem alle scopes, fra det mest nestede scope mod det
+        // øverste scope
         for (int i = scopes.size() - 1; i >= 0; i--) {
-           // System.out.println(scopes.get(i)+i);
             if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {
-                // if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
                 replaceValue(nodeToChange, toChange);
                 return;
             }
         }
+        // Det her kode gør ikke noget:1
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() -1 ;
+            from = activeScope.getFirst() - 1;
         } else {
             from = scopes.size() - 1;
         }
@@ -302,13 +301,8 @@ public class EvaluatorExecutor {
                 return;
             }
         }
-        // if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-        // AstNode nodeToChange =
-        // scopes.getFirst().get(node.getIdentifier().toString());
-        // AstNode toChange = node.getValue();
-        // replaceValue(nodeToChange, toChange);
-        // return;
-        // }
+        // Det her kode gør ikke noget:1 har prøvet at slette det og det gør ikke nogen
+        // forskel?
 
         throw new RuntimeException("Variable '" + node.getIdentifier() + "' has not been defined yet.");
     }
@@ -316,8 +310,6 @@ public class EvaluatorExecutor {
     public void visit(VariableDeclarationNode node) {
 
         if (!scopes.getLast().containsKey(node.getIdentifier().getIdentifier())) {
-            // if (!idExists(node.getIdentifier().toString())) {
-
             AstNode toChange = node.getValue();
             if (toChange instanceof FunctionCallNode) {
                 toChange = visit((FunctionCallNode) toChange);
@@ -336,13 +328,13 @@ public class EvaluatorExecutor {
                         } else if (variable instanceof StringNode) {
                             scopes.getLast().put(node.getIdentifier().toString(), new StringNode(variable.toString()));
                         } else if (variable instanceof BoolNode) {
-                            scopes.getLast().put(node.getIdentifier().toString(), new BoolNode(((BoolNode) variable).getValue()));
+                            scopes.getLast().put(node.getIdentifier().toString(),
+                                    new BoolNode(((BoolNode) variable).getValue()));
                         } else {
                             throw new RuntimeException("haa");
                         }
                     }
                 }
-
 
             } else if (toChange instanceof PropertyAccessNode) {
                 toChange = visit((PropertyAccessNode) toChange);
@@ -457,15 +449,16 @@ public class EvaluatorExecutor {
 
     private boolean idExists(String id) {
         boolean found = false;
-        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-        for (int i = scopes.size() - 1; i >= towards; i--) {
+        // ændring til at loope igennem alting
+        for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(id)) {
                 found = true;
             }
         }
+        // Bruges ikke til noget igen :2
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() -1;
+            from = activeScope.getFirst() - 1;
         } else {
             from = scopes.size() - 1;
         }
@@ -474,20 +467,7 @@ public class EvaluatorExecutor {
                 found = true;
             }
         }
-        // if (scopes.getFirst().containsKey(id)) {
-        // found = true;
-        // }
-
-        // if (scopes.getFirst().containsKey(id)) {
-        // found = true;
-        // }
-        //
-        // for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-        // if (scopes.get(i).containsKey(id)) {
-        // found = true;
-        // }
-        // }
-
+        // Bruges ikke til noget igen :2
         return found;
     }
 
@@ -539,7 +519,7 @@ public class EvaluatorExecutor {
         } else if (node.getFunctionName().toString().equals("setSeed")) {
             InbuildClasses.setSeed(node);
         } else {
-           // Boolean returnVoidCase = false;
+            // Boolean returnVoidCase = false;
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
             activeScope.add(scopes.size() - 1);
@@ -569,7 +549,7 @@ public class EvaluatorExecutor {
                     }
                     return returnValue;
                 }
-                
+
             }
             scopes.remove(localTable);
             activeScope.removeLast();
@@ -640,7 +620,7 @@ public class EvaluatorExecutor {
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof FloatNode && right instanceof IntNode) {
-          //  AstNode floatnode =BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
+            
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof IntNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
@@ -679,7 +659,8 @@ public class EvaluatorExecutor {
             return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
         }
 
-        throw new RuntimeException("RelationsAndLogicalOperator not implemented clause " + left.getClass() + " " + right.getClass());
+        throw new RuntimeException(
+                "RelationsAndLogicalOperator not implemented clause " + left.getClass() + " " + right.getClass());
     }
 
     public AstNode visit(WhileLoopNode node) {
