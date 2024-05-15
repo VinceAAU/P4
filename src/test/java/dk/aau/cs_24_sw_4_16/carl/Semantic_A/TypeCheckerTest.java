@@ -85,10 +85,9 @@ public class TypeCheckerTest {
 
         assertEquals(Type.INT, testfn1, "Should have returned int");
         String correct_error = """
-                            Error 1
-                Wrong types for binary operation:BOOLEAN: false And:String:STRING
+                Error: 1
+                Wrong types for binary operation: BOOLEAN:  false And: String: STRING
                                                 """;
-        ;
 
         String terminal_Errors = normalizeOutput();
         System.out.println(terminal_Errors);
@@ -108,10 +107,10 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                Error 1
-                Wrong types for binary operation:INT:integer And:test_string:STRING
-                Error 2
-                Tryied to asssign Type:UNKNOWN to the variable:result that has the type:INT And that is hella iligal
+                Error: 1
+                Wrong types for binary operation: INT: integer And: test_string: STRING
+                Error: 2
+                Tried to assign Type: UNKNOWN to the variable: result that has the type: INT
                                     """;
         SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
@@ -124,9 +123,9 @@ public class TypeCheckerTest {
         String testString2 = "test2";
         SemanticChecker.errorHandler(testString);
         SemanticChecker.errorHandler(testString2);
-        String expectedOutput = "Error 1\n" +
+        String expectedOutput = "Error: 1\n" +
                 "test1\n" +
-                "Error 2\n" +
+                "Error: 2\n" +
                 "test2\n";
         // System.out.println(outContent.toString().trim());
         // System.err.println(expectedOutput.length()+"actual;"+errContent.toString().length());
@@ -205,12 +204,12 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                Error 1
-                could not find the variable v
-                Error 2
-                Tried to declare the array:array but argument: 0 is of type:UNKNOWN and should be:INT
-                Error 3
-                Identifier:array is alredy used, rename it
+                Error: 1
+                Could not find the variable v
+                Error: 2
+                Tried to declare the array: array but argument: 0 is of type: UNKNOWN and should be: INT
+                Error: 3
+                Identifier: array is already used
                     """;
         SemanticChecker.visitor(astTree);
 
@@ -230,10 +229,10 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                            Error 1
-                Tried to assign the type:STRING to the array:array that has the type:INT, and that is ilegal
-                Error 2
-                Tried to assign the array:array but acces value: 0 is of type:STRING and should be:INT
+                Error: 1
+                Tried to assign the type: STRING to the array: array that has the type: INT
+                Error: 2
+                Tried to assign the array: array but access value: 0 is of type: STRING and should be: INT
                                 """;
         SemanticChecker.visitor(astTree);
 
@@ -268,9 +267,9 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                            Error 1
-                variable difficulty already exists in struct
-                Error 2
+                            Error: 1
+                Variable difficulty already exists in struct
+                Error: 2
                 Struct Goblin2 already exists
                                 """;
         ;
@@ -292,8 +291,8 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                Error 1
-                You may not redeclare a inbuilt function. The function you tried to redeclare is:print
+                Error: 1
+                You may not redeclare a inbuilt function. The function you tried to redeclare is: print
                     """;
         ;
         SemanticChecker.visitor(astTree);
@@ -317,10 +316,9 @@ public class TypeCheckerTest {
                 var test_variable2:string=test_variable
                 """;
         AstNode astTree = treemaker(code);
-
         String correct_error = """
-                Error 1
-                Tryied to asssign Type:INT to the variable:test_variable2 that has the type:STRING And that is hella iligal""";
+                Error: 1
+                Tried to assign Type: INT to the variable: test_variable2 that has the type: STRING""";
         SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
@@ -340,8 +338,8 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                Error 1
-                variable: test_variable already exists in the scope""";
+                Error: 1
+                Variable: test_variable already exists in the scope""";
         SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
@@ -361,11 +359,12 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                Error 1
-                could not find the variable y""";
+                Error: 1
+                Could not find the variable y""";
         SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         // assertEquals(correct_error.trim(), terminal_Errors);
+        System.out.println(terminal_Errors);
         assertTrue(terminal_Errors.contains(correct_error));
     }
 
@@ -381,8 +380,8 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                        Error 1
-                You have made return statement outside a function THAT IS illigal""";
+                        Error: 1
+                Return statement should be in a function""";
         SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
@@ -430,7 +429,7 @@ public class TypeCheckerTest {
         AstNode astTree = treemaker(code);
 
         String correct_error = """
-                        Error 1
+                        Error: 1
                 The return type STRING Does not match the return statement of the function int
                        """;
         SemanticChecker.visitor(astTree);
