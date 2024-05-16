@@ -296,7 +296,7 @@ public class EvaluatorExecutor {
         } else {
             from = scopes.size() - 1;
         }
-        System.out.println(from);
+        //System.out.println(from);
         for (int i = from; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
@@ -337,9 +337,9 @@ public class EvaluatorExecutor {
                     wantedType = Type.FLOAT;
                 }
 
-                System.out.println("Wanted type in methodCall node:" + wantedType);
+              
                 toChange = visit((MethodCallNode) toChange);
-                System.out.println(toChange.getClass());
+                
                 Type tochange_Type = Type.UNKNOWN;
                 if (toChange instanceof IntNode) {
                     tochange_Type = Type.INT;

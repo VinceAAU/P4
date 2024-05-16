@@ -169,6 +169,7 @@ public class SemanticChecker {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
                 arrayType = scopes.get(i).get(identifier);
+                wanted_type=arrayType;
             }
         }
         if (found) {
@@ -254,6 +255,7 @@ public class SemanticChecker {
 
     public void visitPropertyAssignment(PropertyAssignmentNode node) {
         Type oldType = visitPropertyAccessNode(node.getPropertyAccessNode());
+        wanted_type = oldType;
         Type newType = getType(node.getValue());
         errorHandler(oldType + "  " + newType);
         if (oldType != newType) {
@@ -392,6 +394,8 @@ public class SemanticChecker {
                 Type variableType = getType(node.getType()); // Left side type
                 wanted_type = variableType;
                 AstNode ass = node.getValue(); // THis is right side should be a node
+                
+               
                 Type assignmentType = getType(ass); // This should give right side type
 
                 if (variableType == assignmentType) {
@@ -399,6 +403,9 @@ public class SemanticChecker {
                     scopes.getLast().put(node.getIdentifier().toString(), typeWeSaveInETable);
 
                 } else {
+
+                    
+                   
                     errorHandler("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
                             + " that has the type:" + variableType
                             + " And that is hella iligal");
@@ -469,9 +476,10 @@ public class SemanticChecker {
                 String identifier = node.getIdentifier().toString();
 
                 Type rightType = getType(node.getValue());
-
+                wanted_type = oldType;
                 // tjekke om det er lovligt.
                 if (oldType != rightType) {
+                    
                     errorHandler("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
                             + " that has the type:" + oldType
                             + " And that is hella iligal");
