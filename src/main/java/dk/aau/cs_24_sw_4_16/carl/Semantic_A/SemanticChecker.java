@@ -10,7 +10,7 @@ public class SemanticChecker {
 
     HashMap<String, Type> typeOfReturnFunction;
     HashMap<String, List<Type>> functionParameters;
-    List<String> listOfInbuiltFunctions = new ArrayList<>(Arrays.asList("print", "generateGrid", "generateRooms",
+    List<String> listOfInbuiltFunctions = new ArrayList<>(Arrays.asList("print", "generateMap", "generateRooms",
             "generateCorridors", "generateSpawns", "printMap", "generatePrint", "writeToFile", "overlap",
             "tileInformationStringBuilder", "setSeed"));
     HashMap<String, HashMap<String, Type>> structVariablesTable;

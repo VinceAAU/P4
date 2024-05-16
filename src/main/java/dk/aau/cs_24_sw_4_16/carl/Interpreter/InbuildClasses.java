@@ -159,6 +159,29 @@ public class InbuildClasses {
 
     public static void generateSpawns(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy, List<HashMap<String, AstNode>> rooms) {
         ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
+        System.out.println(tileInformationEnemy);
+        if (!node.getArguments().isEmpty()) {
+            if(node.getArguments().size() == 1 && node.getArguments().get(0) instanceof IntNode) {
+                int difficulty = ((IntNode) node.getArguments().get(0)).getValue();
+                while (difficulty > 0) {
+                    int roomSpawn = EvaluatorExecutor.rand.nextInt(0,rooms.size() - 2);
+                    int x = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(roomSpawn).get("x")).getValue(), (((IntNode) rooms.get(roomSpawn).get("x")).getValue() + ((IntNode) rooms.get(roomSpawn).get("width")).getValue()));
+                    int y = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(roomSpawn).get("y")).getValue(), (((IntNode) rooms.get(roomSpawn).get("y")).getValue() + ((IntNode) rooms.get(roomSpawn).get("height")).getValue()));
+                    var key = tileInformationEnemy.keySet().toArray()[EvaluatorExecutor.rand.nextInt(0,tileInformationEnemy.size())];
+                    StringNode symbol = ((StringNode) tileInformationEnemy.get(key).get("symbol"));
+                    int difficultyMonster = ((IntNode) tileInformationEnemy.get(key).get("difficulty")).getValue();
+                    System.out.println(difficultyMonster);
+                    if (difficulty >= difficultyMonster) {
+                        if (((StringNode) map.get(y,x)).getValue().equals("f")) {
+                            System.out.println("Hello");
+                            map.set(new StringNode(symbol.getValue()), y, x);
+                            difficulty -= difficultyMonster;
+                        }
+                    }
+                }
+            }
+        }
+
         int yPlayer = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("width")).getValue()));
         int xPlayer = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("height")).getValue()));
         map.set(new StringNode("p"), xPlayer, yPlayer);
@@ -245,12 +268,11 @@ public class InbuildClasses {
     }
 
     private static void tileInformationStringBuilder(HashMap<String, HashMap<String, AstNode>> tileInformation, StringBuilder sb) {
-        for (String name : tileInformation.keySet()) {
             for (HashMap<String, AstNode> innerHashMap : tileInformation.values()) {
                 sb.append("""
                             {"symbol" :
-                        """).append(((StringNode) innerHashMap.get("symbol")).getValue()).append("""
-                        ,"info":{
+                        """).append("\"").append(((StringNode) innerHashMap.get("symbol")).getValue()).append("""
+                        ","info":{
                         """);
                 for (String key : innerHashMap.keySet()) {
                     if (!key.equals("symbol")) {
@@ -272,7 +294,6 @@ public class InbuildClasses {
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append("}},");
             }
-        }
     }
 
     private static boolean overlap(int x, int y, int width, int height, ArrayNode map) {
