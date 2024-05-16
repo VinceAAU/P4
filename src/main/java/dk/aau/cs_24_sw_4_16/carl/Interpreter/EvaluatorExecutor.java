@@ -1,7 +1,7 @@
 package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
-
+import dk.aau.cs_24_sw_4_16.carl.Semantic_A.Type;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -15,6 +15,7 @@ public class EvaluatorExecutor {
     HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
     HashMap<String, HashMap<String, AstNode>> tileInformationWall;
     List<HashMap<String, AstNode>> rooms;
+    Type wantedType = Type.UNKNOWN;
     // This will be the same instance for all instances of Interpreter
     // This might have unexpected consequences if we expand the program to use
     // more than one instance of Interpreter at a time, but it doesn't yet, so
@@ -59,7 +60,8 @@ public class EvaluatorExecutor {
                     throw new RuntimeException("out of bounds");
                 }
             } else if (((ArgumentListNode) node.getValue()).getList().get(0) instanceof IdentifierNode) {
-                IntNode in = ((IntNode) getVariable((IdentifierNode) ((ArgumentListNode) node.getValue()).getList().get(0)));
+                IntNode in = ((IntNode) getVariable(
+                        (IdentifierNode) ((ArgumentListNode) node.getValue()).getList().get(0)));
                 int index = in.getValue();
                 if (index < rooms.size()) {
                     return rooms.get(in.getValue()).get(node.getIdentifierNode().toString());
@@ -104,7 +106,7 @@ public class EvaluatorExecutor {
     }
 
     public AstNode visit(StatementNode node) {
-       // System.out.println(scopes);
+        // System.out.println(scopes);
         if (node.getNode() instanceof AssignmentNode) {
             visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {
@@ -141,7 +143,8 @@ public class EvaluatorExecutor {
         HashMap<String, AstNode> object = new HashMap<>();
         for (var variable : node.getVariableDeclarations()) {
             if (variable.getValue() instanceof IdentifierNode) {
-                object.put(variable.getIdentifier().toString(), getVariable((new IdentifierNode(variable.getValue().toString()))));
+                object.put(variable.getIdentifier().toString(),
+                        getVariable((new IdentifierNode(variable.getValue().toString()))));
             } else {
 
                 object.put(variable.getIdentifier().toString(), variable.getValue());
@@ -257,7 +260,7 @@ public class EvaluatorExecutor {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst()-1;
+            from = activeScope.getFirst() - 1;
         } else {
             from = scopes.size() - 1;
         }
@@ -273,12 +276,12 @@ public class EvaluatorExecutor {
     }
 
     public void visit(AssignmentNode node) {
-        
-        //System.out.println("fycj me"+node);
+
+        // System.out.println("fycj me"+node);
         int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-      //  System.out.println(towards+":"+activeScope.getLast());
+        // System.out.println(towards+":"+activeScope.getLast());
         for (int i = scopes.size() - 1; i >= 0; i--) {
-           // System.out.println(scopes.get(i)+i);
+            // System.out.println(scopes.get(i)+i);
             if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {
                 // if (vTable.containsKey(node.getIdentifier().toString())) {
                 AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
@@ -289,7 +292,7 @@ public class EvaluatorExecutor {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() -1 ;
+            from = activeScope.getFirst() - 1;
         } else {
             from = scopes.size() - 1;
         }
@@ -313,12 +316,53 @@ public class EvaluatorExecutor {
         throw new RuntimeException("Variable '" + node.getIdentifier() + "' has not been defined yet.");
     }
 
+
+
     public void visit(VariableDeclarationNode node) {
 
         if (!scopes.getLast().containsKey(node.getIdentifier().getIdentifier())) {
-            // if (!idExists(node.getIdentifier().toString())) {
-
+           
             AstNode toChange = node.getValue();
+            String type = node.getType().getType();
+            if (toChange instanceof MethodCallNode) {
+            
+
+                if (type.equals("int")) {
+                    wantedType = Type.INT;
+                } else if (type.equals("string")) {
+                    wantedType = Type.STRING;
+                } else if (type.equals("bool")) {
+                    wantedType = Type.BOOLEAN;
+                } else if (type.equals("float")) {
+                    wantedType = Type.FLOAT;
+                }
+
+                System.out.println("Wanted type in methodCall node:" + wantedType);
+                toChange = visit((MethodCallNode) toChange);
+                System.out.println(toChange.getClass());
+                Type tochange_Type = Type.UNKNOWN;
+                if (toChange instanceof IntNode) {
+                    tochange_Type = Type.INT;
+                } else if (toChange instanceof FloatNode) {
+                    tochange_Type = Type.FLOAT;
+                } else if (toChange instanceof StringNode) {
+                    tochange_Type = Type.STRING;
+                } else if (toChange instanceof BoolNode) {
+                    tochange_Type = Type.BOOLEAN;
+
+                }
+                
+                if (wantedType.equals(tochange_Type)) {
+                  
+                    scopes.getLast().put(node.getIdentifier().toString(), toChange);
+                } else {
+                    System.err.println("You tried to assign Type:" + tochange_Type + " To the variable:"
+                            + node.getIdentifier().getIdentifier() + " of type:" + wantedType
+                            + " in runtime and that is illagal");
+                }
+
+            }
+
             if (toChange instanceof FunctionCallNode) {
                 toChange = visit((FunctionCallNode) toChange);
             }
@@ -336,13 +380,13 @@ public class EvaluatorExecutor {
                         } else if (variable instanceof StringNode) {
                             scopes.getLast().put(node.getIdentifier().toString(), new StringNode(variable.toString()));
                         } else if (variable instanceof BoolNode) {
-                            scopes.getLast().put(node.getIdentifier().toString(), new BoolNode(((BoolNode) variable).getValue()));
+                            scopes.getLast().put(node.getIdentifier().toString(),
+                                    new BoolNode(((BoolNode) variable).getValue()));
                         } else {
                             throw new RuntimeException("haa");
                         }
                     }
                 }
-
 
             } else if (toChange instanceof PropertyAccessNode) {
                 toChange = visit((PropertyAccessNode) toChange);
@@ -351,10 +395,7 @@ public class EvaluatorExecutor {
             } else if (toChange instanceof ArrayAccessNode) {
                 toChange = visit((ArrayAccessNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof MethodCallNode) {
-                toChange = visit((MethodCallNode) toChange);
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof IntNode) {
+            }  else if (toChange instanceof IntNode) {
                 scopes.getLast().put(node.getIdentifier().toString(), new IntNode(toChange.toString()));
             } else if (toChange instanceof FloatNode) {
                 scopes.getLast().put(node.getIdentifier().toString(), new FloatNode(toChange.toString()));
@@ -364,8 +405,10 @@ public class EvaluatorExecutor {
                 scopes.getLast().put(node.getIdentifier().toString(), new BoolNode(((BoolNode) toChange).getValue()));
             }
         } else {
+            wantedType = Type.UNKNOWN;
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists in the current scope");
         }
+        wantedType = Type.UNKNOWN;
     }
 
     private int[] astNodeListToIntArray(List<AstNode> ints) {
@@ -465,7 +508,7 @@ public class EvaluatorExecutor {
         }
         int from = 0;
         if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() -1;
+            from = activeScope.getFirst() - 1;
         } else {
             from = scopes.size() - 1;
         }
@@ -539,7 +582,7 @@ public class EvaluatorExecutor {
         } else if (node.getFunctionName().toString().equals("setSeed")) {
             InbuildClasses.setSeed(node);
         } else {
-           // Boolean returnVoidCase = false;
+            // Boolean returnVoidCase = false;
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
             activeScope.add(scopes.size() - 1);
@@ -569,7 +612,7 @@ public class EvaluatorExecutor {
                     }
                     return returnValue;
                 }
-                
+
             }
             scopes.remove(localTable);
             activeScope.removeLast();
@@ -640,7 +683,8 @@ public class EvaluatorExecutor {
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof FloatNode && right instanceof IntNode) {
-          //  AstNode floatnode =BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
+            // AstNode floatnode =BinaryOperatorNode.getAstNodeValue(left, right,
+            // node.getOperator());
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof IntNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
@@ -679,7 +723,8 @@ public class EvaluatorExecutor {
             return RelationsAndLogicalOperatorNode.getAstNodeValue(left, right, node.getOperator());
         }
 
-        throw new RuntimeException("RelationsAndLogicalOperator not implemented clause " + left.getClass() + " " + right.getClass());
+        throw new RuntimeException(
+                "RelationsAndLogicalOperator not implemented clause " + left.getClass() + " " + right.getClass());
     }
 
     public AstNode visit(WhileLoopNode node) {
