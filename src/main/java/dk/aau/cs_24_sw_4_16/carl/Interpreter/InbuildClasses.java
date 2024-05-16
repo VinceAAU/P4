@@ -10,7 +10,6 @@ import java.util.*;
 
 public class InbuildClasses {
     public static void print(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, Deque<Integer> activeScope) {
-      //  System.out.println("We get in here");
         StringBuilder toPrint = new StringBuilder();
         for (AstNode argument : node.getArguments()) {
             if (argument instanceof StatementNode) {
@@ -42,10 +41,8 @@ public class InbuildClasses {
                 }
 
             } else if (argument instanceof FloatNode) {
-                System.out.println("We get in Floatnode");
                 toPrint.append(((FloatNode) argument).getValue());
             } else if (argument instanceof IntNode) {
-                System.out.println("We get in Intnode");
                 toPrint.append(((IntNode) argument).getValue());
             } else if (argument instanceof StringNode) {
                 toPrint.append(((StringNode) argument).getValue());
@@ -159,21 +156,18 @@ public class InbuildClasses {
 
     public static void generateSpawns(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy, List<HashMap<String, AstNode>> rooms) {
         ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
-        System.out.println(tileInformationEnemy);
         if (!node.getArguments().isEmpty()) {
             if(node.getArguments().size() == 1 && node.getArguments().get(0) instanceof IntNode) {
                 int difficulty = ((IntNode) node.getArguments().get(0)).getValue();
                 while (difficulty > 0) {
-                    int roomSpawn = EvaluatorExecutor.rand.nextInt(0,rooms.size() - 2);
+                    int roomSpawn = EvaluatorExecutor.rand.nextInt(0,rooms.size() - 1);
                     int x = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(roomSpawn).get("x")).getValue(), (((IntNode) rooms.get(roomSpawn).get("x")).getValue() + ((IntNode) rooms.get(roomSpawn).get("width")).getValue()));
                     int y = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(roomSpawn).get("y")).getValue(), (((IntNode) rooms.get(roomSpawn).get("y")).getValue() + ((IntNode) rooms.get(roomSpawn).get("height")).getValue()));
                     var key = tileInformationEnemy.keySet().toArray()[EvaluatorExecutor.rand.nextInt(0,tileInformationEnemy.size())];
                     StringNode symbol = ((StringNode) tileInformationEnemy.get(key).get("symbol"));
                     int difficultyMonster = ((IntNode) tileInformationEnemy.get(key).get("difficulty")).getValue();
-                    System.out.println(difficultyMonster);
                     if (difficulty >= difficultyMonster) {
                         if (((StringNode) map.get(y,x)).getValue().equals("f")) {
-                            System.out.println("Hello");
                             map.set(new StringNode(symbol.getValue()), y, x);
                             difficulty -= difficultyMonster;
                         }
