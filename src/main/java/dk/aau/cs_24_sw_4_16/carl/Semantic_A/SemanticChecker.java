@@ -101,16 +101,19 @@ public class SemanticChecker {
             visitPropertyAssignment((PropertyAssignmentNode) node.getNode());
         }
         if (node.getNode() instanceof MethodCallNode) {
-            errorHandler("ewjrngkewgjewkejnweklrglewrkngewkrgkwen");
-            visitMethodCall((MethodCallNode) node.getNode());
+           // errorHandler("ewjrngkewgjewkejnweklrglewrkngewkrgkwen");
+            //visitMethodCall((MethodCallNode) node.getNode());
         }
     }
 
     public void errorHandler(String errorMessage) {
         thereWasAnError = true;
-        System.err.println("Error " + errorNumber);
-        errorNumber = errorNumber + 1;
-        System.err.println(errorMessage);
+        
+            System.err.println("Error " + errorNumber);
+            errorNumber = errorNumber + 1;
+            System.err.println(errorMessage);
+        
+
     }
 
     /*
@@ -157,17 +160,18 @@ public class SemanticChecker {
     public void visistArrayAssignment(ArrayAssignmentNode node) {
         String identifier = node.getIdentifier().toString();
         Boolean found = false;
-
+        Type arrayType = Type.UNKNOWN;
         found = scopes.getLast().containsKey(identifier);
 
-        // System.out.println(activeScope);
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+       
+        for (int i = scopes.size() - 1; 0 <= i; i--) {
+
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
+                arrayType = scopes.get(i).get(identifier);
             }
         }
         if (found) {
-            Type arrayType = scopes.getLast().get(identifier);
 
             Boolean validTypesaccesTypes = true;
             Type sizeType = Type.UNKNOWN;
@@ -227,7 +231,7 @@ public class SemanticChecker {
         for (int i = 0; i < sizes.size(); i++) {
             AstNode astNode = sizes.get(i);
             sizeType = getType(astNode);
-            if (sizeType != arrayType) {
+            if (sizeType != Type.INT) {
                 arguementNumber = i;
                 validTypes = false;
 
@@ -257,10 +261,9 @@ public class SemanticChecker {
         }
     }
 
-    // Ved ikke om den virker endnu, kan være det er forkert
+   
     public Type visitPropertyAccessNode(PropertyAccessNode node) {
         List<String> validPropertyAccess = new ArrayList<>(Arrays.asList("size", "get"));
-
         String firstIdentifier = node.getIdentifiers().get(0).toString();
         if (!structVariablesTable.containsKey(firstIdentifier) && !validPropertyAccess.contains(firstIdentifier)) {
             errorHandler("could not find the struct variable: " + firstIdentifier);
@@ -334,6 +337,10 @@ public class SemanticChecker {
         } else if (leftType == Type.BOOLEAN && rightType == Type.BOOLEAN) {
             return Type.BOOLEAN;
         }
+        else if (leftType == Type.STRING && rightType == Type.STRING) {
+            return Type.BOOLEAN;
+        }
+        
 
         errorHandler("Wrong types for relation operation:" + leftType + ":" + left + " And:" + right + ":" + rightType);
 
@@ -410,11 +417,11 @@ public class SemanticChecker {
     public Type getVariable(IdentifierNode node) {
 
         if (scopes.getLast().containsKey(node.getIdentifier().toString())) {
-
+           
             currentIdentifierCheck = node.getIdentifier().toString();
             return scopes.getLast().get(node.getIdentifier().toString());
         }
-
+      
         for (int i = activeScope.getLast(); i < scopes.size(); i++) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 currentIdentifierCheck = node.getIdentifier().toString();
@@ -429,7 +436,7 @@ public class SemanticChecker {
     // Check if return = type er det samme som den function den står i.
     public void visitReturnNode(ReturnStatementNode node) {
         Type returnType = getType(node.getReturnValue());
-
+       
         if (currentActiveFunction == "") {
             errorHandler("You have made return statement outside a function THAT IS illigal");
         } else {
@@ -450,9 +457,10 @@ public class SemanticChecker {
         boolean foundIdentifier = false;
 
         for (int i = scopes.size() - 1; 0 <= i; i--) {
-
+           
             HashMap<String, Type> ETable = scopes.get(i);
-
+          
+           
             if (ETable.containsKey(node.getIdentifier().toString())) {// hvis x er i scope
                 foundIdentifier = true;
                 // tjekke om det er lovligt.
@@ -514,12 +522,12 @@ public class SemanticChecker {
         HashMap<String, Type> localTable = new HashMap<>();
         scopes.add(localTable);
         visitBlockNode(node.getBlock());
-        System.out.println(localTable);
+     
         scopes.remove(localTable);
     }
 
     public void visitFunctionDefinition(FunctionDefinitionNode node) {
-        // System.out.println(node + "We get in here");
+       
         if (!listOfInbuiltFunctions.contains(node.getIdentifier().toString())) {
             if (!typeOfReturnFunction.containsKey(node.toString())
                     && !functionParameters.containsKey(node.toString())) {
@@ -550,7 +558,7 @@ public class SemanticChecker {
                 visitBlockNode(node.getBlock());// Alle statement i fn. En af dem er returnStatement
                 currentActiveFunction = "";
                 if (!hasReturnStatement && Type.VOID != getType(node.getReturnType())) {
-
+                    
                     errorHandler("Missing return statement in function declartion:" + node.getIdentifier().toString());
                 }
                 hasReturnStatement = false;
@@ -571,7 +579,7 @@ public class SemanticChecker {
      * Vi skal sige hvis arguemtnet er en forkert type.
      */
     public void visitFunctionCall(FunctionCallNode node) {
-        // System.out.println("we get in here how?" + node);
+      
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
 
             HashMap<String, Type> localETable = new HashMap<>();
@@ -739,6 +747,12 @@ public class SemanticChecker {
         }
     }
 
+    public Type resolveMethodCallType(MethodCallNode node) {
+        Type returnType = Type.INT;
+
+        return returnType;
+    }
+
     public Type getType(Object node) {
         Type type = Type.UNKNOWN;
 
@@ -823,7 +837,8 @@ public class SemanticChecker {
                 default:
                     break;
             }
-        } else {
+        } 
+        else {
             errorHandler("The node we get failed to handle:" + node.getClass());
         }
         return type;
