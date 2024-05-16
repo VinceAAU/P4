@@ -10,7 +10,7 @@ public class EvaluatorExecutor {
     HashMap<String, FunctionDefinitionNode> fTable;
     HashMap<String, AstNode> vTable;
     Stack<HashMap<String, AstNode>> scopes;
-    Deque<Integer> activeScope;
+  
     HashMap<String, HashMap<String, AstNode>> tileInformationEnemy;
     HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
     HashMap<String, HashMap<String, AstNode>> tileInformationWall;
@@ -30,7 +30,7 @@ public class EvaluatorExecutor {
         tileInformationFloor = new HashMap<>();
         tileInformationWall = new HashMap<>();
         scopes = new Stack<>();
-        activeScope = new ArrayDeque<>();
+        
         // activeScope.push(0);
         scopes.add(vTable);
         rooms = new ArrayList<>();
@@ -250,69 +250,30 @@ public class EvaluatorExecutor {
     }
 
     public AstNode getVariable(IdentifierNode node) {
-        // for (HashMap<String, AstNode> vTable : scopes) {
-
-        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-        for (int i = scopes.size() - 1; i >= towards; i--) {
+      
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier())) {
                 return scopes.get(i).get(node.getIdentifier());
             }
         }
-        int from = 0;
-        if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() - 1;
-        } else {
-            from = scopes.size() - 1;
-        }
-        for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(node.getIdentifier())) {
-                return scopes.get(i).get(node.getIdentifier());
-            }
-        }
-        // if (scopes.getFirst().containsKey(node.getIdentifier())) {
-        // return scopes.getFirst().get(node.getIdentifier());
-        // }
+    
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
     }
 
     public void visit(AssignmentNode node) {
 
-        // System.out.println("fycj me"+node);
-        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-        // System.out.println(towards+":"+activeScope.getLast());
+       
         for (int i = scopes.size() - 1; i >= 0; i--) {
-            // System.out.println(scopes.get(i)+i);
+           
             if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {
-                // if (vTable.containsKey(node.getIdentifier().toString())) {
+            
                 AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
                 AstNode toChange = node.getValue();
                 replaceValue(nodeToChange, toChange);
                 return;
             }
         }
-        int from = 0;
-        if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() - 1;
-        } else {
-            from = scopes.size() - 1;
-        }
-        //System.out.println(from);
-        for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
-                AstNode toChange = node.getValue();
-                replaceValue(nodeToChange, toChange);
-                return;
-            }
-        }
-        // if (scopes.getFirst().containsKey(node.getIdentifier().toString())) {
-        // AstNode nodeToChange =
-        // scopes.getFirst().get(node.getIdentifier().toString());
-        // AstNode toChange = node.getValue();
-        // replaceValue(nodeToChange, toChange);
-        // return;
-        // }
-
+        
         throw new RuntimeException("Variable '" + node.getIdentifier() + "' has not been defined yet.");
     }
 
@@ -500,37 +461,14 @@ public class EvaluatorExecutor {
 
     private boolean idExists(String id) {
         boolean found = false;
-        int towards = !activeScope.isEmpty() ? activeScope.getLast() : 0;
-        for (int i = scopes.size() - 1; i >= towards; i--) {
+        
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(id)) {
                 found = true;
             }
         }
-        int from = 0;
-        if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() - 1;
-        } else {
-            from = scopes.size() - 1;
-        }
-        for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(id)) {
-                found = true;
-            }
-        }
-        // if (scopes.getFirst().containsKey(id)) {
-        // found = true;
-        // }
-
-        // if (scopes.getFirst().containsKey(id)) {
-        // found = true;
-        // }
-        //
-        // for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-        // if (scopes.get(i).containsKey(id)) {
-        // found = true;
-        // }
-        // }
-
+       
+    
         return found;
     }
 
@@ -559,7 +497,7 @@ public class EvaluatorExecutor {
 
     public AstNode visit(FunctionCallNode node) {
         if (node.getFunctionName().toString().equals("print")) {
-            InbuildClasses.print(node, scopes, activeScope);
+            InbuildClasses.print(node, scopes);
         } else if (node.getFunctionName().toString().equals("generateMap")) {
             InbuildClasses.generateGrid(node, scopes, tileInformationWall);
 
@@ -585,7 +523,7 @@ public class EvaluatorExecutor {
             // Boolean returnVoidCase = false;
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
-            activeScope.add(scopes.size() - 1);
+            
             if (fTable.containsKey(node.getFunctionName().toString())) {
                 FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
                 List<ParameterNode> arguments = function.getArguments().getParameters();
@@ -602,7 +540,7 @@ public class EvaluatorExecutor {
                         returnValue = getVariable((IdentifierNode) returnValue);
                     }
                     scopes.remove(localTable);
-                    activeScope.removeLast();
+                  
                     if (function.getReturnType().getType().equals("void")) {
                         if (returnValue != null) {
                             throw new RuntimeException(
@@ -615,7 +553,7 @@ public class EvaluatorExecutor {
 
             }
             scopes.remove(localTable);
-            activeScope.removeLast();
+            
         }
         return node;
     }

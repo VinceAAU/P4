@@ -16,7 +16,6 @@ public class SemanticChecker {
 
     HashMap<String, Type> eTable;// variable table, identifier(x) og node(int)
     Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
-    Deque<Integer> activeScope;// Hvilket scope vi er i nu
     int errorNumber = 1;
     Boolean printDebugger = false;
     Boolean hasReturnStatement = false;
@@ -38,8 +37,7 @@ public class SemanticChecker {
         // fTable = new HashMap<>();
         eTable = new HashMap<>();
         scopes = new Stack<>();
-        activeScope = new ArrayDeque<>();
-        activeScope.push(0);
+        
         scopes.add(eTable);
         typeOfReturnFunction = new HashMap<>();
         functionParameters = new HashMap<>();
@@ -123,7 +121,7 @@ public class SemanticChecker {
         String identifier = node.getIdentifier().toString();
         boolean found = scopes.getFirst().containsKey(identifier);
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
             }
@@ -217,7 +215,7 @@ public class SemanticChecker {
         String identifier = node.getIdentifier().toString();
         boolean found = scopes.getFirst().containsKey(identifier);
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
             }
@@ -429,7 +427,7 @@ public class SemanticChecker {
             return scopes.getLast().get(node.getIdentifier().toString());
         }
       
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 currentIdentifierCheck = node.getIdentifier().toString();
                 return scopes.get(i).get(node.getIdentifier().toString());
