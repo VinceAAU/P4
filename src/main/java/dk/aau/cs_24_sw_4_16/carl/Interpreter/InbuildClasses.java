@@ -9,7 +9,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class InbuildClasses {
-    public static void print(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, Deque<Integer> activeScope) {
+    public static void print(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes) {
+      //  System.out.println("We get in here");
         StringBuilder toPrint = new StringBuilder();
         for (AstNode argument : node.getArguments()) {
             if (argument instanceof StatementNode) {
@@ -24,22 +25,8 @@ public class InbuildClasses {
                         break;
                     }
                 }
-                // Kode bliver aldrig kørt?
-                if (!found) {
-                    int from = 0;
-                    if (!activeScope.isEmpty()) {
-                        from = activeScope.getFirst();
-                    } else {
-                        from = scopes.size() - 1;
-                    }
-                    for (int i = from; i >= 0; i--) {
-                        if (scopes.get(i).containsKey(argument.toString())) {
-                            toPrint.append(scopes.getFirst().get(argument.toString()).toString()).append(" ");
-                        }
-                    }
 
-                }
-                // Slet possible?
+                
 
             } else if (argument instanceof FloatNode) {
                 toPrint.append(((FloatNode) argument).getValue());

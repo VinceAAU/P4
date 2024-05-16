@@ -13,11 +13,9 @@ public class SemanticChecker {
     List<String> listOfInbuiltFunctions = new ArrayList<>(Arrays.asList("print", "generateMap", "generateRooms",
             "generateCorridors", "generateSpawns", "printMap", "generatePrint", "writeToFile", "overlap",
             "tileInformationStringBuilder", "setSeed"));
-    HashMap<String, HashMap<String, Type>> structVariablesTable;
-    HashMap<String, Type> structTypes;
+
     HashMap<String, Type> eTable;// variable table, identifier(x) og node(int)
     Stack<HashMap<String, Type>> scopes; // scope table, variable identifier(x) og node
-    Deque<Integer> activeScope;// Hvilket scope vi er i nu
     int errorNumber = 1;
     Boolean printDebugger = false;
     Boolean hasReturnStatement = false;
@@ -25,23 +23,34 @@ public class SemanticChecker {
     public Boolean thereWasAnError = false;
     String currentIdentifierCheck = "";
     Boolean struct_variable_declarion_failed = false;
+    // KUN TIL STRUCTS
+    HashMap<String, Type> structTypes;
+    HashMap<String, HashMap<String, Type>> tileInformationEnemy;
+    HashMap<String, HashMap<String, Type>> tileInformationFloor;
+    HashMap<String, HashMap<String, Type>> tileInformationWall;
+    List<HashMap<String, Type>> rooms;
+    HashMap<String, HashMap<String, Type>> structVariablesTable;
+    Type wanted_type =Type.UNKNOWN;
 
     public SemanticChecker() {
 
         // fTable = new HashMap<>();
         eTable = new HashMap<>();
         scopes = new Stack<>();
-        activeScope = new ArrayDeque<>();
-        activeScope.push(0);
+        
         scopes.add(eTable);
         typeOfReturnFunction = new HashMap<>();
         functionParameters = new HashMap<>();
         structVariablesTable = new HashMap<>();
         structTypes = new HashMap<>();
+        tileInformationEnemy = new HashMap<>();
+        tileInformationFloor = new HashMap<>();
+        tileInformationWall = new HashMap<>();
+        rooms = new ArrayList<>();
     }
 
     public void visitor(AstNode node) {
-        
+        /// System.out.println(node);
         if (node instanceof ProgramNode) {
             visitProgramNode((ProgramNode) node);
         }
@@ -112,7 +121,7 @@ public class SemanticChecker {
         String identifier = node.getIdentifier().toString();
         boolean found = scopes.getFirst().containsKey(identifier);
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
             }
@@ -158,6 +167,7 @@ public class SemanticChecker {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
                 arrayType = scopes.get(i).get(identifier);
+                wanted_type=arrayType;
             }
         }
         if (found) {
@@ -205,7 +215,7 @@ public class SemanticChecker {
         String identifier = node.getIdentifier().toString();
         boolean found = scopes.getFirst().containsKey(identifier);
 
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
             }
@@ -243,6 +253,7 @@ public class SemanticChecker {
 
     public void visitPropertyAssignment(PropertyAssignmentNode node) {
         Type oldType = visitPropertyAccessNode(node.getPropertyAccessNode());
+        wanted_type = oldType;
         Type newType = getType(node.getValue());
         errorHandler(oldType + "  " + newType);
         if (oldType != newType) {
@@ -253,7 +264,6 @@ public class SemanticChecker {
    
     public Type visitPropertyAccessNode(PropertyAccessNode node) {
         List<String> validPropertyAccess = new ArrayList<>(Arrays.asList("size", "get"));
-      
         String firstIdentifier = node.getIdentifiers().get(0).toString();
         if (!structVariablesTable.containsKey(firstIdentifier) && !validPropertyAccess.contains(firstIdentifier)) {
             errorHandler("could not find the struct variable: " + firstIdentifier);
@@ -274,7 +284,40 @@ public class SemanticChecker {
         return Type.UNKNOWN;
     }
 
-   
+    public Type visitMethodCall(MethodCallNode node) { // 
+        // Her skal vi først finde ud af vilken type struct vi skal lede i
+        // Så skal vi finde ud af om structet eksistere
+        // Så skal vi indexe og tjekke dens typer imod den type ting itng
+       
+        /* String identifier = node.getIdentifierNode().toString();
+        System.out.println("Identifier:"+identifier); // Variable vi leder efter i struct
+
+        PropertyAccessNode propertyAccessNode = node.getPropertyAccessContext();
+        System.out.println("Propertyascc:"+propertyAccessNode);
+
+        String list = propertyAccessNode.getList();
+        List<IdentifierNode> identifiernodes = propertyAccessNode.getIdentifiers();
+        System.out.println("Liste:"+list);// Type af struct hasmap vi skal kikke i
+        System.out.println("Identifiernodes"+identifiernodes);
+
+        for (int i = identifiernodes.size()-1; i>=0;i--){
+            System.out.println("Identifiernode:"+i+":"+identifiernodes.get(i));
+        }
+
+        if (node.getValue() instanceof ArgumentListNode) {
+            // Cast node to ArgumentListNode
+            ArgumentListNode argumentListNode = (ArgumentListNode) node.getValue();
+            // You can now use argumentListNode for further operations
+            System.out.println(argumentListNode);
+            List<AstNode> liste = argumentListNode.getList();
+            for (int i = liste.size()-1; i>=0;i--){
+                System.out.println("arguments:"+i+":"+liste.get(i));
+                System.out.println(liste.get(i).getClass());
+            }
+        } */
+
+        return wanted_type; // Vi skal ikke tjekke dette, da vi ikke kan vide det. Fordi det er en runtime ting
+    }
 
     public Type relationOperatorTypeCheck(RelationsAndLogicalOperatorNode node) {
 
@@ -347,8 +390,10 @@ public class SemanticChecker {
                 String identifier = node.getIdentifier().toString();
 
                 Type variableType = getType(node.getType()); // Left side type
-
+                wanted_type = variableType;
                 AstNode ass = node.getValue(); // THis is right side should be a node
+                
+               
                 Type assignmentType = getType(ass); // This should give right side type
 
                 if (variableType == assignmentType) {
@@ -356,11 +401,15 @@ public class SemanticChecker {
                     scopes.getLast().put(node.getIdentifier().toString(), typeWeSaveInETable);
 
                 } else {
+
+                    
+                   
                     errorHandler("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
                             + " that has the type:" + variableType
                             + " And that is hella iligal");
 
                 }
+                wanted_type =Type.UNKNOWN;
             } else {
                 throw new RuntimeException("variable: " + node.getIdentifier() + " already exists in the scope");
             }
@@ -378,15 +427,14 @@ public class SemanticChecker {
             return scopes.getLast().get(node.getIdentifier().toString());
         }
       
-        for (int i = activeScope.getLast(); i < scopes.size(); i++) {
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 currentIdentifierCheck = node.getIdentifier().toString();
                 return scopes.get(i).get(node.getIdentifier().toString());
             }
         }
         errorHandler("could not find the variable " + node.getIdentifier());
-        // throw new RuntimeException("could not find the variable " +
-        // node.getIdentifier());
+
         return Type.UNKNOWN;
     }
 
@@ -426,9 +474,10 @@ public class SemanticChecker {
                 String identifier = node.getIdentifier().toString();
 
                 Type rightType = getType(node.getValue());
-
+                wanted_type = oldType;
                 // tjekke om det er lovligt.
                 if (oldType != rightType) {
+                    
                     errorHandler("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
                             + " that has the type:" + oldType
                             + " And that is hella iligal");
@@ -566,38 +615,102 @@ public class SemanticChecker {
     }
 
     /*
-     * Check om den eksistere
-     * Deklerere den til sidst. fordi kun vis alle variabler i den er okay
-     * check variabler
-     * hvis de ok gem dem i hashmap
-     * Skal også tjekke type af Struct i guess
+     * Vi skal tjekke alle hashmasps med structs for at se om den eksistere i
+     * forvejen
+     * Vi skal gemme structet i den rigtige type hashmap.
+     * Tjekke alle variable statements
+     * Vis nogen fejler skal Struct ikke gemmes i hashmap
      */
-    public void visitStruct(StructureDefinitionNode node) {
-        String identifier = node.getIdentifier().toString();
-        if (!structVariablesTable.containsKey(identifier)) {
+    public void visitStruct(StructureDefinitionNode node) {// ! FORKERT SKAL ÆNDRES
 
-            Type structType = getType(node.getType());
+        // Først skal vi hente typen som der ønskes at blive deklereet
+        String typeStruct = node.getType().toString();
+        
+        if (!structTypes.containsKey(typeStruct)) {
 
-            HashMap<String, Type> localETable = new HashMap<>();
+            if (typeStruct.equals("enemy")) {
+                // Nu har vi typen, så skal vi hente identifieren på structet
+                String identifier = node.getIdentifier().toString();
+               
+                // Nu kender vi identiferen, nu skal vi bare tjekke om den eksistere i hashmap
+                if (!tileInformationEnemy.containsKey(identifier)) {
+                    // Vis den ikke eksisterer skal vi deklere den, efter vi har tjekke variabler
 
-            scopes.add(localETable);
-
-            List<VariableDeclarationNode> declarations = node.getVariableDeclarations();
-            struct_variable_declarion_failed = false;
-            for (VariableDeclarationNode declaration : declarations) {
-                visitVariableDeclarationforStructs(declaration);
+                    // Laver et "Scope" vi kan gemme variablerne i undervejs
+                    HashMap<String, Type> localETable = new HashMap<>();
+                    scopes.add(localETable);
+                    // Henter alle declarations
+                    List<VariableDeclarationNode> declarations = node.getVariableDeclarations();
+                    struct_variable_declarion_failed = false;// Bool til at holde styr på om en deklaration fejler
+                    // Looper over alle declarationerne og gemmer dem i localEtable
+                    for (VariableDeclarationNode declaration : declarations) {
+                        visitVariableDeclarationforStructs(declaration);
+                    }
+                    // Vis så ingen declarationer fejler skal vi gemme variablerne(Etable) med
+                    // structet
+                    if (!struct_variable_declarion_failed) {
+                        tileInformationEnemy.put(identifier, localETable);
+                        structTypes.put(identifier, Type.ENEMY);
+                    }
+                    struct_variable_declarion_failed = false;
+                    scopes.remove(localETable);
+                } else {
+                    // Smide fejl vis vi prøver at redeklere
+                    errorHandler("Struct " + node.getIdentifier().toString() + " already exists");
+                }
             }
-            if (!struct_variable_declarion_failed) {
-                structTypes.put(identifier, structType);
-                structVariablesTable.put(identifier, localETable);
+            // Repeat bare med andre typper
+            if (typeStruct.equals("floor")) {
+                String identifier = node.getIdentifier().toString();
+                if (!tileInformationFloor.containsKey(identifier)) {
+                    HashMap<String, Type> localETable = new HashMap<>();
+                    scopes.add(localETable);
+                    List<VariableDeclarationNode> declarations = node.getVariableDeclarations();
+                    struct_variable_declarion_failed = false;
+
+                    for (VariableDeclarationNode declaration : declarations) {
+                        visitVariableDeclarationforStructs(declaration);
+                    }
+
+                    if (!struct_variable_declarion_failed) {
+                        tileInformationFloor.put(identifier, localETable);
+                        structTypes.put(identifier, Type.FLOOR);
+                    }
+                    struct_variable_declarion_failed = false;
+                    scopes.remove(localETable);
+                } else {
+
+                    errorHandler("Struct " + node.getIdentifier().toString() + " already exists");
+                }
             }
+            if (typeStruct.equals("wall")) {
+                String identifier = node.getIdentifier().toString();
 
-            struct_variable_declarion_failed = false;
-            scopes.remove(localETable);
+                if (!tileInformationWall.containsKey(identifier)) {
+                    HashMap<String, Type> localETable = new HashMap<>();
+                    scopes.add(localETable);
 
+                    List<VariableDeclarationNode> declarations = node.getVariableDeclarations();
+                    struct_variable_declarion_failed = false;
+
+                    for (VariableDeclarationNode declaration : declarations) {
+                        visitVariableDeclarationforStructs(declaration);
+                    }
+
+                    if (!struct_variable_declarion_failed) {
+                        tileInformationWall.put(identifier, localETable);
+                        structTypes.put(identifier, Type.WALL);
+                    }
+                    struct_variable_declarion_failed = false;
+                    scopes.remove(localETable);
+                } else {
+                    errorHandler("Struct " + node.getIdentifier().toString() + " already exists");
+                }
+            }
         } else {
             errorHandler("Struct " + node.getIdentifier().toString() + " already exists");
         }
+
     }
 
     private void visitVariableDeclarationforStructs(VariableDeclarationNode node) {
@@ -663,10 +776,7 @@ public class SemanticChecker {
         } else if (node instanceof PropertyAccessNode) {
             type = visitPropertyAccessNode((PropertyAccessNode) node);
         } else if (node instanceof MethodCallNode) {
-            MethodCallNode methodCallNode = (MethodCallNode) node;
-            type = resolveMethodCallType(methodCallNode);
-           
-           
+            type = visitMethodCall((MethodCallNode) node);
         } else if (node instanceof BinaryOperatorNode) {
             type = binaryOperatorTypeCheck((BinaryOperatorNode) node);
         } else if (node instanceof RelationsAndLogicalOperatorNode) {

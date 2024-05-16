@@ -18,7 +18,7 @@ public class Main {
              * Java libary takes in filepath, reads file into memory. Can now be acced
              * throught identifier fileinput
              */
-            FileInputStream fileInput = new FileInputStream("test2.carl");
+            FileInputStream fileInput = new FileInputStream("test.carl");
             // CARLLexer is a generated lexer class for the CARL language.
             // It tokenizes the input stream (breaks the input into meaningful pieces called
             // tokens).
@@ -46,10 +46,11 @@ public class Main {
             
             SemanticChecker typeChecker = new SemanticChecker();
             typeChecker.visitor(astRoot);
-            
+            System.out.println("yes");
             if (!typeChecker.thereWasAnError) {
                 EvaluatorExecutor inter = new EvaluatorExecutor();
                 inter.visit(astRoot);
+                
             }
             // Interpreter is a class that can traverse the AST and interpret or execute the
             // program based on the AST.

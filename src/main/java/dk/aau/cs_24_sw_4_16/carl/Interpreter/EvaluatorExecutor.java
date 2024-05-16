@@ -1,7 +1,7 @@
 package dk.aau.cs_24_sw_4_16.carl.Interpreter;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.*;
-
+import dk.aau.cs_24_sw_4_16.carl.Semantic_A.Type;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -10,11 +10,12 @@ public class EvaluatorExecutor {
     HashMap<String, FunctionDefinitionNode> fTable;
     HashMap<String, AstNode> vTable;
     Stack<HashMap<String, AstNode>> scopes;
-    Deque<Integer> activeScope;
+  
     HashMap<String, HashMap<String, AstNode>> tileInformationEnemy;
     HashMap<String, HashMap<String, AstNode>> tileInformationFloor;
     HashMap<String, HashMap<String, AstNode>> tileInformationWall;
     List<HashMap<String, AstNode>> rooms;
+    Type wantedType = Type.UNKNOWN;
     // This will be the same instance for all instances of Interpreter
     // This might have unexpected consequences if we expand the program to use
     // more than one instance of Interpreter at a time, but it doesn't yet, so
@@ -29,7 +30,7 @@ public class EvaluatorExecutor {
         tileInformationFloor = new HashMap<>();
         tileInformationWall = new HashMap<>();
         scopes = new Stack<>();
-        activeScope = new ArrayDeque<>();
+        
         // activeScope.push(0);
         scopes.add(vTable);
         rooms = new ArrayList<>();
@@ -105,7 +106,6 @@ public class EvaluatorExecutor {
     }
 
     public AstNode visit(StatementNode node) {
-
         if (node.getNode() instanceof AssignmentNode) {
             visit((AssignmentNode) node.getNode());
         } else if (node.getNode() instanceof VariableDeclarationNode) {
@@ -249,68 +249,80 @@ public class EvaluatorExecutor {
     }
 
     public AstNode getVariable(IdentifierNode node) {
-
-        // Ændring så den kikker igennem alle scopes, fra det mest nestede scope mod det
-        // øverste scope
-        for (int i = scopes.size() - 1; i >= 0; i--) {
+      
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier())) {
                 return scopes.get(i).get(node.getIdentifier());
             }
         }
-
-        // Det her kode gør ikke noget, bliver aldrig reached?
-        int from = 0;
-        if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() - 1;
-        } else {
-            from = scopes.size() - 1;
-        }
-        for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(node.getIdentifier())) {
-                return scopes.get(i).get(node.getIdentifier());
-            }
-        }
-        // Har tjekket at Mantas test2 program virker, uden, det gør det.
+    
         throw new RuntimeException("could not find the variable " + node.getIdentifier());
     }
 
     public void visit(AssignmentNode node) {
-        // Ændring så den kikker igennem alle scopes, fra det mest nestede scope mod det
-        // øverste scope
-        for (int i = scopes.size() - 1; i >= 0; i--) {
-            if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {
-                AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
-                AstNode toChange = node.getValue();
-                replaceValue(nodeToChange, toChange);
-                return;
-            }
-        }
-        // Det her kode gør ikke noget:1
-        int from = 0;
-        if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() - 1;
-        } else {
-            from = scopes.size() - 1;
-        }
-        System.out.println(from);
-        for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
-                AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
-                AstNode toChange = node.getValue();
-                replaceValue(nodeToChange, toChange);
-                return;
-            }
-        }
-        // Det her kode gør ikke noget:1 har prøvet at slette det og det gør ikke nogen
-        // forskel?
 
+       
+        for (int i = scopes.size() - 1; i >= 0; i--) {
+           
+            if (scopes.get(i).containsKey(node.getIdentifier().getIdentifier())) {
+            
+                AstNode nodeToChange = scopes.get(i).get(node.getIdentifier().toString());
+                AstNode toChange = node.getValue();
+                replaceValue(nodeToChange, toChange);
+                return;
+            }
+        }
+        
         throw new RuntimeException("Variable '" + node.getIdentifier() + "' has not been defined yet.");
     }
+
+
 
     public void visit(VariableDeclarationNode node) {
 
         if (!scopes.getLast().containsKey(node.getIdentifier().getIdentifier())) {
+           
             AstNode toChange = node.getValue();
+            String type = node.getType().getType();
+            if (toChange instanceof MethodCallNode) {
+            
+
+                if (type.equals("int")) {
+                    wantedType = Type.INT;
+                } else if (type.equals("string")) {
+                    wantedType = Type.STRING;
+                } else if (type.equals("bool")) {
+                    wantedType = Type.BOOLEAN;
+                } else if (type.equals("float")) {
+                    wantedType = Type.FLOAT;
+                }
+
+              
+                toChange = visit((MethodCallNode) toChange);
+                
+                Type tochange_Type = Type.UNKNOWN;
+                if (toChange instanceof IntNode) {
+                    tochange_Type = Type.INT;
+                } else if (toChange instanceof FloatNode) {
+                    tochange_Type = Type.FLOAT;
+                } else if (toChange instanceof StringNode) {
+                    tochange_Type = Type.STRING;
+                } else if (toChange instanceof BoolNode) {
+                    tochange_Type = Type.BOOLEAN;
+
+                }
+                
+                if (wantedType.equals(tochange_Type)) {
+                  
+                    scopes.getLast().put(node.getIdentifier().toString(), toChange);
+                } else {
+                    System.err.println("You tried to assign Type:" + tochange_Type + " To the variable:"
+                            + node.getIdentifier().getIdentifier() + " of type:" + wantedType
+                            + " in runtime and that is illagal");
+                }
+
+            }
+
             if (toChange instanceof FunctionCallNode) {
                 toChange = visit((FunctionCallNode) toChange);
             }
@@ -343,10 +355,7 @@ public class EvaluatorExecutor {
             } else if (toChange instanceof ArrayAccessNode) {
                 toChange = visit((ArrayAccessNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof MethodCallNode) {
-                toChange = visit((MethodCallNode) toChange);
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof IntNode) {
+            }  else if (toChange instanceof IntNode) {
                 scopes.getLast().put(node.getIdentifier().toString(), new IntNode(toChange.toString()));
             } else if (toChange instanceof FloatNode) {
                 scopes.getLast().put(node.getIdentifier().toString(), new FloatNode(toChange.toString()));
@@ -356,8 +365,10 @@ public class EvaluatorExecutor {
                 scopes.getLast().put(node.getIdentifier().toString(), new BoolNode(((BoolNode) toChange).getValue()));
             }
         } else {
+            wantedType = Type.UNKNOWN;
             throw new RuntimeException("variable " + node.getIdentifier() + " already exists in the current scope");
         }
+        wantedType = Type.UNKNOWN;
     }
 
     private int[] astNodeListToIntArray(List<AstNode> ints) {
@@ -449,25 +460,14 @@ public class EvaluatorExecutor {
 
     private boolean idExists(String id) {
         boolean found = false;
-        // ændring til at loope igennem alting
-        for (int i = scopes.size() - 1; i >= 0; i--) {
+        
+        for (int i = scopes.size()-1; i >= 0; i--) {
             if (scopes.get(i).containsKey(id)) {
                 found = true;
             }
         }
-        // Bruges ikke til noget igen :2
-        int from = 0;
-        if (!activeScope.isEmpty()) {
-            from = activeScope.getFirst() - 1;
-        } else {
-            from = scopes.size() - 1;
-        }
-        for (int i = from; i >= 0; i--) {
-            if (scopes.get(i).containsKey(id)) {
-                found = true;
-            }
-        }
-        // Bruges ikke til noget igen :2
+       
+    
         return found;
     }
 
@@ -496,7 +496,7 @@ public class EvaluatorExecutor {
 
     public AstNode visit(FunctionCallNode node) {
         if (node.getFunctionName().toString().equals("print")) {
-            InbuildClasses.print(node, scopes, activeScope);
+            InbuildClasses.print(node, scopes);
         } else if (node.getFunctionName().toString().equals("generateMap")) {
             InbuildClasses.generateGrid(node, scopes, tileInformationWall);
 
@@ -522,7 +522,7 @@ public class EvaluatorExecutor {
             // Boolean returnVoidCase = false;
             HashMap<String, AstNode> localTable = new HashMap<>();
             scopes.add(localTable);
-            activeScope.add(scopes.size() - 1);
+            
             if (fTable.containsKey(node.getFunctionName().toString())) {
                 FunctionDefinitionNode function = fTable.get(node.getFunctionName().toString());
                 List<ParameterNode> arguments = function.getArguments().getParameters();
@@ -539,7 +539,7 @@ public class EvaluatorExecutor {
                         returnValue = getVariable((IdentifierNode) returnValue);
                     }
                     scopes.remove(localTable);
-                    activeScope.removeLast();
+                  
                     if (function.getReturnType().getType().equals("void")) {
                         if (returnValue != null) {
                             throw new RuntimeException(
@@ -552,7 +552,7 @@ public class EvaluatorExecutor {
 
             }
             scopes.remove(localTable);
-            activeScope.removeLast();
+            
         }
         return node;
     }
@@ -620,7 +620,8 @@ public class EvaluatorExecutor {
         } else if (left instanceof FloatNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof FloatNode && right instanceof IntNode) {
-            
+            // AstNode floatnode =BinaryOperatorNode.getAstNodeValue(left, right,
+            // node.getOperator());
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
         } else if (left instanceof IntNode && right instanceof FloatNode) {
             return BinaryOperatorNode.getAstNodeValue(left, right, node.getOperator());
