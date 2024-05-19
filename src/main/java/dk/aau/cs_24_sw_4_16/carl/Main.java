@@ -46,7 +46,7 @@ public class Main {
             
             SemanticChecker typeChecker = new SemanticChecker();
             typeChecker.visitor(astRoot);
-            System.out.println("yes");
+         
             if (!typeChecker.thereWasAnError) {
                 EvaluatorExecutor inter = new EvaluatorExecutor();
                 inter.visit(astRoot);
