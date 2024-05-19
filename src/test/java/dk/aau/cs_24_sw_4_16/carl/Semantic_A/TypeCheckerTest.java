@@ -111,7 +111,7 @@ public class TypeCheckerTest {
                 Error 1
                 Wrong types for binary operation:INT:integer And:test_string:STRING
                 Error 2
-                Tryied to asssign Type:UNKNOWN to the variable:result that has the type:INT And that is hella iligal
+                Tryied to declare Type:UNKNOWN to the variable:result that has the type:INT And that is hella iligal
                                     """;
         SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
@@ -233,7 +233,7 @@ public class TypeCheckerTest {
                             Error 1
                 Tried to assign the type:STRING to the array:array that has the type:INT, and that is ilegal
                 Error 2
-                Tried to assign the array:array but acces value: 0 is of type:STRING and should be:INT
+                Tried to assign the array:array but acces value: 0 is of type:STRING and should be:Int
                                 """;
         SemanticChecker.visitor(astTree);
 
@@ -320,7 +320,7 @@ public class TypeCheckerTest {
 
         String correct_error = """
                 Error 1
-                Tryied to asssign Type:INT to the variable:test_variable2 that has the type:STRING And that is hella iligal""";
+                Tryied to declare Type:INT to the variable:test_variable2 that has the type:STRING And that is hella iligal""";
         SemanticChecker.visitor(astTree);
         String terminal_Errors = normalizeOutput();
         assertEquals(correct_error.trim(), terminal_Errors);
