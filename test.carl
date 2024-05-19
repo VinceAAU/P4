@@ -1,24 +1,10 @@
-var Goblin : enemy ={
-                    var difficulty : int = 1
-                    var health : int = 500
-                    var symbol : string= "O"
-                    
-                }
+var carl:float = 2
+print(carl)
 
-var Hejman :floor ={
-                    var difficulty : int = 1
-                    var health : int = 500
-                    var symbol : string= "O"
-}
+carl =234234
 
 
-var nejman :wall ={
-                    var difficulty : int = 1
-                    var health : int = 500
-                    var symbol : string= "O"
-}
+var size : int = 20
+var map : float[size][size]
 
-
-
-var i : int = enemy.get(0).symbol
-print(i)
+map[2][2] =4.5

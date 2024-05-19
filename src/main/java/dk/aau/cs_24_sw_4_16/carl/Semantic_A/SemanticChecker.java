@@ -30,14 +30,14 @@ public class SemanticChecker {
     HashMap<String, HashMap<String, Type>> tileInformationWall;
     List<HashMap<String, Type>> rooms;
     HashMap<String, HashMap<String, Type>> structVariablesTable;
-    Type wanted_type =Type.UNKNOWN;
+    Type wanted_type = Type.UNKNOWN;
 
     public SemanticChecker() {
 
         // fTable = new HashMap<>();
         eTable = new HashMap<>();
         scopes = new Stack<>();
-        
+
         scopes.add(eTable);
         typeOfReturnFunction = new HashMap<>();
         functionParameters = new HashMap<>();
@@ -99,18 +99,17 @@ public class SemanticChecker {
             visitPropertyAssignment((PropertyAssignmentNode) node.getNode());
         }
         if (node.getNode() instanceof MethodCallNode) {
-           // errorHandler("ewjrngkewgjewkejnweklrglewrkngewkrgkwen");
-            //visitMethodCall((MethodCallNode) node.getNode());
+            // errorHandler("ewjrngkewgjewkejnweklrglewrkngewkrgkwen");
+            // visitMethodCall((MethodCallNode) node.getNode());
         }
     }
 
     public void errorHandler(String errorMessage) {
         thereWasAnError = true;
-        
-            System.err.println("Error " + errorNumber);
-            errorNumber = errorNumber + 1;
-            System.err.println(errorMessage);
-        
+
+        System.err.println("Error " + errorNumber);
+        errorNumber = errorNumber + 1;
+        System.err.println(errorMessage);
 
     }
 
@@ -121,7 +120,7 @@ public class SemanticChecker {
         String identifier = node.getIdentifier().toString();
         boolean found = scopes.getFirst().containsKey(identifier);
 
-        for (int i = scopes.size()-1; i >= 0; i--) {
+        for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
             }
@@ -161,13 +160,12 @@ public class SemanticChecker {
         Type arrayType = Type.UNKNOWN;
         found = scopes.getLast().containsKey(identifier);
 
-       
         for (int i = scopes.size() - 1; 0 <= i; i--) {
 
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
                 arrayType = scopes.get(i).get(identifier);
-                wanted_type=arrayType;
+                wanted_type = arrayType;
             }
         }
         if (found) {
@@ -190,12 +188,16 @@ public class SemanticChecker {
             }
             if (!validTypesaccesTypes) {
                 errorHandler("Tried to assign the array:" + identifier + " but acces value: " + arguementNumber
-                        + " is of type:" + sizeType + " and should be:" + arrayType);
+                        + " is of type:" + sizeType + " and should be:" + "Int");
             }
 
             // Tjek venstre mod højre
             Type assignType = getType(node.getValue());
-            if (arrayType != assignType) {
+            if (arrayType == assignType) {
+
+            } else if (assignType == Type.INT && arrayType == Type.FLOAT) {
+
+            } else {
                 errorHandler("Tried to assign the type:" + assignType + " to the array:" + identifier
                         + " that has the type:" + arrayType + ", and that is ilegal");
             }
@@ -215,7 +217,7 @@ public class SemanticChecker {
         String identifier = node.getIdentifier().toString();
         boolean found = scopes.getFirst().containsKey(identifier);
 
-        for (int i = scopes.size()-1; i >= 0; i--) {
+        for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(identifier)) {
                 found = true;
             }
@@ -261,7 +263,6 @@ public class SemanticChecker {
         }
     }
 
-   
     public Type visitPropertyAccessNode(PropertyAccessNode node) {
         List<String> validPropertyAccess = new ArrayList<>(Arrays.asList("size", "get"));
         String firstIdentifier = node.getIdentifiers().get(0).toString();
@@ -284,39 +285,10 @@ public class SemanticChecker {
         return Type.UNKNOWN;
     }
 
-    public Type visitMethodCall(MethodCallNode node) { // 
-        // Her skal vi først finde ud af vilken type struct vi skal lede i
-        // Så skal vi finde ud af om structet eksistere
-        // Så skal vi indexe og tjekke dens typer imod den type ting itng
-       
-        /* String identifier = node.getIdentifierNode().toString();
-        System.out.println("Identifier:"+identifier); // Variable vi leder efter i struct
+    public Type visitMethodCall(MethodCallNode node) { //
 
-        PropertyAccessNode propertyAccessNode = node.getPropertyAccessContext();
-        System.out.println("Propertyascc:"+propertyAccessNode);
-
-        String list = propertyAccessNode.getList();
-        List<IdentifierNode> identifiernodes = propertyAccessNode.getIdentifiers();
-        System.out.println("Liste:"+list);// Type af struct hasmap vi skal kikke i
-        System.out.println("Identifiernodes"+identifiernodes);
-
-        for (int i = identifiernodes.size()-1; i>=0;i--){
-            System.out.println("Identifiernode:"+i+":"+identifiernodes.get(i));
-        }
-
-        if (node.getValue() instanceof ArgumentListNode) {
-            // Cast node to ArgumentListNode
-            ArgumentListNode argumentListNode = (ArgumentListNode) node.getValue();
-            // You can now use argumentListNode for further operations
-            System.out.println(argumentListNode);
-            List<AstNode> liste = argumentListNode.getList();
-            for (int i = liste.size()-1; i>=0;i--){
-                System.out.println("arguments:"+i+":"+liste.get(i));
-                System.out.println(liste.get(i).getClass());
-            }
-        } */
-
-        return wanted_type; // Vi skal ikke tjekke dette, da vi ikke kan vide det. Fordi det er en runtime ting
+        return wanted_type; // Vi skal ikke tjekke dette, da vi ikke kan vide det. Fordi det er en runtime
+                            // ting
     }
 
     public Type relationOperatorTypeCheck(RelationsAndLogicalOperatorNode node) {
@@ -336,11 +308,9 @@ public class SemanticChecker {
             return Type.BOOLEAN;
         } else if (leftType == Type.BOOLEAN && rightType == Type.BOOLEAN) {
             return Type.BOOLEAN;
-        }
-        else if (leftType == Type.STRING && rightType == Type.STRING) {
+        } else if (leftType == Type.STRING && rightType == Type.STRING) {
             return Type.BOOLEAN;
         }
-        
 
         errorHandler("Wrong types for relation operation:" + leftType + ":" + left + " And:" + right + ":" + rightType);
 
@@ -392,24 +362,25 @@ public class SemanticChecker {
                 Type variableType = getType(node.getType()); // Left side type
                 wanted_type = variableType;
                 AstNode ass = node.getValue(); // THis is right side should be a node
-                
-               
+
                 Type assignmentType = getType(ass); // This should give right side type
 
                 if (variableType == assignmentType) {
                     Type typeWeSaveInETable = variableType;
                     scopes.getLast().put(node.getIdentifier().toString(), typeWeSaveInETable);
 
+                } else if (variableType == Type.FLOAT && assignmentType == Type.INT) {
+                    Type typeWeSaveInETable = variableType;
+                    scopes.getLast().put(node.getIdentifier().toString(), typeWeSaveInETable);
+
                 } else {
 
-                    
-                   
-                    errorHandler("Tryied to asssign Type:" + assignmentType + " to the variable:" + identifier
+                    errorHandler("Tryied to declare Type:" + assignmentType + " to the variable:" + identifier
                             + " that has the type:" + variableType
                             + " And that is hella iligal");
 
                 }
-                wanted_type =Type.UNKNOWN;
+                wanted_type = Type.UNKNOWN;
             } else {
                 throw new RuntimeException("variable: " + node.getIdentifier() + " already exists in the scope");
             }
@@ -422,12 +393,12 @@ public class SemanticChecker {
     public Type getVariable(IdentifierNode node) {
 
         if (scopes.getLast().containsKey(node.getIdentifier().toString())) {
-           
+
             currentIdentifierCheck = node.getIdentifier().toString();
             return scopes.getLast().get(node.getIdentifier().toString());
         }
-      
-        for (int i = scopes.size()-1; i >= 0; i--) {
+
+        for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(node.getIdentifier().toString())) {
                 currentIdentifierCheck = node.getIdentifier().toString();
                 return scopes.get(i).get(node.getIdentifier().toString());
@@ -441,7 +412,7 @@ public class SemanticChecker {
     // Check if return = type er det samme som den function den står i.
     public void visitReturnNode(ReturnStatementNode node) {
         Type returnType = getType(node.getReturnValue());
-       
+
         if (currentActiveFunction == "") {
             errorHandler("You have made return statement outside a function THAT IS illigal");
         } else {
@@ -462,10 +433,9 @@ public class SemanticChecker {
         boolean foundIdentifier = false;
 
         for (int i = scopes.size() - 1; 0 <= i; i--) {
-           
+
             HashMap<String, Type> ETable = scopes.get(i);
-          
-           
+
             if (ETable.containsKey(node.getIdentifier().toString())) {// hvis x er i scope
                 foundIdentifier = true;
                 // tjekke om det er lovligt.
@@ -476,17 +446,18 @@ public class SemanticChecker {
                 Type rightType = getType(node.getValue());
                 wanted_type = oldType;
                 // tjekke om det er lovligt.
-                if (oldType != rightType) {
-                    
-                    errorHandler("Tryied to asssign Type:" + rightType + " to the variable:" + identifier
+                if (oldType == rightType) {
+
+                } else if (oldType == Type.FLOAT && rightType == Type.INT) {
+
+                } else {
+                    errorHandler("Tried to asssign Type:" + rightType + " to the variable:" + identifier
                             + " that has the type:" + oldType
                             + " And that is hella iligal");
-
                 }
-            } else {
-            }
-            if (foundIdentifier) {
-                break;
+                if (foundIdentifier) {
+                    break;
+                }
             }
         }
         if (!foundIdentifier) {
@@ -528,12 +499,12 @@ public class SemanticChecker {
         HashMap<String, Type> localTable = new HashMap<>();
         scopes.add(localTable);
         visitBlockNode(node.getBlock());
-     
+
         scopes.remove(localTable);
     }
 
     public void visitFunctionDefinition(FunctionDefinitionNode node) {
-       
+
         if (!listOfInbuiltFunctions.contains(node.getIdentifier().toString())) {
             if (!typeOfReturnFunction.containsKey(node.toString())
                     && !functionParameters.containsKey(node.toString())) {
@@ -564,7 +535,7 @@ public class SemanticChecker {
                 visitBlockNode(node.getBlock());// Alle statement i fn. En af dem er returnStatement
                 currentActiveFunction = "";
                 if (!hasReturnStatement && Type.VOID != getType(node.getReturnType())) {
-                    
+
                     errorHandler("Missing return statement in function declartion:" + node.getIdentifier().toString());
                 }
                 hasReturnStatement = false;
@@ -585,7 +556,7 @@ public class SemanticChecker {
      * Vi skal sige hvis arguemtnet er en forkert type.
      */
     public void visitFunctionCall(FunctionCallNode node) {
-      
+
         if (!listOfInbuiltFunctions.contains(node.getFunctionName().toString())) {
 
             HashMap<String, Type> localETable = new HashMap<>();
@@ -625,13 +596,13 @@ public class SemanticChecker {
 
         // Først skal vi hente typen som der ønskes at blive deklereet
         String typeStruct = node.getType().toString();
-        
+
         if (!structTypes.containsKey(typeStruct)) {
 
             if (typeStruct.equals("enemy")) {
                 // Nu har vi typen, så skal vi hente identifieren på structet
                 String identifier = node.getIdentifier().toString();
-               
+
                 // Nu kender vi identiferen, nu skal vi bare tjekke om den eksistere i hashmap
                 if (!tileInformationEnemy.containsKey(identifier)) {
                     // Vis den ikke eksisterer skal vi deklere den, efter vi har tjekke variabler
@@ -843,8 +814,7 @@ public class SemanticChecker {
                 default:
                     break;
             }
-        } 
-        else {
+        } else {
             errorHandler("The node we get failed to handle:" + node.getClass());
         }
         return type;
