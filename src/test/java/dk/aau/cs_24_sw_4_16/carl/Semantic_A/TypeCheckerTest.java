@@ -231,7 +231,7 @@ public class TypeCheckerTest {
 
         String correct_error = """
                             Error 1
-                Tried to assign the type:STRING to the array:array that has the type:INT, and that is ilegal
+                Tried to assign the type:STRING to the array:array that has the type:INT, and that is illegal
                 Error 2
                 Tried to assign the array:array but acces value: 0 is of type:STRING and should be:Int
                                 """;

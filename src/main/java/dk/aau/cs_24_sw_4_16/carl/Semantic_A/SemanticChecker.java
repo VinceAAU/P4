@@ -193,14 +193,11 @@ public class SemanticChecker {
 
             // Tjek venstre mod højre
             Type assignType = getType(node.getValue());
-            if (arrayType == assignType) {
-
-            } else if (assignType == Type.INT && arrayType == Type.FLOAT) {
-
-            } else {
+            if (!(arrayType == assignType || (assignType == Type.INT && arrayType == Type.FLOAT))) {
                 errorHandler("Tried to assign the type:" + assignType + " to the array:" + identifier
-                        + " that has the type:" + arrayType + ", and that is ilegal");
+                        + " that has the type:" + arrayType + ", and that is illegal");
             }
+
 
         } else {
             errorHandler("Array:" + identifier + " Does not exist ");
@@ -446,11 +443,7 @@ public class SemanticChecker {
                 Type rightType = getType(node.getValue());
                 wanted_type = oldType;
                 // tjekke om det er lovligt.
-                if (oldType == rightType) {
-
-                } else if (oldType == Type.FLOAT && rightType == Type.INT) {
-
-                } else {
+                if(!(oldType == rightType|| oldType == Type.FLOAT && rightType == Type.INT)) {
                     errorHandler("Tried to asssign Type:" + rightType + " to the variable:" + identifier
                             + " that has the type:" + oldType
                             + " And that is hella iligal");
