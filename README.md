@@ -39,7 +39,7 @@ supported, but can be done via the shell (e.g. bash or cmd).
 Script language
 ---------------
 A description of how to write in the language can be found in 
-[language.md](language.md)
+[language.md](language.md).
 
 Contact
 -------
