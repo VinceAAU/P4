@@ -18,7 +18,7 @@ public class Main {
              * Java libary takes in filepath, reads file into memory. Can now be acced
              * throught identifier fileinput
              */
-            FileInputStream fileInput = new FileInputStream("test.carl");
+            FileInputStream fileInput = new FileInputStream(args[0]);
             // CARLLexer is a generated lexer class for the CARL language.
             // It tokenizes the input stream (breaks the input into meaningful pieces called
             // tokens).
