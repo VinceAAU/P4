@@ -29,7 +29,6 @@ would output:
     4
 
 ### Primitive Types
-
 CARL has the following primitive types:
 
 | Type      | Explanation                                                                                                       | Examples                             |
@@ -64,9 +63,9 @@ identifier, followed by the indices in square brackets. For example,
 to print the 4th element of `myArray` (note the zero-indexing):
 
     print(myArray[3])
+    
 
 ### Structs
-
 There are currently four structured data types in CARL: `enemy`, 
 `floor`, `wall`, and `room`. Each of these structs has a similar construction:
 
@@ -75,18 +74,19 @@ There are currently four structured data types in CARL: `enemy`,
         var <property>: <type> = <value>
         ...
     }
+property can be any type of variable you want, similar to normal variable declaration works the only one being required in `floor`, `wall`, and `enemy`, is `symbol`.
+
 
 #### Enemy
-The `enemy` struct is used to represent non-player characters on the 
-map. It has three properties: `difficulty`, `health`, and `symbol`
+The `enemy` struct is used to represent non-playable characters on the 
+map. It has two properties used by other inbuilt functions: `difficulty`, and `symbol`.
 
 | Name         | Type     | Explanation |
 |--------------|----------|-------------|
-| `difficulty` | `int`    | ??          |
-| `health`     | `int`    | ??          |
-| `symbol`     | `string` | ??          |
+| `difficulty` | `int`    | used by generateSpawns to spawn them is substracted from the given value when put in map |
+| `symbol`     | `string` | used for symbolizing specific enemy on the map|
 
-The following is an example enemy, an orc:
+The following is an example enemy, an orc using custom attributes instead of just relying on inbuilt functions:
 
     var Orc : enemy = {
         var difficulty : int = 1
@@ -95,11 +95,26 @@ The following is an example enemy, an orc:
     }
 
 #### Floor
+Floor is used to define a new default floor or a new floor you want to use in custom algorithm.
+| Name         | Type     | Explanation |
+|--------------|----------|-------------|
+| `symbol`     | `string` | used instead of default being f|
+
 
 #### Wall
+Floor is used to define a new default wall or a new wall you want to use in custom algorithm.
+| Name         | Type     | Explanation |
+|--------------|----------|-------------|
+| `symbol`     | `string` | used instead of default being w|
+
 
 #### Room
-
+| Name         | Type     | Explanation |
+|--------------|----------|-------------|
+| `x`     | `int` | represents starting x point of a room|
+| `y`     | `int` | represents starting y point of a room|
+| `width`     | `int` | represents width of a room|
+| `height`     | `int` | represents height of a room|
 ## Operators
 
 CARL supports the following arithmetic operators:
@@ -187,20 +202,41 @@ Here is an example of a while loop, that will print the numbers 1 to 5:
 ## Functions
 
 ### Defining custom functions
-
+```
+    fn test() -> void {
+        print("test")
+    }
+    test()
+```
+this would call test function that prints `test`
 ### Builtin functions
-
+there exist built-in functions specified below
 
 #### print
-
+`print()` is the basic print function that every langauge has but in the flavour of carl.
+To make hello world! string concatenation example using print it would look like this.
+```
+print("hello", "world!")
+```
+This syntax is the same for variables as well.
+```
+var 
+print("hello", "world!")
+```
 #### generateMap
+`generateMap(20, 20)` this will generate the skeleton of the map by creating a matrix of the size 20X20, and then filling it with the wall tile. It will either take the first wall specified by a `wall` struct and use its symbol or `w` if there is not one.
 
 #### generateRooms
+`generateRooms(3,5,7)` will place 3 rooms in the map array with size between 5 and 7 tiles. It will either take the first floor specified by a `floor` struct and use its symbol or `f` if there is not one. it will also ccreate room structs for each room with their `x`, `y`., `width`, and `height`.
 
 #### generateCorridors
+`generateCorridors()` will generate corridors between each room and the next one.
 
 #### generateSpawns
+`generateSpawns()` will place enemies in a random location in any room besides the last one, to the map array if a difficulty is specified and substracts the difficulty of specific enemies from the specified `int`. During the itterative process of randomly selecting a tile in a random room, it will check if the tile is a floor tile and puts an enemy there. At the end the function will place the player in a random location within the last room, this happens no matter if a parameter is given or not.
 
 #### printMap
+`printMap()` will print out what the map currently looks like with all the other information like attributes at the bottom. Calling `printMap()` after running `generateMap(20, 20)` it will just print out a 20x20 matrix filled with walls with the default information about wall, floor and player below.
 
 #### writeToFile
+`writeToFile()` does the exact same thing as `printMap()` but instead of sending it to the standart output it will save to a file called `map.json`.
