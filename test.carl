@@ -1,10 +1,5 @@
-var carl:float = 2
-print(carl)
-
-carl =234234
-
-
-var size : int = 20
-var map : float[size][size]
-
-map[2][2] =4.5
+generateMap(20,25)
+generateRooms(3,5,7)
+generateCorridors()
+generateSpawns()
+writeToFile()
