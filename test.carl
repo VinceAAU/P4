@@ -1,6 +1,8 @@
 var carl:float = 2
 print(carl)
+fn carlersej (carlerSupersej:int) -> void{
 
+}
 carl =234234
 
 
@@ -8,3 +10,4 @@ var size : int = 20
 var map : float[size][size]
 
 map[2][2] =4.5
+

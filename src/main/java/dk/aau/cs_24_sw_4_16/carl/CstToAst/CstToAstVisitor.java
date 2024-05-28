@@ -182,7 +182,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         List<ParameterNode> parameters = new ArrayList<>();
         if (ctx != null) {
                 for (int i = 0; i < Math.ceilDiv(ctx.getChildCount(), 4); i++) {
-                    System.out.println(ctx.IDENTIFIER().size());
+                    //System.out.println(ctx.IDENTIFIER().size());
                     IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
                     TypeNode type = (TypeNode) visit(ctx.type(i));
                     parameters.add(new ParameterNode(identifier, type));

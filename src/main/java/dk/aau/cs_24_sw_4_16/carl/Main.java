@@ -49,18 +49,13 @@ public class Main {
          
             if (!typeChecker.thereWasAnError) {
                 EvaluatorExecutor inter = new EvaluatorExecutor();
-                inter.visit(astRoot);
-                
+                inter.visit(astRoot);               
             }
             // Interpreter is a class that can traverse the AST and interpret or execute the
             // program based on the AST.
 
         } catch (IOException e) {
             System.out.println(e.toString());
-        } catch (Exception e) {
-            // Catches any exception that occurs within the try block.
-            // Prints the string representation of the exception to standard output.
-            System.out.println();
         }
-    }
+    }    
 }
