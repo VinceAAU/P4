@@ -1,0 +1,19 @@
+var size : int = 20
+var map : string[size][size]
+var i : int = 0
+var j : int = 0
+while i < size{
+    j  = 0
+    while j < size {
+        map[i][j] = "w"
+        j = j+1
+    }
+    i = i+1
+}
+generateRooms(3,5,7)
+generateCorridors()
+
+var playerX : int = room.get(0).x .. room.get(0).x + room.get(0).width
+var playerY : int = room.get(0).y .. room.get(0).y + room.get(0).height
+map[playerY][playerX] = "p"
+writeToFile()
