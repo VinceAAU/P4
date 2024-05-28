@@ -316,11 +316,8 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitNot(CARLParser.NotContext ctx) {
         AstNode left = visit(ctx.expression()); //Why do we need both a left and a right if they're the same? -Vincent
         AstNode right = visit(ctx.expression());
-        if (left instanceof BoolNode) {
-            AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
-            return new BoolNode(value.toString());
-        }
-        return null;
+        AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
+        return value;
     }
 
     @Override

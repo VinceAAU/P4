@@ -767,4 +767,169 @@ printMap()
 
     assertEquals("1".trim(), outContent.toString().trim());
   }
+
+
+    @Test
+    public void testNotTrue() throws Exception {
+        String code = """
+                var x : bool = !true
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("false".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotFalse() throws Exception {
+        String code = """
+                var x : bool = !false
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("true".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersTrue() throws Exception {
+        String code = """
+                var x : bool = true
+                var y: !x
+                print(y)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("false".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersFalse() throws Exception {
+        String code = """
+                var x : bool = false
+                var y: !x
+                print(y)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("true".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersInIf() throws Exception {
+        String code = """
+                var x : bool = true
+                
+                if !x {
+                    print("beep boop")
+                }
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertNotEquals("beep boop".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersInIf2() throws Exception {
+        String code = """
+                var x : bool = false
+                
+                if !x {
+                    print("beep boop")
+                }
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("beep boop".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testAMillionNots() throws Exception {
+        String code = """
+                var x : bool = true
+                var y: !!!!!!!!!!!!!!x
+                
+                print(y)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertNotEquals("true".trim(), outContent.toString().trim());
+    }
 }
