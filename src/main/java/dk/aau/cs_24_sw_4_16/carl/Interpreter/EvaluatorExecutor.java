@@ -329,9 +329,6 @@ public class EvaluatorExecutor {
             if (node.getValue() instanceof BinaryOperatorNode) {
                 toChange = visit((BinaryOperatorNode) node.getValue());
                 scopes.getLast().put(node.getIdentifier().toString(), toChange);
-            } else if (toChange instanceof RelationsAndLogicalOperatorNode) {
-                toChange = visit((RelationsAndLogicalOperatorNode) node.getValue());
-                scopes.getLast().put(node.getIdentifier().toString(), toChange);
             } else if (toChange instanceof IdentifierNode) {
                 for (HashMap<String, AstNode> vTable : scopes) {
                     if (vTable.containsKey(toChange.toString())) {
