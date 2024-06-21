@@ -6,3 +6,4 @@ target/
 .project
 .factorypath
 map.json
+flake.lock

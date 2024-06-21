@@ -182,7 +182,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
         List<ParameterNode> parameters = new ArrayList<>();
         if (ctx != null) {
                 for (int i = 0; i < Math.ceilDiv(ctx.getChildCount(), 4); i++) {
-                    //System.out.println(ctx.IDENTIFIER().size());
+                    System.out.println(ctx.IDENTIFIER().size());
                     IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
                     TypeNode type = (TypeNode) visit(ctx.type(i));
                     parameters.add(new ParameterNode(identifier, type));
@@ -316,8 +316,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitNot(CARLParser.NotContext ctx) {
         AstNode left = visit(ctx.expression()); //Why do we need both a left and a right if they're the same? -Vincent
         AstNode right = visit(ctx.expression());
-        AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
-        return value;
+        if (left instanceof BoolNode) {
+            AstNode value = new RelationsAndLogicalOperatorNode(left, right, "!");
+            return new BoolNode(value.toString());
+        }
+        return null;
     }
 
     @Override

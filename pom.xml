@@ -55,6 +55,8 @@
   </dependencies>
 
   <build>
+    <testSourceDirectory>src/test/java/dk/aau/cs_24_sw_4_16/carl</testSourceDirectory>
+
     <plugins>
       <!-- The assembly plugin, dictates how the resulting .jar looks -->
       <plugin>
@@ -110,4 +112,5 @@
         </plugin>
     </plugins>
   </build>
+
 </project>
