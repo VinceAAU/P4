@@ -3,6 +3,7 @@ package dk.aau.cs_24_sw_4_16.carl.CstToAst;
 import dk.aau.cs_24_sw_4_16.carl.CARLBaseVisitor;
 import dk.aau.cs_24_sw_4_16.carl.CARLParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +74,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     @Override
     public AstNode visitVariableDeclaration(CARLParser.VariableDeclarationContext ctx) {
         String identifier = ctx.IDENTIFIER().getText();
-
         IdentifierNode identifierNode = new IdentifierNode(identifier);
 
         TypeNode type = (TypeNode) visit(ctx.type());
@@ -89,12 +89,21 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
         TypeNode type = (TypeNode) /*This is the part where we pray to God that it does indeed return a TypeNode */ visit(ctx.legalArrayType());
 
-        List<Integer> sizes = ctx.arrayOptionalIndex().stream()
+        /*List<Integer> sizes = ctx.arrayOptionalIndex().stream()
                 .map(arrayOptionalIndexContext -> {
                     if (arrayOptionalIndexContext.INT() == null)
                         return -1;
                     else
                         return Integer.parseInt(arrayOptionalIndexContext.INT().getText()); //And on this line, we pray that the int is indeed an int...
+                })
+                .toList();*/
+
+        List<AstNode> sizes = ctx.arrayOptionalIndex().stream()
+                .map(arrayOptionalIndexContext -> {
+                    if (arrayOptionalIndexContext.expression() == null)
+                        return new IntNode(-1);
+                    else
+                        return new ExpressionNode(visit(arrayOptionalIndexContext.expression()));
                 })
                 .toList();
 
@@ -130,7 +139,9 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitArrayAccess(CARLParser.ArrayAccessContext ctx) {
         IdentifierNode id = new IdentifierNode(ctx.IDENTIFIER().getText());
 
-        List<Integer> indices = ctx.INT().stream().map(tn -> Integer.parseInt(tn.getText())).toList();
+        //List<Integer> indices = ctx.INT().stream().map(tn -> Integer.parseInt(tn.getText())).toList();
+
+        List<AstNode> indices = ctx.expression().stream().map(e -> new ExpressionNode(visit(e)).getNode()).toList();
 
         return new ArrayAccessNode(id, indices);
     }
@@ -170,11 +181,12 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     public AstNode visitParameterList(CARLParser.ParameterListContext ctx) {
         List<ParameterNode> parameters = new ArrayList<>();
         if (ctx != null) {
-            for (int i = 0; i < ctx.getChildCount() / 3; i++) {
-                IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
-                TypeNode type = (TypeNode) visit(ctx.type(i));
-                parameters.add(new ParameterNode(identifier, type));
-            }
+                for (int i = 0; i < Math.ceilDiv(ctx.getChildCount(), 4); i++) {
+                    System.out.println(ctx.IDENTIFIER().size());
+                    IdentifierNode identifier = new IdentifierNode(ctx.IDENTIFIER(i).getText());
+                    TypeNode type = (TypeNode) visit(ctx.type(i));
+                    parameters.add(new ParameterNode(identifier, type));
+                }
         }
 
         return new ParameterListNode(parameters);
@@ -188,6 +200,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitInt(CARLParser.IntContext ctx) {
+        return new IntNode(ctx.getText());
+    }
+
+    @Override
+    public AstNode visitInteger(CARLParser.IntegerContext ctx) {
         return new IntNode(ctx.getText());
     }
 
@@ -291,6 +308,11 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
     }
 
     @Override
+    public AstNode visitFpNum(CARLParser.FpNumContext ctx) {
+        return new FloatNode(ctx.getText());
+    }
+
+    @Override
     public AstNode visitNot(CARLParser.NotContext ctx) {
         AstNode left = visit(ctx.expression()); //Why do we need both a left and a right if they're the same? -Vincent
         AstNode right = visit(ctx.expression());
@@ -332,7 +354,6 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
                 expressionNodes.add(new ExpressionNode(visit(exp)));
             }
         }
-
         List<BlockNode> blocks = new ArrayList<>();
         for (CARLParser.BlockContext block : ctx.block()) {
             blocks.add((BlockNode) visitBlock(block));
@@ -350,6 +371,7 @@ public class CstToAstVisitor extends CARLBaseVisitor<AstNode> {
             } else {
                 left = visit(ctx.expression().getChild(0));
             }
+
             AstNode right;
             if (ctx.expression().getChild(2) instanceof CARLParser.IdentifierContext) {
                 right = new IdentifierNode(ctx.expression().getChild(2).getText());

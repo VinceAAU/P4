@@ -2,7 +2,7 @@ package dk.aau.cs_24_sw_4_16.carl;
 
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.AstNode;
 import dk.aau.cs_24_sw_4_16.carl.CstToAst.CstToAstVisitor;
-import dk.aau.cs_24_sw_4_16.carl.Interpreter.Interpreter;
+import dk.aau.cs_24_sw_4_16.carl.Interpreter.EvaluatorExecutor;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleFunctionIntegrationTest {
@@ -34,8 +35,8 @@ public class SimpleFunctionIntegrationTest {
     @Test
     public void testingPrintSatement() throws Exception {
         String code = """
-                       print("test")
-                       """;
+                print("test")
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -45,19 +46,19 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
-        assertEquals("\"test\"".trim(), outContent.toString().trim(), "expected the output to be test");
+        assertEquals("test".trim(), outContent.toString().trim(), "expected the output to be test");
     }
 
     @Test
     public void testingVariable() throws Exception {
         String code = """
-                       var x : int = 42
-                       var y : int = x
-                       print(y)
-                       """;
+                var x : int = 42
+                var y : int = x
+                print(y)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -67,7 +68,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -89,8 +90,8 @@ public class SimpleFunctionIntegrationTest {
         ParseTree tree = parser.program();
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
-
-        Interpreter interpreter = new Interpreter();
+       // System.out.println(astRoot);
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("2".trim(), outContent.toString().trim(), "Expected the output to be 2 because 'l' was incremented once.");
@@ -99,9 +100,9 @@ public class SimpleFunctionIntegrationTest {
     @Test
     public void testingAddition() throws Exception {
         String code = """
-                       var x : int = (1 + 2) - 2
-                       print(x)
-                       """;
+                var x : int = (1 + 2) - 2
+                print(x)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -111,7 +112,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -139,7 +140,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -169,18 +170,19 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
         assertEquals("3".trim(), outContent.toString().trim(), "Expected the output to be 3 because x does not meet the other conditions and therefore, y should be set to 3.");
     }
+
     @Test
     public void testingMult() throws Exception {
         String code = """
-                       var x : int = (1 * 4) / 2
-                       print(x)
-                       """;
+                var x : int = (1 * 4) / 2
+                print(x)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -190,7 +192,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -215,7 +217,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -225,12 +227,12 @@ public class SimpleFunctionIntegrationTest {
     @Test
     public void testingFunction() throws Exception {
         String code = """
-                       fn calculate() -> int {
-                           return 42
-                       }
-                       var result: int = calculate()
-                       print(result)
-                       """;
+                fn calculate() -> int {
+                    return 42
+                }
+                var result: int = calculate()
+                print(result)
+                """;
 
         InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
         CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
@@ -240,7 +242,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -263,7 +265,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -285,7 +287,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -307,7 +309,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         // Assertions can be extended based on the print output or internal state checks
@@ -330,7 +332,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("42".trim(), outContent.toString().trim());
@@ -351,7 +353,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("42.5".trim(), outContent.toString().trim());
@@ -372,10 +374,10 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
-        assertEquals("\"test\"".trim(), outContent.toString().trim());
+        assertEquals("test".trim(), outContent.toString().trim());
     }
 
     @Test
@@ -393,7 +395,7 @@ public class SimpleFunctionIntegrationTest {
         CstToAstVisitor visitor = new CstToAstVisitor();
         AstNode astRoot = visitor.visit(tree);
 
-        Interpreter interpreter = new Interpreter();
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
         interpreter.visit(astRoot);
 
         assertEquals("true".trim(), outContent.toString().trim());
@@ -421,6 +423,513 @@ public class SimpleFunctionIntegrationTest {
 //        assertEquals("true", outContent.toString().trim(), "Expected the output to be true because 3 < 4.");
 //    }
 
+    @Test
+    public void testingSeed() throws Exception {
+        String code = """
+                setSeed(42069)
+                var test : int = 1..20
+                print(test)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
 
 
+        assertEquals("14".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testingSeed2() throws Exception {
+        String code = """
+                setSeed(555)
+                var test : int = 1..20
+                print(test)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+
+        assertEquals("6".trim(), outContent.toString().trim());
+    }
+
+
+    @Test
+    public void testingEntireProcedure() throws Exception {
+        String code = """
+                setSeed(42069)
+                generateMap(20,25)
+                generateRooms(3,5,7)
+                generateCorridors()
+                generateSpawns()
+                printMap()
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+// do not touch the indentation of the check it will break
+        assertEquals("""
+{"map" : {
+    "size":{
+    "height" : 10,
+    "width" : 10
+     },
+     "tiles": [
+
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","p","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","f","f","f","f","f","f","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","f","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","f","f","f","f","f","f","f","f","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]}],
+"level" : 1,
+"type" : "Room",
+"tileInformation":[
+{
+"symbol" : "w" ,
+"info" : {
+    "name" : "Wall"
+   }
+},
+{
+"symbol" : "f" ,
+"info" : {
+    "name" : "Floor"
+   }
+},
+{
+"symbol" : "p" ,
+"info" : {
+    "name" : "Player"
+   }
+}
+]}}
+                """.trim(), outContent.toString().trim());
+    }
+
+
+    //* +++++++++++++++++++++++    DONT YOU DARE TOUCH THIS TEST   +++++++++++++++++++++ *//
+    @Test
+    public void testingEntireProcedure2() throws Exception {
+        String code = """
+setSeed(242)
+generateMap(20,25)
+generateRooms(3,5,7)
+generateCorridors()
+generateSpawns()
+printMap()
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+
+        assertEquals("""
+{"map" : {
+    "size":{
+    "height" : 10,
+    "width" : 10
+     },
+     "tiles": [
+
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","f","f","f","f","f","f","w","w","w","w","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","w","w","w","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","p","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","f","f","f","f","f","w","w","w","w","w"]},
+{"row":["w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w","w"]}],
+"level" : 1,
+"type" : "Room",
+"tileInformation":[
+{
+"symbol" : "w" ,
+"info" : {
+    "name" : "Wall"
+   }
+},
+{
+"symbol" : "f" ,
+"info" : {
+    "name" : "Floor"
+   }
+},
+{
+"symbol" : "p" ,
+"info" : {
+    "name" : "Player"
+   }
+}
+]}}
+""".trim(), outContent.toString().trim());
+    }
+
+  @Test
+  public void testingStruct1() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+            }
+                var test : int = 5
+            test = enemy.Goblin.health
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
+    interpreter.visit(astRoot);
+
+    assertEquals("5300".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct2() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : string = "ssssssss"
+            test = enemy.Goblin.gender
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
+    interpreter.visit(astRoot);
+
+    assertEquals("orcacnian".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct3() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : string = "ssssssss"
+            test = enemy.Goblin.gender
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
+    interpreter.visit(astRoot);
+
+    assertEquals("orcacnian".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct4() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : string = "ssssssss"
+            test = enemy.get(0).gender
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
+    interpreter.visit(astRoot);
+
+    assertEquals("orcacnian".trim(), outContent.toString().trim());
+  }
+
+  @Test
+  public void testingStruct5() throws Exception {
+    String code = """
+        var Goblin : enemy ={
+                var difficulty : int = 1
+                var health : int = 5300
+                var symbol : string= "O"
+                var gender : string= "orcacnian"
+            }
+                var test : int =44
+            test = enemy.size()
+            print(test)
+
+                    """;
+
+    InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    CARLParser parser = new CARLParser(tokens);
+    ParseTree tree = parser.program();
+    CstToAstVisitor visitor = new CstToAstVisitor();
+    AstNode astRoot = visitor.visit(tree);
+
+    EvaluatorExecutor interpreter = new EvaluatorExecutor();
+    interpreter.visit(astRoot);
+
+    assertEquals("1".trim(), outContent.toString().trim());
+  }
+
+
+    @Test
+    public void testNotTrue() throws Exception {
+        String code = """
+                var x : bool = !true
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("false".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotFalse() throws Exception {
+        String code = """
+                var x : bool = !false
+                print(x)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("true".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersTrue() throws Exception {
+        String code = """
+                var x : bool = true
+                var y: !x
+                print(y)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("false".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersFalse() throws Exception {
+        String code = """
+                var x : bool = false
+                var y: !x
+                print(y)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("true".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersInIf() throws Exception {
+        String code = """
+                var x : bool = true
+                
+                if !x {
+                    print("beep boop")
+                }
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertNotEquals("beep boop".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testNotIdentifiersInIf2() throws Exception {
+        String code = """
+                var x : bool = false
+                
+                if !x {
+                    print("beep boop")
+                }
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertEquals("beep boop".trim(), outContent.toString().trim());
+    }
+
+    @Test
+    public void testAMillionNots() throws Exception {
+        String code = """
+                var x : bool = true
+                var y: !!!!!!!!!!!!!!x
+                
+                print(y)
+                """;
+
+        InputStream stream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+        CARLLexer lexer = new CARLLexer(CharStreams.fromStream(stream));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CARLParser parser = new CARLParser(tokens);
+        ParseTree tree = parser.program();
+        CstToAstVisitor visitor = new CstToAstVisitor();
+        AstNode astRoot = visitor.visit(tree);
+
+        EvaluatorExecutor interpreter = new EvaluatorExecutor();
+        interpreter.visit(astRoot);
+
+        // Assertions can be extended based on the print output or internal state checks
+        assertNotEquals("true".trim(), outContent.toString().trim());
+    }
 }

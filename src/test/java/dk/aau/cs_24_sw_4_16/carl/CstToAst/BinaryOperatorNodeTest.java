@@ -36,6 +36,15 @@ public class BinaryOperatorNodeTest {
     }
 
     @Test
+    public void testGetAstNodeValueIntFloat() {
+        AstNode left = new FloatNode("3.0");
+        AstNode right = new IntNode("2");
+        AstNode node = BinaryOperatorNode.getAstNodeValue(left, right, "+");
+        Assertions.assertEquals("5.0", node.toString());
+        Assertions.assertInstanceOf(FloatNode.class, node);
+    }
+
+    @Test
     public void testGetLeft() {
         AstNode left = new IntNode("3");
         BinaryOperatorNode node = new BinaryOperatorNode(left, null, "+");

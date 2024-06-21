@@ -6,11 +6,11 @@ import java.util.List;
 
 @Getter
 public class ArrayAccessNode extends AstNode {
-    final private List<Integer> indices;
+    final private List<AstNode> indices;
 
     final private IdentifierNode identifier;
 
-    public ArrayAccessNode(IdentifierNode identifier, List<Integer> indices){
+    public ArrayAccessNode(IdentifierNode identifier, List<AstNode> indices){
         this.identifier = identifier;
         this.indices = indices;
     }

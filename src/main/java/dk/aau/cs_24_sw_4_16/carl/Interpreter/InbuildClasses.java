@@ -9,21 +9,24 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class InbuildClasses {
-    public static void print(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, Deque<Integer> activeScope) {
+    public static void print(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes) {
+      //  System.out.println("We get in here");
         StringBuilder toPrint = new StringBuilder();
         for (AstNode argument : node.getArguments()) {
             if (argument instanceof StatementNode) {
                 toPrint.append(((StatementNode) argument).getNode()).append(" ");
             } else if (argument instanceof IdentifierNode) {
-                if (scopes.getFirst().containsKey(argument.toString())) {
-                    toPrint.append(scopes.getFirst().get(argument.toString()).toString()).append(" ");
-                } else {
-                    for (int i = activeScope.getLast(); i < scopes.size(); i++) {
-                        if (scopes.get(i).containsKey(argument.toString())) {
-                            toPrint.append(scopes.get(i).get(argument.toString()).toString()).append(" ");
-                        }
+               
+                boolean found = false;
+                for (int i = scopes.size() - 1; i >= 0; i--) {
+                    if (scopes.get(i).containsKey(argument.toString())) {
+                        toPrint.append(scopes.get(i).get(argument.toString()).toString()).append(" ");
+                        found = true;
+                        break;
                     }
                 }
+
+                
 
             } else if (argument instanceof FloatNode) {
                 toPrint.append(((FloatNode) argument).getValue());
@@ -73,10 +76,10 @@ public class InbuildClasses {
             ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
 
             while (roomCount > rooms.size()) {
-                int roomWidth = Interpreter.rand.nextInt(minRoomSize, maxRoomSize);
-                int roomHeight = Interpreter.rand.nextInt(minRoomSize, maxRoomSize);
-                int x = Interpreter.rand.nextInt(1, map.getSizes().get(1) - roomWidth);
-                int y = Interpreter.rand.nextInt(1, map.getSizes().get(0) - roomHeight);
+                int roomWidth = EvaluatorExecutor.rand.nextInt(minRoomSize, maxRoomSize);
+                int roomHeight = EvaluatorExecutor.rand.nextInt(minRoomSize, maxRoomSize);
+                int x = EvaluatorExecutor.rand.nextInt(1, map.getSizes().get(1) - roomWidth);
+                int y = EvaluatorExecutor.rand.nextInt(1, map.getSizes().get(0) - roomHeight);
                 HashMap<String, AstNode> room = new HashMap<>();
                 if (!overlap(x, y, roomWidth, roomHeight, map)) {
                     for (int i = y; i < y + roomHeight; i++) {
@@ -141,19 +144,41 @@ public class InbuildClasses {
 
     public static void generateSpawns(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy, List<HashMap<String, AstNode>> rooms) {
         ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
-        int yPlayer = Interpreter.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("width")).getValue()));
-        int xPlayer = Interpreter.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("height")).getValue()));
+        if (!node.getArguments().isEmpty()) {
+            if(node.getArguments().size() == 1 && node.getArguments().get(0) instanceof IntNode) {
+                int difficulty = ((IntNode) node.getArguments().get(0)).getValue();
+                while (difficulty > 0) {
+                    int roomSpawn = EvaluatorExecutor.rand.nextInt(0,rooms.size() - 1);
+                    int x = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(roomSpawn).get("x")).getValue(), (((IntNode) rooms.get(roomSpawn).get("x")).getValue() + ((IntNode) rooms.get(roomSpawn).get("width")).getValue()));
+                    int y = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(roomSpawn).get("y")).getValue(), (((IntNode) rooms.get(roomSpawn).get("y")).getValue() + ((IntNode) rooms.get(roomSpawn).get("height")).getValue()));
+                    var key = tileInformationEnemy.keySet().toArray()[EvaluatorExecutor.rand.nextInt(0,tileInformationEnemy.size())];
+                    StringNode symbol = ((StringNode) tileInformationEnemy.get(key).get("symbol"));
+                    int difficultyMonster = ((IntNode) tileInformationEnemy.get(key).get("difficulty")).getValue();
+                    if (difficulty >= difficultyMonster) {
+                        if (((StringNode) map.get(y,x)).getValue().equals("f")) {
+                            map.set(new StringNode(symbol.getValue()), y, x);
+                            difficulty -= difficultyMonster;
+                        }
+                    }
+                }
+            }
+        }
+
+        int yPlayer = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("x")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("width")).getValue()));
+        int xPlayer = EvaluatorExecutor.rand.nextInt(((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue(), (((IntNode) rooms.get(rooms.size() - 1).get("y")).getValue() + ((IntNode) rooms.get(rooms.size() - 1).get("height")).getValue()));
         map.set(new StringNode("p"), xPlayer, yPlayer);
     }
 
-    public static void printMap( Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) {
+    public static void printMap(Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) {
 
-        System.out.println(generatePrint(scopes,tileInformationFloor,tileInformationWall,tileInformationEnemy));
+        System.out.println(generatePrint(scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy));
     }
+
     public static void writeToFile(FunctionCallNode node, Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) throws IOException {
-        Files.writeString(Path.of("map.json"), generatePrint(scopes,tileInformationFloor,tileInformationWall,tileInformationEnemy));
+        Files.writeString(Path.of("map.json"), generatePrint(scopes, tileInformationFloor, tileInformationWall, tileInformationEnemy));
     }
-    private static String generatePrint(Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy){
+
+    private static String generatePrint(Stack<HashMap<String, AstNode>> scopes, HashMap<String, HashMap<String, AstNode>> tileInformationFloor, HashMap<String, HashMap<String, AstNode>> tileInformationWall, HashMap<String, HashMap<String, AstNode>> tileInformationEnemy) {
         ArrayNode map = ((ArrayNode) scopes.getFirst().get("map"));
         StringBuilder sb = new StringBuilder("""
                 {"map" : {
@@ -223,13 +248,13 @@ public class InbuildClasses {
         sb.append("]}}");
         return sb.toString();
     }
+
     private static void tileInformationStringBuilder(HashMap<String, HashMap<String, AstNode>> tileInformation, StringBuilder sb) {
-        for (String name : tileInformation.keySet()) {
             for (HashMap<String, AstNode> innerHashMap : tileInformation.values()) {
                 sb.append("""
                             {"symbol" :
-                        """).append(((StringNode) innerHashMap.get("symbol")).getValue()).append("""
-                        ,"info":{
+                        """).append("\"").append(((StringNode) innerHashMap.get("symbol")).getValue()).append("""
+                        ","info":{
                         """);
                 for (String key : innerHashMap.keySet()) {
                     if (!key.equals("symbol")) {
@@ -251,7 +276,6 @@ public class InbuildClasses {
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append("}},");
             }
-        }
     }
 
     private static boolean overlap(int x, int y, int width, int height, ArrayNode map) {
@@ -267,5 +291,19 @@ public class InbuildClasses {
             }
         }
         return false;
+    }
+
+    public static void setSeed(FunctionCallNode node) {
+        if (node.getArguments().size() == 1) {
+            if (node.getArgument(0) instanceof IntNode) {
+                EvaluatorExecutor.rand = new Random(((IntNode) node.getArgument(0)).getValue());
+            } else {
+                throw new RuntimeException("setSeed only supports int arguments");
+            }
+        } else if (node.getArguments().isEmpty()) {
+            EvaluatorExecutor.rand = new Random();
+        } else {
+            throw new RuntimeException("setSeed called accepts only a singular int argument or none");
+        }
     }
 }

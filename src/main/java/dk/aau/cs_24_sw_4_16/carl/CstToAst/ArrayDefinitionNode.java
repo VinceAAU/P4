@@ -7,18 +7,13 @@ import java.util.List;
 public class ArrayDefinitionNode extends AstNode {
     @Getter private final TypeNode type;
 
-    // we need this only if dynamic sizing is allowed
-    @Getter private final List<Integer> sizes;
+    @Getter private final List<AstNode> sizes;
 
-    private IdentifierNode identifier;
+    @Getter private final IdentifierNode identifier;
 
-    public ArrayDefinitionNode(TypeNode type, List<Integer> sizes, IdentifierNode identifier) {
+    public ArrayDefinitionNode(TypeNode type, List<AstNode> sizes, IdentifierNode identifier) {
         this.type = type;
         this.sizes = sizes;
         this.identifier = identifier;
-    }
-
-    public String getIdentifier() {
-        return identifier.toString();
     }
 }
