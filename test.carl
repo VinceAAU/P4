@@ -3,4 +3,3 @@ generateRooms(3,5,7)
 generateCorridors()
 generateSpawns()
 writeToFile()
-
