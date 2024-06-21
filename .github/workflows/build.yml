@@ -22,6 +22,9 @@ jobs:
 
       - name: Build with Maven
         run: mvn package
-
+        
+      - name: Test with Maven
+        run: mvn test
+        
       - name: Verify build
         run: mvn verify
